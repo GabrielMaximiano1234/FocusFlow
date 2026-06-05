@@ -156,6 +156,7 @@ class NotepadManager {
         this.saveNotes(notes);
         this.resetForm();
         this.renderNotes();
+        if (window.updateDashboardStats) window.updateDashboardStats();
     }
 
     // Excluir Nota
@@ -169,6 +170,7 @@ class NotepadManager {
         if (window.showToast) window.showToast('Nota Excluída', 'A nota foi deletada permanentemente.', 'warning');
         
         this.renderNotes();
+        if (window.updateDashboardStats) window.updateDashboardStats();
 
         // Se a nota que estava sendo editada foi excluída, limpa o form
         if (this.editIdInput.value === id) {
@@ -317,6 +319,7 @@ class NotepadManager {
             
             if (permission === 'granted') {
                 if (window.showToast) window.showToast('Notificações Ativadas', 'Você receberá alertas nativos para notas Importantes.', 'success');
+                if (window.logNotificationTrigger) window.logNotificationTrigger('Permissão de Notificação Concedida 🔔', 'success');
                 // Dispara uma notificação de confirmação imediata
                 new Notification('FocusFlow', {
                     body: 'Alertas no navegador ativados com sucesso! 🚀',
@@ -324,6 +327,7 @@ class NotepadManager {
                 });
             } else if (permission === 'denied') {
                 if (window.showToast) window.showToast('Notificações Negadas', 'Permissão negada. Ative manualmente nas configurações do navegador.', 'warning');
+                if (window.logNotificationTrigger) window.logNotificationTrigger('Permissão de Notificação Negada 🔕', 'warning');
             }
         });
     }
@@ -373,6 +377,9 @@ class NotepadManager {
                     tag: 'important-note', // Evita spam agrupando notificações
                     requireInteraction: true // A notificação fica até o usuário fechar
                 });
+                if (window.logNotificationTrigger) {
+                    window.logNotificationTrigger(`Alerta enviado para "${title}" 🔔`, 'info');
+                }
             } catch (e) {
                 console.error('Erro ao tentar disparar Web Notification', e);
             }

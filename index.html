@@ -166,58 +166,85 @@
                 </div>
             </header>
 
-            <div class="dashboard-grid">
-                
-                <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
-                <div class="dashboard-card carousel-card">
-                    <div class="card-header">
-                        <h3><i class="fa-regular fa-compass header-icon"></i> Inspiração e Foco</h3>
-                        <p>Imagens motivacionais para impulsionar o seu foco diário.</p>
-                    </div>
-                    
-                    <div class="carousel-container" id="focus-carousel">
-                        <!-- Slides -->
-                        <div class="carousel-slides">
-                            <div class="carousel-slide active">
-                                <img src="assets/images/workspace.png" alt="Workspace Organizado">
-                                <div class="slide-caption">
-                                    <h4>Organize seu espaço de trabalho</h4>
-                                    <p>Um ambiente livre de distrações melhora a clareza mental e a produtividade.</p>
+            <!-- VIEW 1: DASHBOARD (PADRÃO) -->
+            <div id="view-dashboard" class="spa-view">
+                <div class="dashboard-grid">
+                    <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
+                    <div class="dashboard-card carousel-card">
+                        <div class="card-header">
+                            <h3><i class="fa-regular fa-compass header-icon"></i> Inspiração e Foco</h3>
+                            <p>Imagens motivacionais para impulsionar o seu foco diário.</p>
+                        </div>
+                        
+                        <div class="carousel-container" id="focus-carousel">
+                            <!-- Slides -->
+                            <div class="carousel-slides">
+                                <div class="carousel-slide active">
+                                    <img src="assets/images/workspace.png" alt="Workspace Organizado">
+                                    <div class="slide-caption">
+                                        <h4>Organize seu espaço de trabalho</h4>
+                                        <p>Um ambiente livre de distrações melhora a clareza mental e a produtividade.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <img src="assets/images/planner.png" alt="Digital Planner">
+                                    <div class="slide-caption">
+                                        <h4>Planeje com inteligência</h4>
+                                        <p>Divida seus grandes objetivos em tarefas diárias gerenciáveis.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <img src="assets/images/focus.png" alt="Mente Focada">
+                                    <div class="slide-caption">
+                                        <h4>Mantenha a atenção plena</h4>
+                                        <p>Faça pausas regulares e reconecte-se com sua meta principal.</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="carousel-slide">
-                                <img src="assets/images/planner.png" alt="Digital Planner">
-                                <div class="slide-caption">
-                                    <h4>Planeje com inteligência</h4>
-                                    <p>Divida seus grandes objetivos em tarefas diárias gerenciáveis.</p>
-                                </div>
-                            </div>
-                            <div class="carousel-slide">
-                                <img src="assets/images/focus.png" alt="Mente Focada">
-                                <div class="slide-caption">
-                                    <h4>Mantenha a atenção plena</h4>
-                                    <p>Faça pausas regulares e reconecte-se com sua meta principal.</p>
-                                </div>
+
+                            <!-- Botões de Navegação -->
+                            <button class="carousel-btn prev-btn" id="carousel-prev" aria-label="Slide anterior">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-btn next-btn" id="carousel-next" aria-label="Próximo slide">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Indicadores na base -->
+                            <div class="carousel-dots" id="carousel-dots">
+                                <span class="dot active" data-index="0"></span>
+                                <span class="dot" data-index="1"></span>
+                                <span class="dot" data-index="2"></span>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Botões de Navegação -->
-                        <button class="carousel-btn prev-btn" id="carousel-prev" aria-label="Slide anterior">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <button class="carousel-btn next-btn" id="carousel-next" aria-label="Próximo slide">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-
-                        <!-- Indicadores na base -->
-                        <div class="carousel-dots" id="carousel-dots">
-                            <span class="dot active" data-index="0"></span>
-                            <span class="dot" data-index="1"></span>
-                            <span class="dot" data-index="2"></span>
+                    <!-- CONTAINER EXTRA: STATUS DO USUÁRIO -->
+                    <div class="dashboard-card status-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-line header-icon"></i> Visão Geral</h3>
+                            <p>Estatísticas rápidas sobre seu fluxo de trabalho.</p>
+                        </div>
+                        <div class="status-summary-grid">
+                            <div class="status-item">
+                                <span class="status-number" id="stats-total-notes">0</span>
+                                <span class="status-label">Total de Notas</span>
+                            </div>
+                            <div class="status-item important">
+                                <span class="status-number" id="stats-important-notes">0</span>
+                                <span class="status-label">Notas Importantes</span>
+                            </div>
+                        </div>
+                        <div class="quick-tips">
+                            <h4><i class="fa-regular fa-lightbulb"></i> Dica do FocusFlow</h4>
+                            <p>Use a seção de "Minhas Notas" para registrar ideias. Marque como "Importante" para acionar lembretes nativos do sistema.</p>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- VIEW 2: MINHAS NOTAS -->
+            <div id="view-notes" class="spa-view hidden">
                 <!-- CONTAINER 2: BLOCO DE NOTAS -->
                 <div class="dashboard-card notes-card">
                     <div class="card-header">
@@ -306,7 +333,40 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- VIEW 3: NOTIFICAÇÕES -->
+            <div id="view-notifications" class="spa-view hidden">
+                <div class="dashboard-card notifications-panel-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-bell header-icon"></i> Central de Alertas</h3>
+                        <p>Gerencie as permissões e veja os registros das notificações disparadas.</p>
+                    </div>
+                    
+                    <div class="notification-setting-box">
+                        <div class="setting-desc">
+                            <h4>Notificações do Navegador</h4>
+                            <p>Se ativado, o navegador exibirá pop-ups nativos do sistema quando notas importantes forem salvas.</p>
+                        </div>
+                        <button id="btn-request-notif-view" class="btn-secondary">
+                            <i class="fa-solid fa-bell-slash"></i>
+                            <span>Ativar Notificações</span>
+                        </button>
+                    </div>
+
+                    <div class="notification-history-box">
+                        <h4>Log de Alertas Enviados (Sessão)</h4>
+                        <div class="notif-log-container" id="notif-log-container">
+                            <div class="no-logs-state" id="no-logs-state">
+                                <i class="fa-solid fa-history"></i>
+                                <p>Nenhum alerta foi disparado nesta sessão.</p>
+                            </div>
+                            <ul class="notif-log-list hidden" id="notif-log-list">
+                                <!-- Logs serão listados dinamicamente -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

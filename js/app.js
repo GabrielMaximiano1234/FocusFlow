@@ -72,6 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exporta showToast globalmente para que outros módulos usem
     window.showToast = showToast;
 
+    // Navegação interna do Dashboard (SPA de visualizações secundárias)
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navNotes = document.getElementById('nav-notes');
+    const navNotifications = document.getElementById('nav-notifications');
+
+    const viewDashboard = document.getElementById('view-dashboard');
+    const viewNotes = document.getElementById('view-notes');
+    const viewNotifications = document.getElementById('view-notifications');
+
+    // Histórico de logs de notificações para esta sessão
+    const sessionNotificationLogs = [];
+
     // --- GERENCIADOR DE TRANSIÇÃO DE TELAS (SPA) ---
     function initApp() {
         const user = window.Auth.getCurrentUser();
@@ -109,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (notepadInstance) {
             notepadInstance.setUser(user);
         }
+
+        // Garante que iniciamos na view principal do Dashboard
+        switchSubView('dashboard');
     }
 
     function showAuth() {
@@ -119,6 +134,170 @@ document.addEventListener('DOMContentLoaded', () => {
         if (carouselInstance) {
             carouselInstance.stopAutoplay();
         }
+    }
+
+    // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
+    function switchSubView(targetView) {
+        if (!viewDashboard || !viewNotes || !viewNotifications) return;
+
+        // Oculta todas as sub-views
+        viewDashboard.classList.add('hidden');
+        viewNotes.classList.add('hidden');
+        viewNotifications.classList.add('hidden');
+
+        // Remove active class de todos os botões do menu
+        navDashboard.classList.remove('active');
+        navNotes.classList.remove('active');
+        navNotifications.classList.remove('active');
+
+        // Exibe a view selecionada e ativa o item correspondente no menu
+        if (targetView === 'dashboard') {
+            viewDashboard.classList.remove('hidden');
+            navDashboard.classList.add('active');
+            updateDashboardStats();
+        } else if (targetView === 'notes') {
+            viewNotes.classList.remove('hidden');
+            navNotes.classList.add('active');
+            if (notepadInstance) notepadInstance.renderNotes();
+        } else if (targetView === 'notifications') {
+            viewNotifications.classList.remove('hidden');
+            navNotifications.classList.add('active');
+            updateNotificationsView();
+        }
+    }
+
+    // Vincula cliques aos botões da sidebar
+    if (navDashboard) {
+        navDashboard.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('dashboard');
+        });
+    }
+    if (navNotes) {
+        navNotes.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('notes');
+        });
+    }
+    if (navNotifications) {
+        navNotifications.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('notifications');
+        });
+    }
+
+    // Atualiza as estatísticas exibidas na visão geral do Dashboard
+    function updateDashboardStats() {
+        if (!notepadInstance) return;
+        const notes = notepadInstance.getNotes();
+        
+        const statsTotal = document.getElementById('stats-total-notes');
+        const statsImportant = document.getElementById('stats-important-notes');
+        
+        if (statsTotal) statsTotal.textContent = notes.length;
+        if (statsImportant) {
+            statsImportant.textContent = notes.filter(n => n.isImportant).length;
+        }
+    }
+    window.updateDashboardStats = updateDashboardStats; // Deixa disponível para o notepad.js chamar!
+
+    // Registra e exibe os logs de alertas disparados na sessão
+    function logNotificationTrigger(title, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString('pt-BR');
+        sessionNotificationLogs.unshift({ title, type, timestamp });
+        
+        // Atualiza o badge de notificações não lidas no menu lateral se não estiver na tela de notificações
+        const notifBadge = document.getElementById('notif-badge');
+        const viewNotifications = document.getElementById('view-notifications');
+        if (notifBadge && (!viewNotifications || viewNotifications.classList.contains('hidden'))) {
+            notifBadge.classList.remove('hidden');
+        }
+        
+        // Atualiza a lista de histórico na tela
+        updateNotificationsView();
+    }
+    window.logNotificationTrigger = logNotificationTrigger; // Disponibiliza globalmente
+
+    function updateNotificationsView() {
+        // Oculta badge de novas notificações
+        const notifBadge = document.getElementById('notif-badge');
+        if (notifBadge) notifBadge.classList.add('hidden');
+
+        // Atualiza status da permissão atual
+        const notifPermission = document.getElementById('notif-permission-status');
+        if (notifPermission) {
+            const currentPerm = Notification.permission;
+            notifPermission.textContent = currentPerm === 'granted' ? 'Ativado' : (currentPerm === 'denied' ? 'Bloqueado' : 'Pendente');
+            
+            // Remove classes antigas
+            notifPermission.className = 'status-badge';
+            if (currentPerm === 'granted') notifPermission.classList.add('success');
+            if (currentPerm === 'denied') notifPermission.classList.add('error');
+        }
+
+        // Atualiza botão na view de notificações
+        const btnRequestNotifView = document.getElementById('btn-request-notif-view');
+        if (btnRequestNotifView && notepadInstance) {
+            notepadInstance.updateNotificationButtonState();
+            
+            const isGranted = Notification.permission === 'granted';
+            const icon = btnRequestNotifView.querySelector('i');
+            const text = btnRequestNotifView.querySelector('span');
+
+            if (isGranted) {
+                btnRequestNotifView.className = 'btn-secondary active';
+                if (icon) icon.className = 'fa-solid fa-bell';
+                if (text) text.textContent = 'Notificações Ativadas';
+                btnRequestNotifView.disabled = true;
+            } else {
+                btnRequestNotifView.className = 'btn-secondary';
+                if (icon) icon.className = 'fa-solid fa-bell-slash';
+                if (text) text.textContent = 'Ativar Notificações';
+                btnRequestNotifView.disabled = false;
+            }
+        }
+
+        // Renderiza lista de logs
+        const logList = document.getElementById('notif-log-list');
+        const noLogsState = document.getElementById('no-logs-state');
+        if (!logList || !noLogsState) return;
+
+        logList.innerHTML = '';
+        
+        if (sessionNotificationLogs.length === 0) {
+            noLogsState.classList.remove('hidden');
+            logList.classList.add('hidden');
+        } else {
+            noLogsState.classList.add('hidden');
+            logList.classList.remove('hidden');
+
+            sessionNotificationLogs.forEach(log => {
+                const li = document.createElement('li');
+                li.className = `notif-log-item ${log.type}`;
+                
+                let iconClass = 'fa-solid fa-circle-info';
+                if (log.type === 'success') iconClass = 'fa-solid fa-circle-check';
+                if (log.type === 'warning') iconClass = 'fa-solid fa-triangle-exclamation';
+
+                li.innerHTML = `
+                    <i class="${iconClass}"></i>
+                    <span>${log.title}</span>
+                    <span class="notif-log-time">${log.timestamp}</span>
+                `;
+                logList.appendChild(li);
+            });
+        }
+    }
+
+    // Associa clique do botão da view de notificações
+    const btnRequestNotifView = document.getElementById('btn-request-notif-view');
+    if (btnRequestNotifView) {
+        btnRequestNotifView.addEventListener('click', () => {
+            if (notepadInstance) {
+                notepadInstance.requestNotificationPermission();
+                setTimeout(() => updateNotificationsView(), 1000);
+            }
+        });
     }
 
     // --- EVENTOS E CALLBACKS ---
