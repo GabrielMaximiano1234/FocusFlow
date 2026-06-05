@@ -165,7 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (targetView === 'library') {
             viewLibrary.classList.remove('hidden');
             navLibrary.classList.add('active');
-            if (notepadInstance) notepadInstance.renderNotes();
+            if (notepadInstance) {
+                if (notepadInstance.activeNotebookId) {
+                    notepadInstance.renderNotes();
+                } else {
+                    notepadInstance.renderNotebooks();
+                }
+            }
         } else if (targetView === 'notifications') {
             viewNotifications.classList.remove('hidden');
             navNotifications.classList.add('active');
@@ -199,6 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navLibrary) {
         navLibrary.addEventListener('click', (e) => {
             e.preventDefault();
+            if (notepadInstance) {
+                notepadInstance.exitNotebook();
+            }
             switchSubView('library');
         });
     }

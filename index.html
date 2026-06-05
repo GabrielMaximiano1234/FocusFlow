@@ -196,6 +196,16 @@
                             </div>
                         </div>
 
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="note-notebook"><i class="fa-solid fa-folder"></i> Salvar no Caderno</label>
+                                <select id="note-notebook">
+                                    <option value="">Notas Gerais (Sem Caderno)</option>
+                                    <!-- Os cadernos serão povoados dinamicamente -->
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="form-row-picker">
                             <!-- Seleção de cor -->
                             <div class="color-picker">
@@ -335,24 +345,50 @@
                         <p>Consulte, filtre, edite ou exclua as suas anotações salvas.</p>
                     </div>
 
-                    <!-- Barra de filtros e pesquisa -->
-                    <div class="notes-filter-bar">
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" id="search-notes" placeholder="Pesquisar notas...">
+                    <!-- SUB-VIEW 1: LISTA DE CADERNOS -->
+                    <div id="library-notebooks-view">
+                        <div class="notebooks-header" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                            <button id="btn-create-notebook" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
+                                <i class="fa-solid fa-folder-plus"></i>
+                                <span>+ Criar Novo Caderno</span>
+                            </button>
                         </div>
-                        <div class="filter-options">
-                            <button id="filter-all" class="filter-btn active">Todas</button>
-                            <button id="filter-important" class="filter-btn"><i class="fa-solid fa-triangle-exclamation"></i> Importantes</button>
+                        <div class="notebooks-grid" id="notebooks-grid">
+                            <!-- Cadernos inseridos dinamicamente -->
                         </div>
                     </div>
 
-                    <!-- Container para renderizar a lista de notas -->
-                    <div class="notes-grid" id="notes-grid">
-                        <!-- As notas serão inseridas dinamicamente via JS -->
-                        <div class="no-notes-state" id="no-notes-state">
-                            <i class="fa-regular fa-folder-open"></i>
-                            <p>Nenhuma nota encontrada. Crie uma nota no menu Início!</p>
+                    <!-- SUB-VIEW 2: NOTAS DO CADERNO SELECIONADO -->
+                    <div id="library-notes-view" class="hidden">
+                        <div class="notebook-detail-header">
+                            <button id="btn-back-to-notebooks" class="btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Voltar para Cadernos
+                            </button>
+                            <h3 id="active-notebook-title" style="margin: 0; font-family: var(--font-display);">Caderno: Geral</h3>
+                            <button id="btn-add-note-in-notebook" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
+                                <i class="fa-solid fa-plus"></i> Criar Nota Aqui
+                            </button>
+                        </div>
+
+                        <!-- Barra de filtros e pesquisa -->
+                        <div class="notes-filter-bar">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-notes" placeholder="Pesquisar notas...">
+                            </div>
+                            <div class="filter-options">
+                                <button id="filter-all" class="filter-btn active">Todas</button>
+                                <button id="filter-important" class="filter-btn"><i class="fa-solid fa-triangle-exclamation"></i> Importantes</button>
+                            </div>
+                        </div>
+
+                        <!-- Container para renderizar a lista de notas -->
+                        <div class="notes-grid" id="notes-grid">
+                            <!-- As notas serão inseridas dinamicamente via JS -->
+                            <div class="no-notes-state" id="no-notes-state">
+                                <i class="fa-regular fa-folder-open"></i>
+                                <p>Nenhuma nota encontrada. Crie uma nota no menu Início!</p>
+                            </div>
                         </div>
                     </div>
                 </div>
