@@ -12,15 +12,24 @@ class NotepadManager {
         this.activeNotebookId = null; // null = grid de cadernos, 'general' = notas gerais, 'notebook_id' = caderno específico
         this.autoSaveTimeout = null;
         
-        // Elementos da DOM - Notas
-        this.form = document.getElementById('note-form');
-        this.editIdInput = document.getElementById('edit-note-id');
-        this.titleInput = document.getElementById('note-title');
-        this.contentInput = document.getElementById('note-content');
+        // Elementos da DOM - Notas e Modal
+        this.modal = document.getElementById('add-item-modal');
+        this.modalForm = document.getElementById('modal-item-form');
+        this.modalEditId = document.getElementById('modal-edit-id');
+        this.modalTitle = document.getElementById('modal-item-title');
+        this.modalDate = document.getElementById('modal-item-date');
+        this.modalTime = document.getElementById('modal-item-time');
+        this.modalType = document.getElementById('modal-item-type');
+        this.modalPriority = document.getElementById('modal-item-priority');
+        this.modalContent = document.getElementById('modal-item-content');
+        this.modalCategoryGrid = document.getElementById('modal-category-grid');
+        this.modalCloseX = document.getElementById('modal-close-x');
+        this.modalCancelBtn = document.getElementById('modal-cancel-btn');
+        this.selectedCategory = '';
+        
         this.notesGrid = document.getElementById('notes-grid');
         this.noNotesState = document.getElementById('no-notes-state');
         this.searchInput = document.getElementById('search-notes');
-        this.reminderTimeInput = document.getElementById('note-reminder-time');
         
         // Elementos da DOM - Cadernos
         this.notebooksViewContainer = document.getElementById('library-notebooks-view');
@@ -45,10 +54,37 @@ class NotepadManager {
     }
 
     init() {
-        if (!this.form) return;
+        // Associa submissão do formulário do modal
+        if (this.modalForm) {
+            this.modalForm.addEventListener('submit', (e) => this.handleSaveModalItem(e));
+        }
 
-        // Associa submissão do formulário
-        this.form.addEventListener('submit', (e) => this.handleSaveNote(e));
+        // Categoria no Modal
+        if (this.modalCategoryGrid) {
+            const catButtons = this.modalCategoryGrid.querySelectorAll('.category-select-btn');
+            catButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    catButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.selectedCategory = btn.getAttribute('data-category');
+                });
+            });
+        }
+
+        // Eventos de Fechamento do Modal
+        if (this.modalCloseX) {
+            this.modalCloseX.addEventListener('click', () => this.closeModal());
+        }
+        if (this.modalCancelBtn) {
+            this.modalCancelBtn.addEventListener('click', () => this.closeModal());
+        }
+        if (this.modal) {
+            this.modal.addEventListener('click', (e) => {
+                if (e.target === this.modal) {
+                    this.closeModal();
+                }
+            });
+        }
 
         // Associa busca
         if (this.searchInput) {
@@ -120,7 +156,7 @@ class NotepadManager {
     setUser(user) {
         this.currentUser = user;
         this.activeNotebookId = null; // Reseta para a raiz da biblioteca ao logar/trocar
-        this.resetForm();
+        this.resetModalForm();
         this.renderNotebooks();
     }
 
@@ -414,27 +450,31 @@ class NotepadManager {
         });
     }
 
-    // Ação de Salvar/Editar Nota Rápida
-    handleSaveNote(e) {
+    // Ação de Salvar/Editar no Modal
+    handleSaveModalItem(e) {
         e.preventDefault();
         if (!this.currentUser) return;
 
-        const title = this.titleInput.value.trim();
-        const content = this.contentInput.value.trim();
-        const editId = this.editIdInput.value;
-        const reminderTime = this.reminderTimeInput ? this.reminderTimeInput.value : '';
-        
-        // Capturar cor selecionada
-        const colorRadio = this.form.querySelector('input[name="note-color"]:checked');
-        const colorClass = colorRadio ? colorRadio.value : 'note-default';
-
-        // Capturar prioridade e categoria
-        const priorityEl = document.getElementById('note-priority');
-        const priority = priorityEl ? priorityEl.value : 'Medium';
-        const categoryEl = document.getElementById('note-category');
-        const category = categoryEl ? categoryEl.value.trim() : '';
+        const title = this.modalTitle ? this.modalTitle.value.trim() : '';
+        const content = this.modalContent ? this.modalContent.value.trim() : '';
+        const editId = this.modalEditId ? this.modalEditId.value : '';
+        const reminderDate = this.modalDate ? this.modalDate.value : '';
+        const reminderTime = this.modalTime ? this.modalTime.value : '';
+        const type = this.modalType ? this.modalType.value : 'Task';
+        const priority = this.modalPriority ? this.modalPriority.value : 'Medium';
+        const category = this.selectedCategory || '';
 
         if (!title || !content) return;
+
+        // Mapear categoria para cor
+        let colorClass = 'note-default';
+        if (category === 'Work') colorClass = 'note-blue';
+        else if (category === 'School') colorClass = 'note-purple';
+        else if (category === 'Family') colorClass = 'note-green';
+        else if (category === 'Church') colorClass = 'note-amber';
+        else if (category === 'Health') colorClass = 'note-green';
+        else if (category === 'Friends') colorClass = 'note-blue';
+        else if (category === 'Love') colorClass = 'note-purple';
 
         let notes = this.getNotes();
         let isEditMode = false;
@@ -444,24 +484,27 @@ class NotepadManager {
             notes = notes.map(note => {
                 if (note.id === editId) {
                     isEditMode = true;
+                    const oldReminderDate = note.reminderDate || '';
                     const oldReminderTime = note.reminderTime || '';
-                    const hasReminderChanged = oldReminderTime !== reminderTime;
+                    const hasReminderChanged = oldReminderDate !== reminderDate || oldReminderTime !== reminderTime;
                     return {
                         ...note,
                         title,
                         content,
                         color: colorClass,
                         notebookId: null,
+                        reminderDate: reminderDate || null,
                         reminderTime: reminderTime || null,
                         reminderTriggered: hasReminderChanged ? false : (note.reminderTriggered || false),
                         priority,
                         category: category || null,
+                        type,
                         updatedAt: new Date().toISOString()
                     };
                 }
                 return note;
             });
-            if (window.showToast) window.showToast('Nota Atualizada', 'A anotação foi editada com sucesso.', 'success');
+            if (window.showToast) window.showToast('Item Atualizado', 'O item foi editado com sucesso.', 'success');
         } else {
             // Modo Criação
             const newNote = {
@@ -471,92 +514,142 @@ class NotepadManager {
                 content,
                 color: colorClass,
                 notebookId: null,
+                reminderDate: reminderDate || null,
                 reminderTime: reminderTime || null,
                 reminderTriggered: false,
                 priority,
                 category: category || null,
+                type,
                 completed: false,
                 createdAt: new Date().toISOString()
             };
             notes.unshift(newNote);
 
-            if (window.showToast) window.showToast('Nota Salva', 'Nova anotação adicionada ao seu bloco.', 'success');
+            if (window.showToast) window.showToast('Item Salvo', 'Novo item adicionado com sucesso.', 'success');
         }
 
         this.saveNotes(notes);
-        this.resetForm();
+        this.closeModal();
 
-        // Direciona o usuário para as Notas Gerais na Biblioteca
-        this.activeNotebookId = 'general';
-        
-        if (this.notebooksViewContainer) this.notebooksViewContainer.classList.add('hidden');
-        if (this.notebookEditorView) this.notebookEditorView.classList.add('hidden');
-        if (this.notesViewContainer) this.notesViewContainer.classList.remove('hidden');
-        
-        if (this.activeNotebookTitle) this.activeNotebookTitle.innerHTML = `<i class="fa-solid fa-folder-open"></i> Notas Gerais`;
-
-        if (window.switchSubView) {
-            window.switchSubView('library');
-        } else {
+        // Se estivermos visualizando Notas Gerais, renderizar
+        if (this.activeNotebookId === 'general') {
             this.renderNotes();
+        } else if (this.activeNotebookId === null) {
+            this.renderNotebooks();
         }
+
+        this.renderCalendar();
+        this.renderTasksManager();
+
         if (window.updateDashboardStats) window.updateDashboardStats();
     }
 
     // Excluir Nota
     deleteNote(id) {
-        if (!confirm('Deseja realmente excluir esta nota?')) return;
+        if (!confirm('Deseja realmente excluir este item?')) return;
         
         let notes = this.getNotes();
         notes = notes.filter(n => n.id !== id);
         this.saveNotes(notes);
         
-        if (window.showToast) window.showToast('Nota Excluída', 'A nota foi deletada permanentemente.', 'warning');
+        if (window.showToast) window.showToast('Item Excluído', 'O item foi deletado permanentemente.', 'warning');
         
         this.renderNotes();
+        this.renderCalendar();
+        this.renderTasksManager();
+
         if (window.updateDashboardStats) window.updateDashboardStats();
 
-        if (this.editIdInput.value === id) {
-            this.resetForm();
+        if (this.modalEditId && this.modalEditId.value === id) {
+            this.closeModal();
         }
     }
 
     // Carregar Nota no Formulário para Edição
     startEditNote(id) {
-        const notes = this.getNotes();
-        const note = notes.find(n => n.id === id);
-        if (!note) return;
+        this.openModal(id);
+    }
 
-        this.editIdInput.value = note.id;
-        this.titleInput.value = note.title;
-        this.contentInput.value = note.content;
-        if (this.reminderTimeInput) {
-            this.reminderTimeInput.value = note.reminderTime || '';
+    // Abrir o Modal de Adição/Edição
+    openModal(editId = null) {
+        if (!this.modal) return;
+        this.resetModalForm();
+
+        if (editId) {
+            const notes = this.getNotes();
+            const note = notes.find(n => n.id === editId);
+            if (note) {
+                if (this.modalEditId) this.modalEditId.value = note.id;
+                if (this.modalTitle) this.modalTitle.value = note.title || '';
+                if (this.modalDate) this.modalDate.value = note.reminderDate || '';
+                if (this.modalTime) this.modalTime.value = note.reminderTime || '';
+                if (this.modalType) this.modalType.value = note.type || 'Task';
+                if (this.modalPriority) this.modalPriority.value = note.priority || 'Medium';
+                if (this.modalContent) this.modalContent.value = note.content || '';
+                
+                this.selectedCategory = note.category || '';
+                if (this.modalCategoryGrid) {
+                    const catButtons = this.modalCategoryGrid.querySelectorAll('.category-select-btn');
+                    catButtons.forEach(btn => {
+                        if (btn.getAttribute('data-category') === this.selectedCategory) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                }
+            }
+        } else {
+            if (this.modalDate) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                this.modalDate.value = `${yyyy}-${mm}-${dd}`;
+            }
         }
 
-        const priorityEl = document.getElementById('note-priority');
-        if (priorityEl) priorityEl.value = note.priority || 'Medium';
-        const categoryEl = document.getElementById('note-category');
-        if (categoryEl) categoryEl.value = note.category || '';
+        this.modal.classList.remove('hidden');
+        setTimeout(() => {
+            this.modal.style.opacity = '1';
+            this.modal.style.pointerEvents = 'auto';
+            const modalBox = this.modal.querySelector('.modal-box');
+            if (modalBox) {
+                modalBox.style.transform = 'scale(1)';
+            }
+        }, 10);
 
-        const radio = this.form.querySelector(`input[name="note-color"][value="${note.color}"]`);
-        if (radio) {
-            radio.checked = true;
-            document.querySelectorAll('.color-option-btn').forEach(o => o.classList.remove('active'));
-            radio.parentElement.classList.add('active');
+        if (this.modalTitle) this.modalTitle.focus();
+    }
+
+    // Fechar o Modal
+    closeModal() {
+        if (!this.modal) return;
+        this.modal.style.opacity = '0';
+        this.modal.style.pointerEvents = 'none';
+        const modalBox = this.modal.querySelector('.modal-box');
+        if (modalBox) {
+            modalBox.style.transform = 'scale(0.9)';
         }
+        setTimeout(() => {
+            this.modal.classList.add('hidden');
+            this.resetModalForm();
+        }, 300);
+    }
 
-        if (window.switchSubView) {
-            window.switchSubView('home');
+    // Limpar o formulário do Modal
+    resetModalForm() {
+        if (this.modalForm) {
+            this.modalForm.reset();
         }
-
-        this.titleInput.scrollIntoView({ behavior: 'smooth' });
-        this.titleInput.focus();
-
-        const btnSaveSpan = this.form.querySelector('.btn-save span');
-        const btnSaveIcon = this.form.querySelector('.btn-save i');
-        if (btnSaveSpan) btnSaveSpan.textContent = 'Atualizar';
-        if (btnSaveIcon) btnSaveIcon.className = 'fa-solid fa-arrows-rotate';
+        if (this.modalEditId) {
+            this.modalEditId.value = '';
+        }
+        this.selectedCategory = '';
+        if (this.modalCategoryGrid) {
+            const catButtons = this.modalCategoryGrid.querySelectorAll('.category-select-btn');
+            catButtons.forEach(btn => btn.classList.remove('active'));
+        }
     }
 
     // Renderiza os cards das notas rápidas (Notas Gerais)
@@ -596,9 +689,20 @@ class NotepadManager {
             const date = new Date(note.createdAt);
             const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            const timeBadge = note.reminderTime ? `
+            let timeStr = '';
+            if (note.reminderDate) {
+                const [yyyy, mm, dd] = note.reminderDate.split('-');
+                timeStr = `${dd}/${mm}`;
+                if (note.reminderTime) {
+                    timeStr += ` às ${note.reminderTime}`;
+                }
+            } else if (note.reminderTime) {
+                timeStr = note.reminderTime;
+            }
+
+            const timeBadge = timeStr ? `
                 <span class="note-card-time" title="Lembrete agendado">
-                    <i class="fa-regular fa-clock"></i> ${note.reminderTime}
+                    <i class="fa-regular fa-clock"></i> ${timeStr}
                 </span>
             ` : '';
 
@@ -646,31 +750,7 @@ class NotepadManager {
         });
     }
 
-    // Limpa formulário
-    resetForm() {
-        this.form.reset();
-        this.editIdInput.value = '';
-        if (this.reminderTimeInput) {
-            this.reminderTimeInput.value = '';
-        }
-        
-        const priorityEl = document.getElementById('note-priority');
-        if (priorityEl) priorityEl.value = 'Medium';
-        const categoryEl = document.getElementById('note-category');
-        if (categoryEl) categoryEl.value = '';
-
-        document.querySelectorAll('.color-option-btn').forEach(o => o.classList.remove('active'));
-        const defaultColor = document.querySelector('.color-default');
-        if (defaultColor) {
-            defaultColor.classList.add('active');
-            defaultColor.querySelector('input').checked = true;
-        }
-
-        const btnSaveSpan = this.form.querySelector('.btn-save span');
-        const btnSaveIcon = this.form.querySelector('.btn-save i');
-        if (btnSaveSpan) btnSaveSpan.textContent = 'Salvar';
-        if (btnSaveIcon) btnSaveIcon.className = 'fa-solid fa-plus';
-    }
+    // resetForm foi substituído por resetModalForm e closeModal do modal.
 
     // --- MÉTODOS DE INTEGRACÃO COM WEB NOTIFICATIONS API ---
 
@@ -732,6 +812,11 @@ class NotepadManager {
         const notes = this.getNotes();
 
         const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const currentDateString = `${yyyy}-${mm}-${dd}`;
+
         const currentHours = String(now.getHours()).padStart(2, '0');
         const currentMinutes = String(now.getMinutes()).padStart(2, '0');
         const currentTimeString = `${currentHours}:${currentMinutes}`;
@@ -739,10 +824,14 @@ class NotepadManager {
         let updated = false;
 
         const updatedNotes = notes.map(note => {
-            if (note.reminderTime && !note.reminderTriggered && note.reminderTime === currentTimeString) {
-                this.triggerReminderNotification(note);
-                note.reminderTriggered = true;
-                updated = true;
+            if (note.reminderTime && !note.reminderTriggered) {
+                const timeMatches = note.reminderTime === currentTimeString;
+                const dateMatches = !note.reminderDate || note.reminderDate === currentDateString;
+                if (timeMatches && dateMatches) {
+                    this.triggerReminderNotification(note);
+                    note.reminderTriggered = true;
+                    updated = true;
+                }
             }
             return note;
         });
@@ -754,6 +843,8 @@ class NotepadManager {
             } else if (!this.activeNotebookId) {
                 this.renderNotebooks();
             }
+            this.renderCalendar();
+            this.renderTasksManager();
         }
     }
 
@@ -773,7 +864,8 @@ class NotepadManager {
                     requireInteraction: true
                 });
                 if (window.logNotificationTrigger) {
-                    window.logNotificationTrigger(`Lembrete disparado para "${note.title}" às ${note.reminderTime} ⏰`, 'success');
+                    const scheduledTime = note.reminderDate ? `${note.reminderDate} ${note.reminderTime || ''}` : (note.reminderTime || '');
+                    window.logNotificationTrigger(`Lembrete disparado para "${note.title}" às ${scheduledTime} ⏰`, 'success');
                 }
             } catch (e) {
                 console.error('Erro ao disparar notificação de lembrete', e);
@@ -866,6 +958,10 @@ class NotepadManager {
             cell.appendChild(daySpan);
 
             const dayTasks = notes.filter(note => {
+                if (note.reminderDate) {
+                    const [ry, rm, rd] = note.reminderDate.split('-').map(Number);
+                    return ry === year && rm === (month + 1) && rd === day;
+                }
                 const noteDate = new Date(note.createdAt);
                 return noteDate.getFullYear() === year &&
                        noteDate.getMonth() === month &&
@@ -944,12 +1040,25 @@ class NotepadManager {
             const priorityBadge = note.priority ? `<span class="badge-priority ${note.priority.toLowerCase()}" style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${note.priority === 'High' ? 'Alta' : (note.priority === 'Medium' ? 'Média' : 'Baixa')}</span>` : '';
             const categoryBadge = note.category ? `<span class="badge-category" style="background: rgba(255,255,255,0.08); font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #e5e7eb;">${note.category}</span>` : '';
             
+            let timeStr = '';
+            if (note.reminderDate) {
+                const [yyyy, mm, dd] = note.reminderDate.split('-');
+                timeStr = `${dd}/${mm}`;
+                if (note.reminderTime) {
+                    timeStr += ` às ${note.reminderTime}`;
+                }
+            } else if (note.reminderTime) {
+                timeStr = note.reminderTime;
+            }
+            const timeBadge = timeStr ? `<span style="font-size: 10px; background: rgba(255,255,255,0.05); color: #9ca3af; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>` : '';
+
             div.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <span style="font-size: 14px; font-weight: 500; color: #fff; text-decoration: ${note.completed ? 'line-through' : 'none'};">${note.title}</span>
-                    <div style="display: flex; gap: 6px; align-items: center;">
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                         ${priorityBadge}
                         ${categoryBadge}
+                        ${timeBadge}
                     </div>
                 </div>
                 <button class="btn-toggle-day-task" style="background: none; border: none; color: ${note.completed ? '#10b981' : '#8a8ab0'}; cursor: pointer; font-size: 16px; padding: 0;"><i class="${note.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i></button>
@@ -1023,7 +1132,17 @@ class NotepadManager {
 
             const priorityBadge = note.priority ? `<span style="font-size: 10px; background: rgba(255,255,255,0.05); border: 1px solid ${pColor}55; color: ${pColor}; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${pName}</span>` : '';
             const categoryBadge = note.category ? `<span style="font-size: 10px; background: rgba(255,255,255,0.08); color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${note.category}</span>` : '';
-            const timeBadge = note.reminderTime ? `<span style="font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 4px;"><i class="fa-regular fa-clock"></i> ${note.reminderTime}</span>` : '';
+            let timeStr = '';
+            if (note.reminderDate) {
+                const [yyyy, mm, dd] = note.reminderDate.split('-');
+                timeStr = `${dd}/${mm}`;
+                if (note.reminderTime) {
+                    timeStr += ` às ${note.reminderTime}`;
+                }
+            } else if (note.reminderTime) {
+                timeStr = note.reminderTime;
+            }
+            const timeBadge = timeStr ? `<span style="font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 4px;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>` : '';
 
             div.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 12px;">

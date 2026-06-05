@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!notepadInstance && window.NotepadManager) {
             notepadInstance = new window.NotepadManager();
+            window.notepadInstance = notepadInstance; // Expose globally
         }
 
         // Passa o escopo do usuário atual para carregar suas notas particulares
@@ -253,7 +254,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnDashboardQuickAdd) {
         btnDashboardQuickAdd.addEventListener('click', (e) => {
             e.preventDefault();
-            switchSubView('home');
+            if (notepadInstance) {
+                notepadInstance.openModal();
+            }
+        });
+    }
+
+    const btnHomeAddTask = document.getElementById('btn-home-add-task');
+    if (btnHomeAddTask) {
+        btnHomeAddTask.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (notepadInstance) {
+                notepadInstance.openModal();
+            }
         });
     }
 
@@ -266,9 +279,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         notes.forEach(note => {
             if (note.reminderTime && !note.completed) {
-                const [hours, minutes] = note.reminderTime.split(':').map(Number);
-                const reminderDate = new Date();
-                reminderDate.setHours(hours, minutes, 0, 0);
+                let reminderDate;
+                if (note.reminderDate) {
+                    const [year, month, day] = note.reminderDate.split('-').map(Number);
+                    const [hours, minutes] = note.reminderTime.split(':').map(Number);
+                    reminderDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+                } else {
+                    const [hours, minutes] = note.reminderTime.split(':').map(Number);
+                    reminderDate = new Date();
+                    reminderDate.setHours(hours, minutes, 0, 0);
+                }
 
                 if (reminderDate > now) {
                     upcoming.push({ note, date: reminderDate });
@@ -307,7 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const { note, date } = nextUp;
         titleEl.textContent = note.title;
         descEl.textContent = note.content;
-        timeEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${note.reminderTime}`;
+        
+        let displayTimeStr = note.reminderTime;
+        if (note.reminderDate) {
+            const [yyyy, mm, dd] = note.reminderDate.split('-');
+            displayTimeStr = `${dd}/${mm} ${note.reminderTime}`;
+        }
+        timeEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${displayTimeStr}`;
 
         const updateTimer = () => {
             const now = new Date();
@@ -389,9 +415,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
             ` : '';
 
-            const timeInfo = note.reminderTime ? `
+            let timeStr = '';
+            if (note.reminderDate) {
+                const [yyyy, mm, dd] = note.reminderDate.split('-');
+                timeStr = `${dd}/${mm}`;
+                if (note.reminderTime) {
+                    timeStr += ` às ${note.reminderTime}`;
+                }
+            } else if (note.reminderTime) {
+                timeStr = note.reminderTime;
+            }
+            const timeInfo = timeStr ? `
                 <span style="font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-regular fa-clock"></i> ${note.reminderTime}
+                    <i class="fa-regular fa-clock"></i> ${timeStr}
                 </span>
             ` : '';
 

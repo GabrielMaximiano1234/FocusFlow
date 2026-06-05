@@ -178,104 +178,20 @@
                 </div>
             </header>
 
-            <!-- VIEW 1: INÍCIO (CRIAR NOTA RÁPIDA) -->
+            <!-- VIEW 1: INÍCIO (TELA DE BOAS VINDAS / HUB CENTRAL) -->
             <div id="view-home" class="spa-view">
-                <div class="dashboard-card quick-create-card">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-pen-to-square header-icon"></i> Criar Nota Rápida</h3>
-                        <p>Registre suas ideias e tarefas com alertas do sistema.</p>
+                <div class="dashboard-card welcome-hub-card" style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+                    <div class="welcome-hub-icon" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px; animation: floatIcon 3s ease-in-out infinite;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
                     </div>
-
-                    <!-- Editor de notas -->
-                    <form id="note-form" class="note-form">
-                        <input type="hidden" id="edit-note-id">
-                        
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="note-title">Título</label>
-                                <input type="text" id="note-title" placeholder="Título da nota..." required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="note-content">Conteúdo</label>
-                                <textarea id="note-content" placeholder="Escreva o conteúdo da nota aqui..." rows="4" required></textarea>
-                            </div>
-                        </div>
-
-
-
-                        <div class="form-row-picker">
-                            <!-- Seleção de cor -->
-                            <div class="color-picker">
-                                <span class="color-label">Cor do Card:</span>
-                                <div class="color-options">
-                                    <label class="color-option-btn color-default active">
-                                        <input type="radio" name="note-color" value="note-default" checked>
-                                        <span class="color-dot"></span>
-                                    </label>
-                                    <label class="color-option-btn color-blue">
-                                        <input type="radio" name="note-color" value="note-blue">
-                                        <span class="color-dot"></span>
-                                    </label>
-                                    <label class="color-option-btn color-green">
-                                        <input type="radio" name="note-color" value="note-green">
-                                        <span class="color-dot"></span>
-                                    </label>
-                                    <label class="color-option-btn color-amber">
-                                        <input type="radio" name="note-color" value="note-amber">
-                                        <span class="color-dot"></span>
-                                    </label>
-                                    <label class="color-option-btn color-purple">
-                                        <input type="radio" name="note-color" value="note-purple">
-                                        <span class="color-dot"></span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Lembrete de Horário -->
-                            <div class="input-group time-group">
-                                <label for="note-reminder-time"><i class="fa-regular fa-clock"></i> Lembrete (Horário):</label>
-                                <input type="time" id="note-reminder-time">
-                            </div>
-                        </div>
-
-                        <div class="form-row-picker" style="margin-top: 16px;">
-                            <!-- Seleção de Prioridade -->
-                            <div class="input-group priority-group" style="flex: 1; min-width: 140px;">
-                                <label for="note-priority"><i class="fa-solid fa-triangle-exclamation"></i> Prioridade:</label>
-                                <select id="note-priority" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                                    <option value="Low" style="background: #1f1f2e; color: #fff;">Baixa</option>
-                                    <option value="Medium" selected style="background: #1f1f2e; color: #fff;">Média</option>
-                                    <option value="High" style="background: #1f1f2e; color: #fff;">Alta</option>
-                                </select>
-                            </div>
-
-                            <!-- Seleção de Categoria -->
-                            <div class="input-group category-group" style="flex: 1; min-width: 140px;">
-                                <label for="note-category"><i class="fa-solid fa-tag"></i> Categoria:</label>
-                                <input type="text" id="note-category" placeholder="Ex: Trabalho, Church, Medium..." list="category-suggestions" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                                <datalist id="category-suggestions">
-                                    <option value="Work">
-                                    <option value="Personal">
-                                    <option value="Church">
-                                    <option value="Medium">
-                                    <option value="Health">
-                                    <option value="Study">
-                                </datalist>
-                            </div>
-                        </div>
-
-                        <div class="form-footer">
-                            <div class="note-options"></div>
-
-                            <button type="submit" id="btn-save-note" class="btn-save">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Salvar Nota</span>
-                            </button>
-                        </div>
-                    </form>
+                    <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin-bottom: 12px;">Bem-vindo ao FocusFlow</h2>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 30px auto; line-height: 1.6;">
+                        Organize seus compromissos, agende lembretes inteligentes e domine sua rotina com facilidade.
+                    </p>
+                    
+                    <button id="btn-home-add-task" class="btn-primary" style="margin: 0 auto; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
+                        <i class="fa-solid fa-circle-plus"></i> + Add New Item
+                    </button>
                 </div>
             </div>
 
@@ -565,6 +481,104 @@
         </section>
     </main>
 
+    <!-- 3. MODAL ADICIONAR NOVO ITEM (ADD NEW ITEM OVERLAY) -->
+    <div id="add-item-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div class="modal-box" style="background: linear-gradient(145deg, #181824 0%, #10101a 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; width: 90%; max-width: 520px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 20px;">
+                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; margin: 0;"><i class="fa-solid fa-circle-plus" style="color: var(--primary); margin-right: 6px;"></i> Add New Item</h3>
+                <button id="modal-close-x" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <form id="modal-item-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="modal-edit-id">
+                
+                <!-- TITLE -->
+                <div class="input-group">
+                    <label for="modal-item-title" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Title</label>
+                    <input type="text" id="modal-item-title" placeholder="What's this about?" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.2s;">
+                </div>
+                
+                <!-- DATE & TIME -->
+                <div style="display: flex; gap: 16px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-date" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Date</label>
+                        <input type="date" id="modal-item-date" required style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-time" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Time (Optional)</label>
+                        <input type="time" id="modal-item-time" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                </div>
+                
+                <!-- CATEGORY GRID -->
+                <div class="input-group">
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">Category</label>
+                    <div id="modal-category-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <button type="button" class="category-select-btn" data-category="Work" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-briefcase" style="color: #60a5fa; font-size: 1.1rem;"></i>
+                            Work
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="School" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-graduation-cap" style="color: #a855f7; font-size: 1.1rem;"></i>
+                            School
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Family" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-house-chimney-user" style="color: #22c55e; font-size: 1.1rem;"></i>
+                            Family
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Church" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-church" style="color: #f59e0b; font-size: 1.1rem;"></i>
+                            Church
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Health" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-heart-pulse" style="color: #ef4444; font-size: 1.1rem;"></i>
+                            Health
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Friends" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-user-group" style="color: #06b6d4; font-size: 1.1rem;"></i>
+                            Friends
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Love" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-heart" style="color: #ec4899; font-size: 1.1rem;"></i>
+                            Love
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- TYPE & PRIORITY SELECTS -->
+                <div style="display: flex; gap: 16px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-type" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Type</label>
+                        <select id="modal-item-type" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
+                            <option value="Task" style="background: #181824; color: #fff;">Task / To-Do</option>
+                            <option value="Note" style="background: #181824; color: #fff;">Note</option>
+                            <option value="Reminder" style="background: #181824; color: #fff;">Reminder</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-priority" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Priority</label>
+                        <select id="modal-item-priority" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
+                            <option value="Low" style="background: #181824; color: #fff;">🟢 Low</option>
+                            <option value="Medium" selected style="background: #181824; color: #fff;">🟡 Medium</option>
+                            <option value="High" style="background: #181824; color: #fff;">🔴 High</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- DESCRIPTION / CONTENT -->
+                <div class="input-group">
+                    <label for="modal-item-content" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Description / Notes</label>
+                    <textarea id="modal-item-content" placeholder="Enter details or notes..." rows="3" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; resize: vertical; transition: all 0.2s;"></textarea>
+                </div>
+                
+                <!-- MODAL ACTIONS -->
+                <div class="modal-actions-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; margin-top: 8px;">
+                    <button type="button" id="modal-cancel-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;">Cancel</button>
+                    <button type="submit" id="modal-save-btn" class="btn-primary" style="margin-top: 0; padding: 10px 24px; font-size: 0.9rem; font-weight: 600;">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Scripts JavaScript -->
     <script src="js/auth.js"></script>
     <script src="js/carousel.js"></script>
