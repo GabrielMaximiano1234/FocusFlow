@@ -2042,4 +2042,8 @@ body.portrait-locked #landscape-lock-overlay {
     display: flex !important;
 }
 
+body.fullscreen-scaled {
+    overflow-x: hidden !important;
+}
+
 

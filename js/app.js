@@ -659,21 +659,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    const dashboardSection = document.getElementById('dashboard-section');
 
-    // Sincroniza a escala do viewport ao entrar/sair de tela cheia para evitar zoom incorreto
+    // Sincroniza a escala dinâmica via CSS transform ao entrar/sair de tela cheia
     const handleFullscreenViewportSync = () => {
-        if (!viewportMeta) return;
+        const scaleWrapper = document.getElementById('modal-scale-wrapper');
+        
         if (document.fullscreenElement) {
             const isMobileDevice = Math.min(screen.width, screen.height) <= 600;
-            if (isMobileDevice) {
-                const screenWidth = Math.max(screen.width, screen.height);
-                const scale = (screenWidth / 1280).toFixed(3);
-                viewportMeta.setAttribute('content', `width=1280, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=${scale}, user-scalable=no`);
+            const isLandscape = window.innerWidth > window.innerHeight;
+            const isMobileLandscape = isMobileDevice && isLandscape;
+            
+            if (isMobileLandscape) {
+                // Proporção base do layout desktop = 1280px
+                const scale = window.innerWidth / 1280;
+                
+                // Aplica a transformação de escala no wrapper do Dashboard
+                if (dashboardSection) {
+                    dashboardSection.style.transform = `scale(${scale})`;
+                    dashboardSection.style.transformOrigin = 'top left';
+                    dashboardSection.style.width = '1280px';
+                }
+                
+                // Aplica a mesma escala no wrapper do modal
+                if (scaleWrapper) {
+                    scaleWrapper.style.transform = `scale(${scale})`;
+                    scaleWrapper.style.transformOrigin = 'center center';
+                }
+                
+                document.body.classList.add('fullscreen-scaled');
+            } else {
+                restoreScale();
             }
         } else {
-            viewportMeta.setAttribute('content', 'width=1280');
+            restoreScale();
         }
+    };
+
+    const restoreScale = () => {
+        if (dashboardSection) {
+            dashboardSection.style.transform = '';
+            dashboardSection.style.transformOrigin = '';
+            dashboardSection.style.width = '';
+        }
+        const scaleWrapper = document.getElementById('modal-scale-wrapper');
+        if (scaleWrapper) {
+            scaleWrapper.style.transform = '';
+            scaleWrapper.style.transformOrigin = '';
+        }
+        document.body.classList.remove('fullscreen-scaled');
     };
 
     // Trava de orientação vertical para dispositivos móveis
@@ -683,13 +717,27 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (isMobileDevice && isPortrait) {
             document.body.classList.add('portrait-locked');
+            restoreScale(); // Garante restaurar escala ao voltar para portrait
         } else {
             document.body.classList.remove('portrait-locked');
+            if (document.fullscreenElement) {
+                handleFullscreenViewportSync();
+            }
         }
     };
     
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
+    window.addEventListener('resize', () => {
+        checkOrientation();
+        if (document.fullscreenElement) {
+            handleFullscreenViewportSync();
+        }
+    });
+    window.addEventListener('orientationchange', () => {
+        checkOrientation();
+        if (document.fullscreenElement) {
+            handleFullscreenViewportSync();
+        }
+    });
     checkOrientation();
     
     if (btnFullscreen) {
@@ -731,8 +779,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             handleFullscreenViewportSync();
         });
-
-        window.addEventListener('resize', handleFullscreenViewportSync);
     }
 
     // Inicialização da aplicação
