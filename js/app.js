@@ -659,6 +659,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+
+    // Sincroniza a escala do viewport ao entrar/sair de tela cheia para evitar zoom incorreto
+    const handleFullscreenViewportSync = () => {
+        if (!viewportMeta) return;
+        if (document.fullscreenElement) {
+            const isMobileDevice = Math.min(screen.width, screen.height) <= 600;
+            if (isMobileDevice) {
+                const screenWidth = Math.max(screen.width, screen.height);
+                const scale = (screenWidth / 1280).toFixed(3);
+                viewportMeta.setAttribute('content', `width=1280, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=${scale}, user-scalable=no`);
+            }
+        } else {
+            viewportMeta.setAttribute('content', 'width=1280');
+        }
+    };
 
     // Trava de orientação vertical para dispositivos móveis
     const checkOrientation = () => {
@@ -713,6 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     try { screen.orientation.unlock(); } catch(e) {}
                 }
             }
+            handleFullscreenViewportSync();
         });
 
         window.addEventListener('resize', handleFullscreenViewportSync);
