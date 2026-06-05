@@ -659,24 +659,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
+
+    // Trava de orientação vertical para dispositivos móveis
+    const checkOrientation = () => {
+        const isMobileDevice = Math.min(screen.width, screen.height) <= 600;
+        const isPortrait = window.innerHeight > window.innerWidth;
+        
+        if (isMobileDevice && isPortrait) {
+            document.body.classList.add('portrait-locked');
+        } else {
+            document.body.classList.remove('portrait-locked');
+        }
+    };
+    
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    checkOrientation();
     
     if (btnFullscreen) {
-        const handleFullscreenViewportSync = () => {
-            if (document.fullscreenElement) {
-                // Se estiver em tela cheia e for mobile landscape (altura <= 500px)
-                if (window.innerHeight <= 500 || (screen.height && screen.height <= 500)) {
-                    if (viewportMeta) {
-                        viewportMeta.setAttribute('content', 'width=1280, initial-scale=0.5, maximum-scale=1.0, user-scalable=no');
-                    }
-                } else {
-                    if (viewportMeta) {
-                        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-                    }
-                }
-            }
-        };
-
         btnFullscreen.addEventListener('click', async () => {
             try {
                 if (!document.fullscreenElement) {
@@ -712,11 +712,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (screen.orientation && screen.orientation.unlock) {
                     try { screen.orientation.unlock(); } catch(e) {}
                 }
-                if (viewportMeta) {
-                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-                }
-            } else {
-                handleFullscreenViewportSync();
             }
         });
 
