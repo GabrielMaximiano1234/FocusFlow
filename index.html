@@ -120,13 +120,17 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" id="nav-dashboard">
+                <a href="#" class="nav-item active" id="nav-home">
                     <i class="fa-solid fa-house"></i>
                     <span>Início</span>
                 </a>
-                <a href="#" class="nav-item" id="nav-notes">
+                <a href="#" class="nav-item" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-library">
                     <i class="fa-regular fa-clipboard"></i>
-                    <span>Minhas Notas</span>
+                    <span>Biblioteca</span>
                 </a>
                 <a href="#" class="nav-item" id="nav-notifications" style="position: relative;">
                     <i class="fa-regular fa-bell"></i>
@@ -166,8 +170,88 @@
                 </div>
             </header>
 
-            <!-- VIEW 1: DASHBOARD (PADRÃO) -->
-            <div id="view-dashboard" class="spa-view">
+            <!-- VIEW 1: INÍCIO (CRIAR NOTA RÁPIDA) -->
+            <div id="view-home" class="spa-view">
+                <div class="dashboard-card quick-create-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-pen-to-square header-icon"></i> Criar Nota Rápida</h3>
+                        <p>Registre suas ideias e tarefas com alertas do sistema.</p>
+                    </div>
+
+                    <!-- Editor de notas -->
+                    <form id="note-form" class="note-form">
+                        <input type="hidden" id="edit-note-id">
+                        
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="note-title">Título</label>
+                                <input type="text" id="note-title" placeholder="Título da nota..." required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="note-content">Conteúdo</label>
+                                <textarea id="note-content" placeholder="Escreva o conteúdo da nota aqui..." rows="4" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row-picker">
+                            <!-- Seleção de cor -->
+                            <div class="color-picker">
+                                <span class="color-label">Cor do Card:</span>
+                                <div class="color-options">
+                                    <label class="color-option-btn color-default active">
+                                        <input type="radio" name="note-color" value="note-default" checked>
+                                        <span class="color-dot"></span>
+                                    </label>
+                                    <label class="color-option-btn color-blue">
+                                        <input type="radio" name="note-color" value="note-blue">
+                                        <span class="color-dot"></span>
+                                    </label>
+                                    <label class="color-option-btn color-green">
+                                        <input type="radio" name="note-color" value="note-green">
+                                        <span class="color-dot"></span>
+                                    </label>
+                                    <label class="color-option-btn color-amber">
+                                        <input type="radio" name="note-color" value="note-amber">
+                                        <span class="color-dot"></span>
+                                    </label>
+                                    <label class="color-option-btn color-purple">
+                                        <input type="radio" name="note-color" value="note-purple">
+                                        <span class="color-dot"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Lembrete de Horário -->
+                            <div class="input-group time-group">
+                                <label for="note-reminder-time"><i class="fa-regular fa-clock"></i> Lembrete (Horário):</label>
+                                <input type="time" id="note-reminder-time">
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <div class="note-options">
+                                <!-- Checkbox de Importante -->
+                                <label class="important-checkbox-wrapper" for="note-important">
+                                    <input type="checkbox" id="note-important">
+                                    <span class="custom-checkbox"></span>
+                                    <span class="checkbox-text"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" id="btn-save-note" class="btn-save">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Salvar Nota</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VIEW 2: DASHBOARD (INSPIRAÇÃO E STATUS) -->
+            <div id="view-dashboard" class="spa-view hidden">
                 <div class="dashboard-grid">
                     <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
                     <div class="dashboard-card carousel-card">
@@ -237,80 +321,19 @@
                         </div>
                         <div class="quick-tips">
                             <h4><i class="fa-regular fa-lightbulb"></i> Dica do FocusFlow</h4>
-                            <p>Use a seção de "Minhas Notas" para registrar ideias. Marque como "Importante" para acionar lembretes nativos do sistema.</p>
+                            <p>Defina horários de lembrete nas suas notas para receber alertas automáticos no horário agendado!</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 2: MINHAS NOTAS -->
-            <div id="view-notes" class="spa-view hidden">
-                <!-- CONTAINER 2: BLOCO DE NOTAS -->
+            <!-- VIEW 3: BIBLIOTECA (LISTA DE NOTAS) -->
+            <div id="view-library" class="spa-view hidden">
                 <div class="dashboard-card notes-card">
                     <div class="card-header">
-                        <h3><i class="fa-regular fa-note-sticky header-icon"></i> Bloco de Notas</h3>
-                        <p>Crie notas rápidas e receba alertas para anotações marcadas como importantes.</p>
+                        <h3><i class="fa-regular fa-clipboard header-icon"></i> Biblioteca de Notas</h3>
+                        <p>Consulte, filtre, edite ou exclua as suas anotações salvas.</p>
                     </div>
-
-                    <!-- Editor de notas -->
-                    <form id="note-form" class="note-form">
-                        <input type="hidden" id="edit-note-id">
-                        
-                        <div class="form-row">
-                            <div class="input-group">
-                                <input type="text" id="note-title" placeholder="Título da nota..." required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="input-group">
-                                <textarea id="note-content" placeholder="Escreva o conteúdo da nota aqui..." rows="3" required></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-footer">
-                            <div class="note-options">
-                                <!-- Seleção de cor -->
-                                <div class="color-picker">
-                                    <span class="color-label">Cor:</span>
-                                    <div class="color-options">
-                                        <label class="color-option-btn color-default active">
-                                            <input type="radio" name="note-color" value="note-default" checked>
-                                            <span class="color-dot"></span>
-                                        </label>
-                                        <label class="color-option-btn color-blue">
-                                            <input type="radio" name="note-color" value="note-blue">
-                                            <span class="color-dot"></span>
-                                        </label>
-                                        <label class="color-option-btn color-green">
-                                            <input type="radio" name="note-color" value="note-green">
-                                            <span class="color-dot"></span>
-                                        </label>
-                                        <label class="color-option-btn color-amber">
-                                            <input type="radio" name="note-color" value="note-amber">
-                                            <span class="color-dot"></span>
-                                        </label>
-                                        <label class="color-option-btn color-purple">
-                                            <input type="radio" name="note-color" value="note-purple">
-                                            <span class="color-dot"></span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- Checkbox de Importante -->
-                                <label class="important-checkbox-wrapper" for="note-important">
-                                    <input type="checkbox" id="note-important">
-                                    <span class="custom-checkbox"></span>
-                                    <span class="checkbox-text"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>
-                                </label>
-                            </div>
-
-                            <button type="submit" id="btn-save-note" class="btn-save">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Salvar</span>
-                            </button>
-                        </div>
-                    </form>
 
                     <!-- Barra de filtros e pesquisa -->
                     <div class="notes-filter-bar">
@@ -329,13 +352,13 @@
                         <!-- As notas serão inseridas dinamicamente via JS -->
                         <div class="no-notes-state" id="no-notes-state">
                             <i class="fa-regular fa-folder-open"></i>
-                            <p>Nenhuma nota encontrada. Crie uma nota acima!</p>
+                            <p>Nenhuma nota encontrada. Crie uma nota no menu Início!</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 3: NOTIFICAÇÕES -->
+            <!-- VIEW 4: NOTIFICAÇÕES -->
             <div id="view-notifications" class="spa-view hidden">
                 <div class="dashboard-card notifications-panel-card">
                     <div class="card-header">
@@ -346,7 +369,7 @@
                     <div class="notification-setting-box">
                         <div class="setting-desc">
                             <h4>Notificações do Navegador</h4>
-                            <p>Se ativado, o navegador exibirá pop-ups nativos do sistema quando notas importantes forem salvas.</p>
+                            <p>Se ativado, o navegador exibirá pop-ups nativos do sistema quando notas importantes forem salvas ou nos horários agendados.</p>
                         </div>
                         <button id="btn-request-notif-view" class="btn-secondary">
                             <i class="fa-solid fa-bell-slash"></i>

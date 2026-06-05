@@ -73,12 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showToast = showToast;
 
     // Navegação interna do Dashboard (SPA de visualizações secundárias)
+    const navHome = document.getElementById('nav-home');
     const navDashboard = document.getElementById('nav-dashboard');
-    const navNotes = document.getElementById('nav-notes');
+    const navLibrary = document.getElementById('nav-library');
     const navNotifications = document.getElementById('nav-notifications');
 
+    const viewHome = document.getElementById('view-home');
     const viewDashboard = document.getElementById('view-dashboard');
-    const viewNotes = document.getElementById('view-notes');
+    const viewLibrary = document.getElementById('view-library');
     const viewNotifications = document.getElementById('view-notifications');
 
     // Histórico de logs de notificações para esta sessão
@@ -122,8 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notepadInstance.setUser(user);
         }
 
-        // Garante que iniciamos na view principal do Dashboard
-        switchSubView('dashboard');
+        // Garante que iniciamos na view principal de Início
+        switchSubView('home');
     }
 
     function showAuth() {
@@ -138,26 +140,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewDashboard || !viewNotes || !viewNotifications) return;
+        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications) return;
 
         // Oculta todas as sub-views
+        viewHome.classList.add('hidden');
         viewDashboard.classList.add('hidden');
-        viewNotes.classList.add('hidden');
+        viewLibrary.classList.add('hidden');
         viewNotifications.classList.add('hidden');
 
         // Remove active class de todos os botões do menu
+        navHome.classList.remove('active');
         navDashboard.classList.remove('active');
-        navNotes.classList.remove('active');
+        navLibrary.classList.remove('active');
         navNotifications.classList.remove('active');
 
         // Exibe a view selecionada e ativa o item correspondente no menu
-        if (targetView === 'dashboard') {
+        if (targetView === 'home') {
+            viewHome.classList.remove('hidden');
+            navHome.classList.add('active');
+        } else if (targetView === 'dashboard') {
             viewDashboard.classList.remove('hidden');
             navDashboard.classList.add('active');
             updateDashboardStats();
-        } else if (targetView === 'notes') {
-            viewNotes.classList.remove('hidden');
-            navNotes.classList.add('active');
+        } else if (targetView === 'library') {
+            viewLibrary.classList.remove('hidden');
+            navLibrary.classList.add('active');
             if (notepadInstance) notepadInstance.renderNotes();
         } else if (targetView === 'notifications') {
             viewNotifications.classList.remove('hidden');
@@ -166,12 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Expor globalmente para outros scripts (como notepad.js)
+    window.switchSubView = switchSubView;
+
     // Vincula cliques aos botões da sidebar e ao logotipo inicial
     const sidebarBrandHome = document.getElementById('sidebar-brand-home');
     if (sidebarBrandHome) {
         sidebarBrandHome.addEventListener('click', (e) => {
             e.preventDefault();
-            switchSubView('dashboard');
+            switchSubView('home');
+        });
+    }
+    if (navHome) {
+        navHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('home');
         });
     }
     if (navDashboard) {
@@ -180,10 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
             switchSubView('dashboard');
         });
     }
-    if (navNotes) {
-        navNotes.addEventListener('click', (e) => {
+    if (navLibrary) {
+        navLibrary.addEventListener('click', (e) => {
             e.preventDefault();
-            switchSubView('notes');
+            switchSubView('library');
         });
     }
     if (navNotifications) {

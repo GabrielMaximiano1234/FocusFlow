@@ -18,6 +18,7 @@ class NotepadManager {
         this.notesGrid = document.getElementById('notes-grid');
         this.noNotesState = document.getElementById('no-notes-state');
         this.searchInput = document.getElementById('search-notes');
+        this.reminderTimeInput = document.getElementById('note-reminder-time');
         
         // Filtros
         this.filterAllBtn = document.getElementById('filter-all');
@@ -60,6 +61,9 @@ class NotepadManager {
                 opt.classList.add('active');
             });
         });
+
+        // Iniciar intervalo para verificar lembretes agendados a cada 15 segundos
+        setInterval(() => this.checkReminders(), 15000);
     }
 
     // Define o escopo das notas baseado no usuário logado
@@ -104,6 +108,7 @@ class NotepadManager {
         const content = this.contentInput.value.trim();
         const isImportant = this.importantCheckbox.checked;
         const editId = this.editIdInput.value;
+        const reminderTime = this.reminderTimeInput ? this.reminderTimeInput.value : '';
         
         // Capturar cor selecionada
         const colorRadio = this.form.querySelector('input[name="note-color"]:checked');
@@ -119,12 +124,16 @@ class NotepadManager {
             notes = notes.map(note => {
                 if (note.id === editId) {
                     isEditMode = true;
+                    const oldReminderTime = note.reminderTime || '';
+                    const hasReminderChanged = oldReminderTime !== reminderTime;
                     return {
                         ...note,
                         title,
                         content,
                         color: colorClass,
                         isImportant,
+                        reminderTime: reminderTime || null,
+                        reminderTriggered: hasReminderChanged ? false : (note.reminderTriggered || false),
                         updatedAt: new Date().toISOString()
                     };
                 }
@@ -140,6 +149,8 @@ class NotepadManager {
                 content,
                 color: colorClass,
                 isImportant,
+                reminderTime: reminderTime || null,
+                reminderTriggered: false,
                 createdAt: new Date().toISOString()
             };
             notes.unshift(newNote); // Adiciona no início da lista
@@ -155,7 +166,11 @@ class NotepadManager {
 
         this.saveNotes(notes);
         this.resetForm();
-        this.renderNotes();
+        if (window.switchSubView) {
+            window.switchSubView('library');
+        } else {
+            this.renderNotes();
+        }
         if (window.updateDashboardStats) window.updateDashboardStats();
     }
 
@@ -188,6 +203,9 @@ class NotepadManager {
         this.titleInput.value = note.title;
         this.contentInput.value = note.content;
         this.importantCheckbox.checked = note.isImportant;
+        if (this.reminderTimeInput) {
+            this.reminderTimeInput.value = note.reminderTime || '';
+        }
 
         // Selecionar cor correspondente no formulário
         const radio = this.form.querySelector(`input[name="note-color"][value="${note.color}"]`);
@@ -196,6 +214,11 @@ class NotepadManager {
             // Atualiza borda ativa na UI do seletor
             document.querySelectorAll('.color-option-btn').forEach(o => o.classList.remove('active'));
             radio.parentElement.classList.add('active');
+        }
+
+        // Mudar para visualização de "Início" para mostrar o formulário
+        if (window.switchSubView) {
+            window.switchSubView('home');
         }
 
         // Rola até o formulário para ficar visível e foca
@@ -251,10 +274,19 @@ class NotepadManager {
             const date = new Date(note.createdAt);
             const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+            const timeBadge = note.reminderTime ? `
+                <span class="note-card-time" title="Lembrete agendado">
+                    <i class="fa-regular fa-clock"></i> ${note.reminderTime}
+                </span>
+            ` : '';
+
             card.innerHTML = `
                 <div class="note-header">
                     <h4 class="note-card-title">${this.escapeHTML(note.title)}</h4>
-                    ${note.isImportant ? '<span class="note-card-badge" title="Item Importante"><i class="fa-solid fa-triangle-exclamation"></i></span>' : ''}
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        ${timeBadge}
+                        ${note.isImportant ? '<span class="note-card-badge" title="Item Importante"><i class="fa-solid fa-triangle-exclamation"></i></span>' : ''}
+                    </div>
                 </div>
                 <p class="note-body">${this.escapeHTML(note.content)}</p>
                 <div class="note-actions">
@@ -289,6 +321,9 @@ class NotepadManager {
     resetForm() {
         this.form.reset();
         this.editIdInput.value = '';
+        if (this.reminderTimeInput) {
+            this.reminderTimeInput.value = '';
+        }
         
         // Reseta o visual do seletor de cores
         document.querySelectorAll('.color-option-btn').forEach(o => o.classList.remove('active'));
@@ -386,6 +421,59 @@ class NotepadManager {
         } else if (Notification.permission === 'default') {
             // Solicita permissão se ainda não decidiu
             this.requestNotificationPermission();
+        }
+    }
+
+    // Verifica se há lembretes agendados para disparar
+    checkReminders() {
+        if (!this.currentUser) return;
+        const notes = this.getNotes();
+
+        // Obter hora atual no formato HH:MM
+        const now = new Date();
+        const currentHours = String(now.getHours()).padStart(2, '0');
+        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTimeString = `${currentHours}:${currentMinutes}`;
+
+        let updated = false;
+
+        const updatedNotes = notes.map(note => {
+            if (note.reminderTime && !note.reminderTriggered && note.reminderTime === currentTimeString) {
+                this.triggerReminderNotification(note);
+                note.reminderTriggered = true;
+                updated = true;
+            }
+            return note;
+        });
+
+        if (updated) {
+            // Salva todas as notas com a alteração do lembrete disparado
+            this.saveNotes(updatedNotes);
+            this.renderNotes();
+        }
+    }
+
+    // Dispara a notificação de lembrete agendado
+    triggerReminderNotification(note) {
+        if (window.showToast) {
+            window.showToast('Lembrete Agendado ⏰', `Está na hora: "${note.title}"`, 'info');
+        }
+
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const snippet = note.content.length > 80 ? note.content.substring(0, 80) + '...' : note.content;
+            try {
+                new Notification(`Lembrete: ${note.title}`, {
+                    body: snippet,
+                    icon: 'assets/images/workspace.png',
+                    tag: `reminder-${note.id}`,
+                    requireInteraction: true
+                });
+                if (window.logNotificationTrigger) {
+                    window.logNotificationTrigger(`Lembrete disparado para "${note.title}" às ${note.reminderTime} ⏰`, 'success');
+                }
+            } catch (e) {
+                console.error('Erro ao disparar notificação de lembrete', e);
+            }
         }
     }
 

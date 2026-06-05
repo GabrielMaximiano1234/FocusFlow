@@ -1500,3 +1500,71 @@ button {
     margin-left: auto;
     font-family: var(--font-display);
 }
+
+/* Time Picker & Reorganization Styling */
+.form-row-picker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.time-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.time-group label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.time-group input[type="time"] {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
+    outline: none;
+}
+
+.time-group input[type="time"]:focus {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.02);
+}
+
+/* Custom time picker webkit overrides for modern look */
+.time-group input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: var(--transition-fast);
+}
+
+.time-group input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+.note-card-time {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.note-card.note-amber .note-card-time {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+}
