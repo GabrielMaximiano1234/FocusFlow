@@ -77,11 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const navDashboard = document.getElementById('nav-dashboard');
     const navLibrary = document.getElementById('nav-library');
     const navNotifications = document.getElementById('nav-notifications');
+    const navTopCalendar = document.getElementById('nav-top-calendar');
+    const navTopTasks = document.getElementById('nav-top-tasks');
 
     const viewHome = document.getElementById('view-home');
     const viewDashboard = document.getElementById('view-dashboard');
     const viewLibrary = document.getElementById('view-library');
     const viewNotifications = document.getElementById('view-notifications');
+    const viewCalendar = document.getElementById('view-calendar');
+    const viewTasks = document.getElementById('view-tasks');
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -140,19 +144,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications) return;
+        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks) return;
 
         // Oculta todas as sub-views
         viewHome.classList.add('hidden');
         viewDashboard.classList.add('hidden');
         viewLibrary.classList.add('hidden');
         viewNotifications.classList.add('hidden');
+        viewCalendar.classList.add('hidden');
+        viewTasks.classList.add('hidden');
 
-        // Remove active class de todos os botões do menu
+        // Remove active class de todos os botões do menu lateral
         navHome.classList.remove('active');
         navDashboard.classList.remove('active');
         navLibrary.classList.remove('active');
         navNotifications.classList.remove('active');
+        
+        // Remove active class dos botões superiores
+        if (navTopCalendar) navTopCalendar.classList.remove('active');
+        if (navTopTasks) navTopTasks.classList.remove('active');
 
         // Exibe a view selecionada e ativa o item correspondente no menu
         if (targetView === 'home') {
@@ -178,6 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
             viewNotifications.classList.remove('hidden');
             navNotifications.classList.add('active');
             updateNotificationsView();
+        } else if (targetView === 'calendar') {
+            viewCalendar.classList.remove('hidden');
+            if (navTopCalendar) navTopCalendar.classList.add('active');
+            if (notepadInstance) notepadInstance.renderCalendar();
+        } else if (targetView === 'tasks') {
+            viewTasks.classList.remove('hidden');
+            if (navTopTasks) navTopTasks.classList.add('active');
+            if (notepadInstance) notepadInstance.renderTasksManager();
         }
     }
 
@@ -219,19 +237,247 @@ document.addEventListener('DOMContentLoaded', () => {
             switchSubView('notifications');
         });
     }
+    if (navTopCalendar) {
+        navTopCalendar.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('calendar');
+        });
+    }
+    if (navTopTasks) {
+        navTopTasks.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('tasks');
+        });
+    }
+    const btnDashboardQuickAdd = document.getElementById('btn-dashboard-quick-add');
+    if (btnDashboardQuickAdd) {
+        btnDashboardQuickAdd.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('home');
+        });
+    }
+
+    // Global countdown state
+    let countdownInterval = null;
+
+    function getNextScheduledTask(notes) {
+        const now = new Date();
+        const upcoming = [];
+
+        notes.forEach(note => {
+            if (note.reminderTime && !note.completed) {
+                const [hours, minutes] = note.reminderTime.split(':').map(Number);
+                const reminderDate = new Date();
+                reminderDate.setHours(hours, minutes, 0, 0);
+
+                if (reminderDate > now) {
+                    upcoming.push({ note, date: reminderDate });
+                }
+            }
+        });
+
+        if (upcoming.length === 0) return null;
+
+        upcoming.sort((a, b) => a.date - b.date);
+        return upcoming[0];
+    }
+
+    function renderNextUpCard(notes) {
+        const nextUp = getNextScheduledTask(notes);
+        const titleEl = document.getElementById('next-up-task-title');
+        const descEl = document.getElementById('next-up-task-desc');
+        const timeEl = document.getElementById('next-up-task-time');
+        const timerEl = document.getElementById('next-up-timer');
+
+        if (!titleEl || !descEl || !timeEl || !timerEl) return;
+
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+
+        if (!nextUp) {
+            titleEl.textContent = 'Nenhum lembrete agendado';
+            descEl.textContent = 'Crie uma nota rápida com horário programado para ver o próximo evento aqui.';
+            timeEl.innerHTML = '<i class="fa-regular fa-clock"></i> --:--';
+            timerEl.textContent = '--:--:--';
+            return;
+        }
+
+        const { note, date } = nextUp;
+        titleEl.textContent = note.title;
+        descEl.textContent = note.content;
+        timeEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${note.reminderTime}`;
+
+        const updateTimer = () => {
+            const now = new Date();
+            const diffMs = date - now;
+
+            if (diffMs <= 0) {
+                timerEl.textContent = 'Disparando lembrete!';
+                clearInterval(countdownInterval);
+                setTimeout(() => updateDashboardStats(), 2000);
+                return;
+            }
+
+            const totalSecs = Math.floor(diffMs / 1000);
+            const hours = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            const secs = totalSecs % 60;
+
+            let timerStr = '';
+            if (hours > 0) {
+                timerStr += `${hours}h `;
+            }
+            timerStr += `${mins}m ${String(secs).padStart(2, '0')}s from now`;
+            timerEl.textContent = timerStr;
+        };
+
+        updateTimer();
+        countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    function renderDashboardTaskList(notes) {
+        const container = document.getElementById('dashboard-tasks-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const pendingNotes = notes.filter(n => !n.completed).slice(0, 5);
+
+        if (pendingNotes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state-tasks" style="text-align: center; padding: 24px; color: #9ca3af;">
+                    <i class="fa-solid fa-tasks" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
+                    <p>Nenhuma tarefa pendente criada.</p>
+                </div>
+            `;
+            return;
+        }
+
+        pendingNotes.forEach(note => {
+            const div = document.createElement('div');
+            div.className = `dashboard-task-item ${note.color || 'note-default'}`;
+            div.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.02);
+                border-left: 4px solid var(--accent-color, #3b82f6);
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                border-right: 1px solid rgba(255, 255, 255, 0.05);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            `;
+
+            let borderCol = '#3b82f6';
+            if (note.color === 'note-blue') borderCol = '#3b82f6';
+            else if (note.color === 'note-green') borderCol = '#22c55e';
+            else if (note.color === 'note-amber') borderCol = '#f59e0b';
+            else if (note.color === 'note-purple') borderCol = '#a855f7';
+            div.style.borderLeftColor = borderCol;
+
+            const priorityBadge = note.priority ? `
+                <span class="badge-priority ${note.priority.toLowerCase()}" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase;">
+                    ${note.priority === 'High' ? 'Alta' : (note.priority === 'Medium' ? 'Média' : 'Baixa')}
+                </span>
+            ` : '';
+
+            const categoryBadge = note.category ? `
+                <span class="badge-category" style="background: rgba(255,255,255,0.08); color: #e5e7eb; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 500;">
+                    ${note.category}
+                </span>
+            ` : '';
+
+            const timeInfo = note.reminderTime ? `
+                <span style="font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-regular fa-clock"></i> ${note.reminderTime}
+                </span>
+            ` : '';
+
+            div.innerHTML = `
+                <div class="task-info-side" style="display: flex; flex-direction: column; gap: 4px;">
+                    <h4 style="color: #fff; font-size: 14px; font-weight: 600; margin: 0;">${note.title}</h4>
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                        ${priorityBadge}
+                        ${categoryBadge}
+                        ${timeInfo}
+                    </div>
+                </div>
+                <button class="btn-mark-done" data-id="${note.id}" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; transition: all 0.2s;">
+                    Mark done ✓
+                </button>
+            `;
+
+            div.querySelector('.btn-mark-done').addEventListener('click', () => {
+                if (window.notepadInstance) {
+                    window.notepadInstance.toggleNoteCompleted(note.id);
+                }
+            });
+
+            container.appendChild(div);
+        });
+    }
+
+    function updateDashboardGreeting(user, notes) {
+        const greetingText = document.getElementById('dashboard-greeting-text');
+        const greetingSubtext = document.getElementById('dashboard-greeting-subtext');
+        if (!greetingText || !greetingSubtext) return;
+
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting = 'Good morning';
+        if (hour >= 12 && hour < 18) {
+            greeting = 'Good afternoon';
+        } else if (hour >= 18 || hour < 5) {
+            greeting = 'Good evening';
+        }
+
+        const firstName = user ? user.name.split(' ')[0] : 'Usuário';
+        greetingText.textContent = `${greeting}, ${firstName}! 👋`;
+
+        const todayStr = now.toDateString();
+        
+        const todayNotes = notes.filter(n => {
+            const createdDateStr = new Date(n.createdAt).toDateString();
+            return createdDateStr === todayStr && !n.completed;
+        });
+
+        const highPriorityCount = todayNotes.filter(n => n.priority === 'High').length;
+
+        greetingSubtext.innerHTML = `Você tem <strong>${todayNotes.length}</strong> tarefas restantes para hoje, sendo <strong>${highPriorityCount}</strong> de alta prioridade.`;
+    }
 
     // Atualiza as estatísticas exibidas na visão geral do Dashboard
     function updateDashboardStats() {
         if (!notepadInstance) return;
         const notes = notepadInstance.getNotes();
+        const user = window.Auth.getCurrentUser();
         
-        const statsTotal = document.getElementById('stats-total-notes');
-        const statsImportant = document.getElementById('stats-important-notes');
-        
-        if (statsTotal) statsTotal.textContent = notes.length;
-        if (statsImportant) {
-            statsImportant.textContent = notes.filter(n => n.reminderTime && !n.reminderTriggered).length;
-        }
+        // Atualiza saudação
+        updateDashboardGreeting(user, notes);
+
+        const statsToday = document.getElementById('metric-today-items');
+        const statsPending = document.getElementById('metric-pending-tasks');
+        const statsCompleted = document.getElementById('metric-completed-tasks');
+        const statsHigh = document.getElementById('metric-high-priority');
+
+        const now = new Date();
+        const todayStr = now.toDateString();
+
+        const todayItems = notes.filter(n => new Date(n.createdAt).toDateString() === todayStr);
+        const pendingItems = notes.filter(n => !n.completed);
+        const completedItems = notes.filter(n => n.completed);
+        const highPriorityPending = notes.filter(n => n.priority === 'High' && !n.completed);
+
+        if (statsToday) statsToday.textContent = todayItems.length;
+        if (statsPending) statsPending.textContent = pendingItems.length;
+        if (statsCompleted) statsCompleted.textContent = completedItems.length;
+        if (statsHigh) statsHigh.textContent = highPriorityPending.length;
+
+        // Renderizar lista e Next Up
+        renderDashboardTaskList(notes);
+        renderNextUpCard(notes);
     }
     window.updateDashboardStats = updateDashboardStats; // Deixa disponível para o notepad.js chamar!
 

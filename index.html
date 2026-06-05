@@ -162,7 +162,15 @@
                     <h2>Olá, <span id="welcome-username">Usuário</span>! 👋</h2>
                     <p>Aqui está o resumo do seu dia.</p>
                 </div>
-                <div class="header-actions">
+                <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button id="nav-top-calendar" class="btn-secondary">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>Calendar</span>
+                    </button>
+                    <button id="nav-top-tasks" class="btn-secondary">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Tasks</span>
+                    </button>
                     <button id="btn-request-notif" class="btn-secondary">
                         <i class="fa-solid fa-bell-slash"></i>
                         <span>Ativar Alertas no Navegador</span>
@@ -233,6 +241,32 @@
                             </div>
                         </div>
 
+                        <div class="form-row-picker" style="margin-top: 16px;">
+                            <!-- Seleção de Prioridade -->
+                            <div class="input-group priority-group" style="flex: 1; min-width: 140px;">
+                                <label for="note-priority"><i class="fa-solid fa-triangle-exclamation"></i> Prioridade:</label>
+                                <select id="note-priority" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                                    <option value="Low" style="background: #1f1f2e; color: #fff;">Baixa</option>
+                                    <option value="Medium" selected style="background: #1f1f2e; color: #fff;">Média</option>
+                                    <option value="High" style="background: #1f1f2e; color: #fff;">Alta</option>
+                                </select>
+                            </div>
+
+                            <!-- Seleção de Categoria -->
+                            <div class="input-group category-group" style="flex: 1; min-width: 140px;">
+                                <label for="note-category"><i class="fa-solid fa-tag"></i> Categoria:</label>
+                                <input type="text" id="note-category" placeholder="Ex: Trabalho, Church, Medium..." list="category-suggestions" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                                <datalist id="category-suggestions">
+                                    <option value="Work">
+                                    <option value="Personal">
+                                    <option value="Church">
+                                    <option value="Medium">
+                                    <option value="Health">
+                                    <option value="Study">
+                                </datalist>
+                            </div>
+                        </div>
+
                         <div class="form-footer">
                             <div class="note-options"></div>
 
@@ -247,6 +281,55 @@
 
             <!-- VIEW 2: DASHBOARD (INSPIRAÇÃO E STATUS) -->
             <div id="view-dashboard" class="spa-view hidden">
+                <!-- CABEÇALHO DINÂMICO -->
+                <div class="dashboard-header-premium" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 20px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);">
+                    <div class="greeting-area">
+                        <h2 id="dashboard-greeting-text" style="font-family: 'Outfit', sans-serif; font-size: 24px; margin-bottom: 6px; color: #fff;">Good morning, Usuário</h2>
+                        <p id="dashboard-greeting-subtext" style="font-size: 14px; color: #a0a0b0;">Você tem 0 tarefas restantes para hoje, sendo 0 de alta prioridade.</p>
+                    </div>
+                    <button id="btn-dashboard-quick-add" class="btn-primary" style="margin-top: 0; padding: 10px 20px; font-weight: 500;">
+                        <i class="fa-solid fa-plus"></i> + Quick Add
+                    </button>
+                </div>
+
+                <!-- 4 CARDS DE ESTATÍSTICAS -->
+                <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Today's Items</span>
+                        <span id="metric-today-items" style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Pending Tasks</span>
+                        <span id="metric-pending-tasks" style="font-size: 32px; font-weight: 700; color: #eab308; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Completed</span>
+                        <span id="metric-completed-tasks" style="font-size: 32px; font-weight: 700; color: #22c55e; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">High Priority</span>
+                        <span id="metric-high-priority" style="font-size: 32px; font-weight: 700; color: #ef4444; margin-top: 10px;">0</span>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 'NEXT UP' -->
+                <div class="next-up-section" style="margin-bottom: 24px;">
+                    <div class="dashboard-card next-up-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div class="next-up-info">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="badge-next-up" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px;">Next Up</span>
+                                <span id="next-up-task-time" style="font-size: 13px; color: #9ca3af;"><i class="fa-regular fa-clock"></i> --:--</span>
+                            </div>
+                            <h3 id="next-up-task-title" style="font-family: 'Outfit', sans-serif; font-size: 18px; color: #fff; margin-bottom: 4px;">Nenhum lembrete agendado</h3>
+                            <p id="next-up-task-desc" style="font-size: 14px; color: #9ca3af; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Crie uma nota rápida com horário programado para ver o próximo evento aqui.</p>
+                        </div>
+                        <div class="next-up-countdown" style="text-align: right; min-width: 150px;">
+                            <span style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px;">CONTAGEM REGRESSIVA</span>
+                            <span id="next-up-timer" style="font-family: monospace; font-size: 24px; font-weight: 700; color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="dashboard-grid">
                     <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
                     <div class="dashboard-card carousel-card">
@@ -298,25 +381,21 @@
                         </div>
                     </div>
 
-                    <!-- CONTAINER EXTRA: STATUS DO USUÁRIO -->
-                    <div class="dashboard-card status-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-line header-icon"></i> Visão Geral</h3>
-                            <p>Estatísticas rápidas sobre seu fluxo de trabalho.</p>
-                        </div>
-                        <div class="status-summary-grid">
-                            <div class="status-item">
-                                <span class="status-number" id="stats-total-notes">0</span>
-                                <span class="status-label">Total de Notas</span>
-                            </div>
-                            <div class="status-item important">
-                                <span class="status-number" id="stats-important-notes">0</span>
-                                <span class="status-label">Lembretes Ativos</span>
+                    <!-- CONTAINER 2: TAREFAS DE HOJE / RECENTES -->
+                    <div class="dashboard-card tasks-today-card" style="display: flex; flex-direction: column;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3><i class="fa-solid fa-list-check header-icon"></i> Tarefas Recentes</h3>
+                                <p>Gerencie seus itens diretamente do Dashboard.</p>
                             </div>
                         </div>
-                        <div class="quick-tips">
-                            <h4><i class="fa-regular fa-lightbulb"></i> Dica do FocusFlow</h4>
-                            <p>Defina horários de lembrete nas suas notas para receber alertas automáticos no horário agendado!</p>
+                        
+                        <div id="dashboard-tasks-list" class="dashboard-tasks-list" style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto;">
+                            <!-- Tarefas serão renderizadas aqui pelo JS -->
+                            <div class="empty-state-tasks" style="text-align: center; padding: 24px; color: #9ca3af;">
+                                <i class="fa-solid fa-tasks" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
+                                <p>Nenhuma tarefa pendente criada.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -420,6 +499,65 @@
                             <ul class="notif-log-list hidden" id="notif-log-list">
                                 <!-- Logs serão listados dinamicamente -->
                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: CALENDAR -->
+            <div id="view-calendar" class="spa-view hidden">
+                <div class="dashboard-card calendar-card-view">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-calendar header-icon"></i> Calendário de Tarefas</h3>
+                        <p>Visualize e organize suas tarefas programadas.</p>
+                    </div>
+                    <div class="calendar-container-view" style="padding: 20px;">
+                        <div class="calendar-header-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <button id="btn-prev-month" class="btn-secondary" style="margin-top: 0; padding: 6px 12px;"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h4 id="calendar-month-year" style="font-family: 'Outfit', sans-serif; font-size: 18px; margin: 0; color: #fff;">Junho 2026</h4>
+                            <button id="btn-next-month" class="btn-secondary" style="margin-top: 0; padding: 6px 12px;"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-days-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 500; color: #8a8ab0; margin-bottom: 8px;">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                            <!-- Dias gerados via JS -->
+                        </div>
+                    </div>
+                    <div id="calendar-day-tasks" style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <h4 style="color: #fff; margin-bottom: 12px;">Tarefas para o dia selecionado</h4>
+                        <div id="calendar-tasks-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Tarefas do dia -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: TASKS -->
+            <div id="view-tasks" class="spa-view hidden">
+                <div class="dashboard-card tasks-manager-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3><i class="fa-solid fa-list-check header-icon"></i> Gerenciador de Tarefas</h3>
+                            <p>Lista interativa de todas as suas tarefas com filtros rápidos.</p>
+                        </div>
+                        <div class="tasks-filter-bar" style="display: flex; gap: 8px; align-items: center;">
+                            <select id="filter-task-status" style="padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                                <option value="all">Status: Todas</option>
+                                <option value="pending">Status: Pendentes</option>
+                                <option value="completed">Status: Concluídas</option>
+                            </select>
+                            <select id="filter-task-priority" style="padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                                <option value="all">Prioridade: Todas</option>
+                                <option value="High">Prioridade: Alta</option>
+                                <option value="Medium">Prioridade: Média</option>
+                                <option value="Low">Prioridade: Baixa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="tasks-list-container" style="padding: 20px;">
+                        <div id="tasks-manager-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Renderizado via JS -->
                         </div>
                     </div>
                 </div>

@@ -1811,3 +1811,130 @@ button {
     color: var(--text-muted);
     opacity: 0.6;
 }
+
+/* ==========================================================================
+   FASE 5: DASHBOARD UPGRADE & TASK MANAGER ADVANCED STYLING
+   ========================================================================== */
+
+/* Active top header navigation buttons */
+#nav-top-calendar.active, #nav-top-tasks.active {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+/* Dynamic Greeting area */
+.dashboard-header-premium {
+    animation: fadeInView 0.5s ease-out;
+}
+
+/* Metrics Grid and Cards */
+.metrics-grid {
+    animation: fadeInView 0.5s ease-out;
+}
+
+.metric-card-premium {
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.metric-card-premium:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: var(--shadow-md);
+}
+
+/* Priority Badges */
+.badge-priority.high {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-priority.medium {
+    background: rgba(234, 179, 8, 0.15);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.badge-priority.low {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Next Up countdown styling */
+.next-up-card {
+    transition: var(--transition-smooth);
+}
+.next-up-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+}
+
+/* Tasks list elements */
+.dashboard-task-item {
+    transition: var(--transition-smooth);
+}
+
+.dashboard-task-item:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    transform: translateX(4px);
+}
+
+.dashboard-task-item .btn-mark-done:hover {
+    background: #22c55e !important;
+    color: #fff !important;
+    transform: scale(1.05);
+}
+
+/* Calendar Month View Styling */
+.calendar-grid {
+    transition: var(--transition-smooth);
+}
+
+.calendar-day:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.calendar-day.empty:hover {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    cursor: default;
+}
+
+/* Task list completed check transition */
+.task-item-horizontal {
+    transition: var(--transition-smooth);
+}
+
+.task-item-horizontal.completed {
+    background: rgba(255, 255, 255, 0.01) !important;
+    border-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Tasks Manager Filter bar and items */
+.tasks-manager-item {
+    transition: var(--transition-smooth);
+}
+
+.tasks-manager-item:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-toggle-task-manager:hover, .btn-toggle-day-task:hover {
+    transform: scale(1.1);
+}
+
+/* Completed task line-through */
+.completed-title {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+

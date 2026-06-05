@@ -100,6 +100,18 @@ class NotepadManager {
             });
         });
 
+        // Controles do Calendário
+        const btnPrevMonth = document.getElementById('btn-prev-month');
+        const btnNextMonth = document.getElementById('btn-next-month');
+        if (btnPrevMonth) btnPrevMonth.addEventListener('click', () => this.changeCalendarMonth(-1));
+        if (btnNextMonth) btnNextMonth.addEventListener('click', () => this.changeCalendarMonth(1));
+
+        // Filtros do Gerenciador de Tarefas
+        const filterTaskStatus = document.getElementById('filter-task-status');
+        const filterTaskPriority = document.getElementById('filter-task-priority');
+        if (filterTaskStatus) filterTaskStatus.addEventListener('change', () => this.renderTasksManager());
+        if (filterTaskPriority) filterTaskPriority.addEventListener('change', () => this.renderTasksManager());
+
         // Iniciar intervalo para verificar lembretes agendados a cada 15 segundos
         setInterval(() => this.checkReminders(), 15000);
     }
@@ -416,6 +428,12 @@ class NotepadManager {
         const colorRadio = this.form.querySelector('input[name="note-color"]:checked');
         const colorClass = colorRadio ? colorRadio.value : 'note-default';
 
+        // Capturar prioridade e categoria
+        const priorityEl = document.getElementById('note-priority');
+        const priority = priorityEl ? priorityEl.value : 'Medium';
+        const categoryEl = document.getElementById('note-category');
+        const category = categoryEl ? categoryEl.value.trim() : '';
+
         if (!title || !content) return;
 
         let notes = this.getNotes();
@@ -436,6 +454,8 @@ class NotepadManager {
                         notebookId: null,
                         reminderTime: reminderTime || null,
                         reminderTriggered: hasReminderChanged ? false : (note.reminderTriggered || false),
+                        priority,
+                        category: category || null,
                         updatedAt: new Date().toISOString()
                     };
                 }
@@ -453,6 +473,9 @@ class NotepadManager {
                 notebookId: null,
                 reminderTime: reminderTime || null,
                 reminderTriggered: false,
+                priority,
+                category: category || null,
+                completed: false,
                 createdAt: new Date().toISOString()
             };
             notes.unshift(newNote);
@@ -511,6 +534,11 @@ class NotepadManager {
             this.reminderTimeInput.value = note.reminderTime || '';
         }
 
+        const priorityEl = document.getElementById('note-priority');
+        if (priorityEl) priorityEl.value = note.priority || 'Medium';
+        const categoryEl = document.getElementById('note-category');
+        if (categoryEl) categoryEl.value = note.category || '';
+
         const radio = this.form.querySelector(`input[name="note-color"][value="${note.color}"]`);
         if (radio) {
             radio.checked = true;
@@ -557,8 +585,13 @@ class NotepadManager {
 
         filteredNotes.forEach(note => {
             const card = document.createElement('div');
-            card.className = `note-card ${note.color}`;
+            card.className = `note-card ${note.color} ${note.completed ? 'completed' : ''}`;
             card.setAttribute('data-id', note.id);
+            if (note.completed) {
+                card.style.opacity = '0.6';
+            } else {
+                card.style.opacity = '1';
+            }
 
             const date = new Date(note.createdAt);
             const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -569,14 +602,35 @@ class NotepadManager {
                 </span>
             ` : '';
 
+            const priorityBadge = note.priority ? `
+                <span class="badge-priority ${note.priority.toLowerCase()}" style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">
+                    ${note.priority === 'High' ? 'Alta' : (note.priority === 'Medium' ? 'Média' : 'Baixa')}
+                </span>
+            ` : '';
+
+            const categoryBadge = note.category ? `
+                <span class="badge-category" style="background: rgba(255,255,255,0.08); font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #e5e7eb;">
+                    ${this.escapeHTML(note.category)}
+                </span>
+            ` : '';
+
+            const doneButton = `
+                <button class="note-action-btn toggle-done" title="${note.completed ? 'Reabrir tarefa' : 'Concluir tarefa'}" style="color: ${note.completed ? '#22c55e' : 'var(--text-muted)'}; background: none; border: none; cursor: pointer; font-size: 1rem; padding: 0;">
+                    <i class="${note.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                </button>
+            `;
+
             card.innerHTML = `
                 <div class="note-header">
-                    <h4 class="note-card-title">${this.escapeHTML(note.title)}</h4>
-                    <div style="display: flex; gap: 6px; align-items: center;">
+                    <h4 class="note-card-title" style="text-decoration: ${note.completed ? 'line-through' : 'none'};">${this.escapeHTML(note.title)}</h4>
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                        ${priorityBadge}
+                        ${categoryBadge}
                         ${timeBadge}
+                        ${doneButton}
                     </div>
                 </div>
-                <p class="note-body">${this.escapeHTML(note.content)}</p>
+                <p class="note-body" style="text-decoration: ${note.completed ? 'line-through' : 'none'};">${this.escapeHTML(note.content)}</p>
                 <div class="note-actions">
                     <span style="font-size:0.7rem; color:var(--text-muted); margin-right:auto; align-self:center;">${dateStr}</span>
                     <button class="note-action-btn edit" title="Editar Nota"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -586,6 +640,7 @@ class NotepadManager {
 
             card.querySelector('.edit').addEventListener('click', () => this.startEditNote(note.id));
             card.querySelector('.delete').addEventListener('click', () => this.deleteNote(note.id));
+            card.querySelector('.toggle-done').addEventListener('click', () => this.toggleNoteCompleted(note.id));
 
             this.notesGrid.appendChild(card);
         });
@@ -599,6 +654,11 @@ class NotepadManager {
             this.reminderTimeInput.value = '';
         }
         
+        const priorityEl = document.getElementById('note-priority');
+        if (priorityEl) priorityEl.value = 'Medium';
+        const categoryEl = document.getElementById('note-category');
+        if (categoryEl) categoryEl.value = '';
+
         document.querySelectorAll('.color-option-btn').forEach(o => o.classList.remove('active'));
         const defaultColor = document.querySelector('.color-default');
         if (defaultColor) {
@@ -728,6 +788,277 @@ class NotepadManager {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    toggleNoteCompleted(id) {
+        let notes = this.getNotes();
+        notes = notes.map(note => {
+            if (note.id === id) {
+                const newStatus = !note.completed;
+                if (window.showToast) {
+                    window.showToast(
+                        newStatus ? 'Tarefa Concluída ✓' : 'Tarefa Reaberta',
+                        `A tarefa "${note.title}" foi marcada como ${newStatus ? 'concluída' : 'pendente'}.`,
+                        newStatus ? 'success' : 'info'
+                    );
+                }
+                return {
+                    ...note,
+                    completed: newStatus,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+            return note;
+        });
+        this.saveNotes(notes);
+        this.renderNotes();
+        if (window.updateDashboardStats) window.updateDashboardStats();
+    }
+
+    changeCalendarMonth(offset) {
+        if (!this.calendarDate) {
+            this.calendarDate = new Date();
+        }
+        this.calendarDate.setMonth(this.calendarDate.getMonth() + offset);
+        this.renderCalendar();
+    }
+
+    renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const monthYearTitle = document.getElementById('calendar-month-year');
+        if (!grid || !monthYearTitle) return;
+
+        grid.innerHTML = '';
+        const notes = this.getNotes();
+
+        if (!this.calendarDate) {
+            this.calendarDate = new Date();
+        }
+
+        const year = this.calendarDate.getFullYear();
+        const month = this.calendarDate.getMonth();
+
+        const monthNames = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        monthYearTitle.textContent = `${monthNames[month]} de ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day empty';
+            cell.style.cssText = 'padding: 10px; opacity: 0.2;';
+            grid.appendChild(cell);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+            cell.style.cssText = 'padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); cursor: pointer; position: relative; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; transition: all 0.2s;';
+            
+            const daySpan = document.createElement('span');
+            daySpan.textContent = day;
+            daySpan.style.fontSize = '14px';
+            daySpan.style.color = '#fff';
+            cell.appendChild(daySpan);
+
+            const dayTasks = notes.filter(note => {
+                const noteDate = new Date(note.createdAt);
+                return noteDate.getFullYear() === year &&
+                       noteDate.getMonth() === month &&
+                       noteDate.getDate() === day;
+            });
+
+            const today = new Date();
+            if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === day) {
+                cell.style.border = '1px solid #3b82f6';
+                cell.style.background = 'rgba(59, 130, 246, 0.1)';
+            }
+
+            if (dayTasks.length > 0) {
+                const dotContainer = document.createElement('div');
+                dotContainer.style.cssText = 'display: flex; gap: 3px; justify-content: center; margin-top: 4px;';
+                
+                dayTasks.slice(0, 3).forEach(task => {
+                    const dot = document.createElement('span');
+                    dot.style.cssText = 'width: 6px; height: 6px; border-radius: 50%; display: block;';
+                    
+                    let dotColor = '#60a5fa';
+                    if (task.priority === 'High') dotColor = '#ef4444';
+                    else if (task.priority === 'Medium') dotColor = '#f59e0b';
+                    else if (task.completed) dotColor = '#10b981';
+
+                    dot.style.background = dotColor;
+                    dotContainer.appendChild(dot);
+                });
+                cell.appendChild(dotContainer);
+            }
+
+            cell.addEventListener('click', () => {
+                document.querySelectorAll('.calendar-day').forEach(c => c.style.boxShadow = 'none');
+                cell.style.boxShadow = '0 0 10px rgba(99, 102, 241, 0.5)';
+                this.renderCalendarDayTasks(year, month, day, dayTasks);
+            });
+
+            grid.appendChild(cell);
+            
+            if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
+                this.renderCalendarDayTasks(year, month, day, dayTasks);
+            }
+        }
+    }
+
+    renderCalendarDayTasks(year, month, day, tasks) {
+        const container = document.getElementById('calendar-tasks-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        
+        const titleEl = document.querySelector('#calendar-day-tasks h4');
+        if (titleEl) {
+            titleEl.textContent = `Tarefas para ${day}/${month + 1}/${year}`;
+        }
+
+        if (tasks.length === 0) {
+            container.innerHTML = '<p style="color: #9ca3af; font-size: 14px;">Nenhuma tarefa registrada para este dia.</p>';
+            return;
+        }
+
+        tasks.forEach(note => {
+            const div = document.createElement('div');
+            div.className = `task-item-horizontal ${note.completed ? 'completed' : ''}`;
+            div.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 14px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.02);
+                border: 1px solid rgba(255,255,255,0.05);
+                opacity: ${note.completed ? 0.6 : 1};
+            `;
+
+            const priorityBadge = note.priority ? `<span class="badge-priority ${note.priority.toLowerCase()}" style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${note.priority === 'High' ? 'Alta' : (note.priority === 'Medium' ? 'Média' : 'Baixa')}</span>` : '';
+            const categoryBadge = note.category ? `<span class="badge-category" style="background: rgba(255,255,255,0.08); font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #e5e7eb;">${note.category}</span>` : '';
+            
+            div.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 14px; font-weight: 500; color: #fff; text-decoration: ${note.completed ? 'line-through' : 'none'};">${note.title}</span>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        ${priorityBadge}
+                        ${categoryBadge}
+                    </div>
+                </div>
+                <button class="btn-toggle-day-task" style="background: none; border: none; color: ${note.completed ? '#10b981' : '#8a8ab0'}; cursor: pointer; font-size: 16px; padding: 0;"><i class="${note.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i></button>
+            `;
+
+            div.querySelector('.btn-toggle-day-task').addEventListener('click', () => {
+                this.toggleNoteCompleted(note.id);
+                setTimeout(() => {
+                    const updatedNotes = this.getNotes();
+                    const updatedDayTasks = updatedNotes.filter(n => {
+                        const noteDate = new Date(n.createdAt);
+                        return noteDate.getFullYear() === year &&
+                               noteDate.getMonth() === month &&
+                               noteDate.getDate() === day;
+                    });
+                    this.renderCalendarDayTasks(year, month, day, updatedDayTasks);
+                    this.renderCalendar();
+                }, 100);
+            });
+
+            container.appendChild(div);
+        });
+    }
+
+    renderTasksManager() {
+        const container = document.getElementById('tasks-manager-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const notes = this.getNotes();
+
+        const statusFilter = document.getElementById('filter-task-status') ? document.getElementById('filter-task-status').value : 'all';
+        const priorityFilter = document.getElementById('filter-task-priority') ? document.getElementById('filter-task-priority').value : 'all';
+
+        let filtered = notes;
+
+        if (statusFilter === 'pending') {
+            filtered = filtered.filter(n => !n.completed);
+        } else if (statusFilter === 'completed') {
+            filtered = filtered.filter(n => n.completed);
+        }
+
+        if (priorityFilter !== 'all') {
+            filtered = filtered.filter(n => n.priority === priorityFilter);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="color: #9ca3af; font-size: 14px; text-align: center; padding: 20px;">Nenhuma tarefa encontrada para os filtros aplicados.</p>';
+            return;
+        }
+
+        filtered.forEach(note => {
+            const div = document.createElement('div');
+            div.className = `tasks-manager-item ${note.color || 'note-default'}`;
+            div.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 14px 18px;
+                border-radius: 10px;
+                background: rgba(255,255,255,0.02);
+                border: 1px solid rgba(255,255,255,0.05);
+                opacity: ${note.completed ? 0.6 : 1};
+            `;
+
+            let pColor = '#a855f7';
+            let pName = 'Média';
+            if (note.priority === 'High') { pColor = '#ef4444'; pName = 'Alta'; }
+            else if (note.priority === 'Medium') { pColor = '#eab308'; pName = 'Média'; }
+            else if (note.priority === 'Low') { pColor = '#3b82f6'; pName = 'Baixa'; }
+
+            const priorityBadge = note.priority ? `<span style="font-size: 10px; background: rgba(255,255,255,0.05); border: 1px solid ${pColor}55; color: ${pColor}; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${pName}</span>` : '';
+            const categoryBadge = note.category ? `<span style="font-size: 10px; background: rgba(255,255,255,0.08); color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${note.category}</span>` : '';
+            const timeBadge = note.reminderTime ? `<span style="font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 4px;"><i class="fa-regular fa-clock"></i> ${note.reminderTime}</span>` : '';
+
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn-toggle-task-manager" style="background: none; border: none; color: ${note.completed ? '#22c55e' : '#8a8ab0'}; cursor: pointer; font-size: 18px; padding: 0;"><i class="${note.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i></button>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 15px; font-weight: 500; color: #fff; text-decoration: ${note.completed ? 'line-through' : 'none'};">${note.title}</span>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                            ${priorityBadge}
+                            ${categoryBadge}
+                            ${timeBadge}
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="note-action-btn edit-task" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="note-action-btn delete-task" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 6px 10px; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+
+            div.querySelector('.btn-toggle-task-manager').addEventListener('click', () => {
+                this.toggleNoteCompleted(note.id);
+                setTimeout(() => this.renderTasksManager(), 100);
+            });
+
+            div.querySelector('.edit-task').addEventListener('click', () => {
+                this.startEditNote(note.id);
+            });
+
+            div.querySelector('.delete-task').addEventListener('click', () => {
+                this.deleteNote(note.id);
+                setTimeout(() => this.renderTasksManager(), 100);
+            });
+
+            container.appendChild(div);
+        });
     }
 }
 
