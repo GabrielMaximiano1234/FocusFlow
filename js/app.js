@@ -657,6 +657,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    if (btnFullscreen) {
+        btnFullscreen.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                    if (screen.orientation && screen.orientation.lock) {
+                        await screen.orientation.lock('landscape').catch(err => {
+                            console.warn('Orientation lock failed or not supported:', err);
+                        });
+                    }
+                    btnFullscreen.querySelector('span').textContent = 'Sair Tela Cheia';
+                    btnFullscreen.querySelector('i').className = 'fa-solid fa-compress';
+                } else {
+                    await document.exitFullscreen();
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                    btnFullscreen.querySelector('span').textContent = 'Tela Cheia';
+                    btnFullscreen.querySelector('i').className = 'fa-solid fa-expand';
+                }
+            } catch (err) {
+                console.error('Fullscreen request failed:', err);
+                if (window.showToast) {
+                    window.showToast('Erro de Tela Cheia', 'Não foi possível ativar a tela cheia neste navegador.', 'warning');
+                }
+            }
+        });
+
+        // Sincronizar estado ao sair manual da tela cheia
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                btnFullscreen.querySelector('span').textContent = 'Tela Cheia';
+                btnFullscreen.querySelector('i').className = 'fa-solid fa-expand';
+                if (screen.orientation && screen.orientation.unlock) {
+                    try { screen.orientation.unlock(); } catch(e) {}
+                }
+            }
+        });
+    }
+
     // Inicialização da aplicação
     initApp();
 });

@@ -2066,4 +2066,40 @@ button {
     box-shadow: 0 0 8px rgba(99, 102, 241, 0.2) !important;
 }
 
+/* Landscape lock phone rotation animation */
+@keyframes rotatePhone {
+    0% {
+        transform: rotate(0deg);
+    }
+    15% {
+        transform: rotate(0deg);
+    }
+    45% {
+        transform: rotate(-90deg);
+    }
+    60% {
+        transform: rotate(-90deg);
+    }
+    90% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* Mobile vertical orientation lock */
+@media (orientation: portrait) and (max-width: 896px) {
+    #auth-section,
+    #dashboard-section,
+    #add-item-modal,
+    #toast-container {
+        display: none !important;
+    }
+    
+    #landscape-lock-overlay {
+        display: flex !important;
+    }
+}
+
 

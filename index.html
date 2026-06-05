@@ -175,6 +175,10 @@
                         <i class="fa-solid fa-bell-slash"></i>
                         <span>Ativar Alertas no Navegador</span>
                     </button>
+                    <button id="btn-fullscreen" class="btn-secondary" title="Tela Cheia (Modo Paisagem)">
+                        <i class="fa-solid fa-expand"></i>
+                        <span>Tela Cheia</span>
+                    </button>
                 </div>
             </header>
 
@@ -592,6 +596,17 @@
             </form>
         </div>
     </div>
+    <!-- LANDSCAPE ORIENTATION LOCK OVERLAY FOR MOBILE -->
+    <div id="landscape-lock-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0c0c14; z-index: 100000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; color: #fff; box-sizing: border-box;">
+        <div class="phone-rotate-icon" style="font-size: 5rem; color: #3b82f6; margin-bottom: 24px; animation: rotatePhone 2.5s ease-in-out infinite;">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+        </div>
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 12px; font-weight: 600;">Modo Paisagem Requerido</h3>
+        <p style="color: #8a8ab0; font-size: 1rem; max-width: 320px; line-height: 1.6; margin: 0;">
+            Para a melhor experiência e para visualizar seu Dashboard completo, por favor, gire seu dispositivo para o modo paisagem (tela deitada).
+        </p>
+    </div>
+
     <!-- Scripts JavaScript -->
     <script src="js/auth.js"></script>
     <script src="js/carousel.js"></script>
