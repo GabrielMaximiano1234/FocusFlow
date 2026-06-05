@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Hub - Domine sua Rotina</title>
+    <meta name="description" content="Aumente sua produtividade diária com o Productivity Hub. Bloco de notas inteligente, carrossel de foco e controle total sobre suas tarefas com notificações em tempo real.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome para ícones premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Notificações Toast no canto da tela (feedback visual interno) -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- 1. TELA DE LOGIN / CADASTRO (BARREIRA DE ENTRADA) -->
+    <section id="auth-section" class="auth-section">
+        <div class="auth-card-wrapper">
+            <div class="auth-brand">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <h1>Productivity<span>Hub</span></h1>
+                <p>Organize suas ideias, foque no que importa.</p>
+            </div>
+            
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <button id="tab-login" class="auth-tab-btn active">Entrar</button>
+                    <button id="tab-signup" class="auth-tab-btn">Cadastrar</button>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form id="login-form" class="auth-form active">
+                    <div class="input-group">
+                        <label for="login-email">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="login-email" placeholder="nome@exemplo.com" required autocomplete="email">
+                        </div>
+                        <span class="error-message" id="login-email-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="login-password">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="login-password" placeholder="Sua senha" required autocomplete="current-password">
+                            <button type="button" class="btn-toggle-password" tabindex="-1">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="login-password-error"></span>
+                    </div>
+
+                    <button type="submit" id="btn-submit-login" class="btn-primary">
+                        <span>Acessar Painel</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- Formulário de Cadastro -->
+                <form id="signup-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="signup-name">Nome Completo</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-user input-icon"></i>
+                            <input type="text" id="signup-name" placeholder="Seu nome" required autocomplete="name">
+                        </div>
+                        <span class="error-message" id="signup-name-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signup-email">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="signup-email" placeholder="nome@exemplo.com" required autocomplete="email">
+                        </div>
+                        <span class="error-message" id="signup-email-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signup-password">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                            <button type="button" class="btn-toggle-password" tabindex="-1">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Força da senha</span>
+                        </div>
+                        <span class="error-message" id="signup-password-error"></span>
+                    </div>
+
+                    <button type="submit" id="btn-submit-signup" class="btn-primary">
+                        <span>Criar Conta</span>
+                        <i class="fa-solid fa-user-plus"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. INTERFACE PRINCIPAL (DASHBOARD - OCULTA POR PADRÃO) -->
+    <main id="dashboard-section" class="dashboard-section hidden">
+        <!-- Sidebar lateral -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <span class="logo-text">Productivity<span>Hub</span></span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-notes">
+                    <i class="fa-regular fa-clipboard"></i>
+                    <span>Minhas Notas</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-notifications" style="position: relative;">
+                    <i class="fa-regular fa-bell"></i>
+                    <span>Notificações</span>
+                    <span id="notif-badge" class="notif-badge hidden"></span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <div class="user-info">
+                        <span class="username" id="user-display-name">Usuário</span>
+                        <span class="user-email" id="user-display-email">usuario@exemplo.com</span>
+                    </div>
+                </div>
+                <button id="btn-logout" class="btn-logout" title="Sair da Conta">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <section class="main-content">
+            <!-- Topbar de boas vindas -->
+            <header class="content-header">
+                <div class="welcome-msg">
+                    <h2>Olá, <span id="welcome-username">Usuário</span>! 👋</h2>
+                    <p>Aqui está o resumo do seu dia.</p>
+                </div>
+                <div class="header-actions">
+                    <button id="btn-request-notif" class="btn-secondary">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <span>Ativar Alertas no Navegador</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                
+                <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
+                <div class="dashboard-card carousel-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-compass header-icon"></i> Inspiração e Foco</h3>
+                        <p>Imagens motivacionais para impulsionar o seu foco diário.</p>
+                    </div>
+                    
+                    <div class="carousel-container" id="focus-carousel">
+                        <!-- Slides -->
+                        <div class="carousel-slides">
+                            <div class="carousel-slide active">
+                                <img src="assets/images/workspace.png" alt="Workspace Organizado">
+                                <div class="slide-caption">
+                                    <h4>Organize seu espaço de trabalho</h4>
+                                    <p>Um ambiente livre de distrações melhora a clareza mental e a produtividade.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="assets/images/planner.png" alt="Digital Planner">
+                                <div class="slide-caption">
+                                    <h4>Planeje com inteligência</h4>
+                                    <p>Divida seus grandes objetivos em tarefas diárias gerenciáveis.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="assets/images/focus.png" alt="Mente Focada">
+                                <div class="slide-caption">
+                                    <h4>Mantenha a atenção plena</h4>
+                                    <p>Faça pausas regulares e reconecte-se com sua meta principal.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Navegação -->
+                        <button class="carousel-btn prev-btn" id="carousel-prev" aria-label="Slide anterior">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-btn next-btn" id="carousel-next" aria-label="Próximo slide">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+
+                        <!-- Indicadores na base -->
+                        <div class="carousel-dots" id="carousel-dots">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTAINER 2: BLOCO DE NOTAS -->
+                <div class="dashboard-card notes-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-note-sticky header-icon"></i> Bloco de Notas</h3>
+                        <p>Crie notas rápidas e receba alertas para anotações marcadas como importantes.</p>
+                    </div>
+
+                    <!-- Editor de notas -->
+                    <form id="note-form" class="note-form">
+                        <input type="hidden" id="edit-note-id">
+                        
+                        <div class="form-row">
+                            <div class="input-group">
+                                <input type="text" id="note-title" placeholder="Título da nota..." required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="input-group">
+                                <textarea id="note-content" placeholder="Escreva o conteúdo da nota aqui..." rows="3" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <div class="note-options">
+                                <!-- Seleção de cor -->
+                                <div class="color-picker">
+                                    <span class="color-label">Cor:</span>
+                                    <div class="color-options">
+                                        <label class="color-option-btn color-default active">
+                                            <input type="radio" name="note-color" value="note-default" checked>
+                                            <span class="color-dot"></span>
+                                        </label>
+                                        <label class="color-option-btn color-blue">
+                                            <input type="radio" name="note-color" value="note-blue">
+                                            <span class="color-dot"></span>
+                                        </label>
+                                        <label class="color-option-btn color-green">
+                                            <input type="radio" name="note-color" value="note-green">
+                                            <span class="color-dot"></span>
+                                        </label>
+                                        <label class="color-option-btn color-amber">
+                                            <input type="radio" name="note-color" value="note-amber">
+                                            <span class="color-dot"></span>
+                                        </label>
+                                        <label class="color-option-btn color-purple">
+                                            <input type="radio" name="note-color" value="note-purple">
+                                            <span class="color-dot"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Checkbox de Importante -->
+                                <label class="important-checkbox-wrapper" for="note-important">
+                                    <input type="checkbox" id="note-important">
+                                    <span class="custom-checkbox"></span>
+                                    <span class="checkbox-text"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" id="btn-save-note" class="btn-save">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Salvar</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Barra de filtros e pesquisa -->
+                    <div class="notes-filter-bar">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="search-notes" placeholder="Pesquisar notas...">
+                        </div>
+                        <div class="filter-options">
+                            <button id="filter-all" class="filter-btn active">Todas</button>
+                            <button id="filter-important" class="filter-btn"><i class="fa-solid fa-triangle-exclamation"></i> Importantes</button>
+                        </div>
+                    </div>
+
+                    <!-- Container para renderizar a lista de notas -->
+                    <div class="notes-grid" id="notes-grid">
+                        <!-- As notas serão inseridas dinamicamente via JS -->
+                        <div class="no-notes-state" id="no-notes-state">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>Nenhuma nota encontrada. Crie uma nota acima!</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts JavaScript -->
+    <script src="js/auth.js"></script>
+    <script src="js/carousel.js"></script>
+    <script src="js/notepad.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
