@@ -1774,3 +1774,40 @@ button {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
 }
+
+/* Contêiner do Editor de Caderno */
+.notebook-editor-container {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: var(--blur-effect);
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+}
+
+.notebook-editor-container:focus-within {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.08);
+}
+
+/* Área de Texto do Editor */
+#notebook-text-content {
+    width: 100%;
+    min-height: 480px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: var(--transition-smooth);
+}
+
+#notebook-text-content::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}

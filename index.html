@@ -196,15 +196,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="note-notebook"><i class="fa-solid fa-folder"></i> Salvar no Caderno</label>
-                                <select id="note-notebook">
-                                    <option value="">Notas Gerais (Sem Caderno)</option>
-                                    <!-- Os cadernos serão povoados dinamicamente -->
-                                </select>
-                            </div>
-                        </div>
+
 
                         <div class="form-row-picker">
                             <!-- Seleção de cor -->
@@ -358,16 +350,13 @@
                         </div>
                     </div>
 
-                    <!-- SUB-VIEW 2: NOTAS DO CADERNO SELECIONADO -->
+                    <!-- SUB-VIEW 2: NOTAS DO CADERNO SELECIONADO (NOTAS GERAIS) -->
                     <div id="library-notes-view" class="hidden">
                         <div class="notebook-detail-header">
                             <button id="btn-back-to-notebooks" class="btn-secondary">
                                 <i class="fa-solid fa-arrow-left"></i> Voltar para Cadernos
                             </button>
-                            <h3 id="active-notebook-title" style="margin: 0; font-family: var(--font-display);">Caderno: Geral</h3>
-                            <button id="btn-add-note-in-notebook" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
-                                <i class="fa-solid fa-plus"></i> Criar Nota Aqui
-                            </button>
+                            <h3 id="active-notebook-title" style="margin: 0; font-family: var(--font-display);">Notas Gerais</h3>
                         </div>
 
                         <!-- Barra de filtros e pesquisa -->
@@ -389,6 +378,25 @@
                                 <i class="fa-regular fa-folder-open"></i>
                                 <p>Nenhuma nota encontrada. Crie uma nota no menu Início!</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-VIEW 3: EDITOR DE TEXTO ÚNICO DO CADERNO -->
+                    <div id="library-notebook-editor-view" class="hidden">
+                        <div class="notebook-detail-header" style="justify-content: space-between;">
+                            <button id="btn-editor-back" class="btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Voltar para Cadernos
+                            </button>
+                            <h3 id="editor-notebook-title" style="margin: 0; font-family: var(--font-display);"><i class="fa-solid fa-folder-open"></i> Caderno: Projetos</h3>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span id="editor-save-status" style="font-size: 0.8rem; color: var(--success); opacity: 0; transition: var(--transition-smooth); display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-circle-check"></i> Salvo</span>
+                                <button id="btn-save-notebook-content" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
+                                    <i class="fa-solid fa-floppy-disk"></i> Salvar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notebook-editor-container" style="margin-top: 20px;">
+                            <textarea id="notebook-text-content" placeholder="Comece a escrever no seu caderno..." rows="20"></textarea>
                         </div>
                     </div>
                 </div>

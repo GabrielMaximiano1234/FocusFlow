@@ -166,8 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
             viewLibrary.classList.remove('hidden');
             navLibrary.classList.add('active');
             if (notepadInstance) {
-                if (notepadInstance.activeNotebookId) {
+                if (notepadInstance.activeNotebookId === 'general') {
                     notepadInstance.renderNotes();
+                } else if (notepadInstance.activeNotebookId) {
+                    notepadInstance.enterNotebook(notepadInstance.activeNotebookId);
                 } else {
                     notepadInstance.renderNotebooks();
                 }
