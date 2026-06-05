@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (statsTotal) statsTotal.textContent = notes.length;
         if (statsImportant) {
-            statsImportant.textContent = notes.filter(n => n.isImportant).length;
+            statsImportant.textContent = notes.filter(n => n.reminderTime && !n.reminderTriggered).length;
         }
     }
     window.updateDashboardStats = updateDashboardStats; // Deixa disponível para o notepad.js chamar!

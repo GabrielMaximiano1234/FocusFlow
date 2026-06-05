@@ -1,7 +1,7 @@
 /**
  * NOTEPAD.JS - Módulo do Bloco de Notas, Notificações e Cadernos
- * Gerencia o ciclo de vida das notas (como cards flutuantes em Notas Gerais) 
- * e dos Cadernos (como documentos de texto contínuos individuais).
+ * Gerencia o ciclo de vida das notas e cadernos do usuário.
+ * Dispara notificações no navegador automaticamente para todas as notas no horário agendado.
  */
 
 class NotepadManager {
@@ -17,13 +17,12 @@ class NotepadManager {
         this.editIdInput = document.getElementById('edit-note-id');
         this.titleInput = document.getElementById('note-title');
         this.contentInput = document.getElementById('note-content');
-        this.importantCheckbox = document.getElementById('note-important');
         this.notesGrid = document.getElementById('notes-grid');
         this.noNotesState = document.getElementById('no-notes-state');
         this.searchInput = document.getElementById('search-notes');
         this.reminderTimeInput = document.getElementById('note-reminder-time');
         
-        // Elementos da DOM - Cadernos (Fase 2 & 3)
+        // Elementos da DOM - Cadernos
         this.notebooksViewContainer = document.getElementById('library-notebooks-view');
         this.notesViewContainer = document.getElementById('library-notes-view');
         this.notebooksGrid = document.getElementById('notebooks-grid');
@@ -31,18 +30,13 @@ class NotepadManager {
         this.btnBackToNotebooks = document.getElementById('btn-back-to-notebooks');
         this.activeNotebookTitle = document.getElementById('active-notebook-title');
         
-        // Elementos da DOM - Editor do Caderno (Fase 3)
+        // Elementos da DOM - Editor do Caderno
         this.notebookEditorView = document.getElementById('library-notebook-editor-view');
         this.editorTitle = document.getElementById('editor-notebook-title');
         this.editorTextarea = document.getElementById('notebook-text-content');
         this.btnEditorSave = document.getElementById('btn-save-notebook-content');
         this.btnEditorBack = document.getElementById('btn-editor-back');
         this.editorSaveStatus = document.getElementById('editor-save-status');
-        
-        // Filtros
-        this.filterAllBtn = document.getElementById('filter-all');
-        this.filterImportantBtn = document.getElementById('filter-important');
-        this.activeFilter = 'all'; // 'all' ou 'important'
         
         // Botão de notificação geral na topbar
         this.btnRequestNotif = document.getElementById('btn-request-notif');
@@ -56,14 +50,9 @@ class NotepadManager {
         // Associa submissão do formulário
         this.form.addEventListener('submit', (e) => this.handleSaveNote(e));
 
-        // Associa busca e filtros
+        // Associa busca
         if (this.searchInput) {
             this.searchInput.addEventListener('input', () => this.renderNotes());
-        }
-
-        if (this.filterAllBtn && this.filterImportantBtn) {
-            this.filterAllBtn.addEventListener('click', () => this.setFilter('all'));
-            this.filterImportantBtn.addEventListener('click', () => this.setFilter('important'));
         }
 
         // Configuração de Notificações
@@ -72,7 +61,7 @@ class NotepadManager {
             this.updateNotificationButtonState();
         }
 
-        // Botões de Cadernos (Fase 2)
+        // Botões de Cadernos
         if (this.btnCreateNotebook) {
             this.btnCreateNotebook.addEventListener('click', () => this.showInlineNotebookCreator());
         }
@@ -80,7 +69,7 @@ class NotepadManager {
             this.btnBackToNotebooks.addEventListener('click', () => this.exitNotebook());
         }
 
-        // Botões e Ações do Editor de Caderno (Fase 3)
+        // Botões e Ações do Editor de Caderno
         if (this.btnEditorSave) {
             this.btnEditorSave.addEventListener('click', () => this.saveActiveNotebookContent(false));
         }
@@ -139,9 +128,7 @@ class NotepadManager {
     saveNotes(notesList) {
         try {
             const allNotes = JSON.parse(localStorage.getItem(this.storageKey)) || [];
-            // Filtra fora as notas do usuário atual para reinseri-las atualizadas
             const otherUsersNotes = allNotes.filter(note => note.owner !== this.currentUser.email);
-            // Une as notas atualizadas deste usuário com as dos outros
             const combinedNotes = [...otherUsersNotes, ...notesList];
             localStorage.setItem(this.storageKey, JSON.stringify(combinedNotes));
         } catch (e) {
@@ -189,7 +176,7 @@ class NotepadManager {
             id: 'notebook_' + Date.now(),
             owner: this.currentUser.email,
             name: name,
-            content: '', // Texto contínuo vazio inicial
+            content: '',
             createdAt: new Date().toISOString()
         };
 
@@ -279,7 +266,6 @@ class NotepadManager {
         this.activeNotebookId = notebookId;
         
         if (notebookId === 'general') {
-            // Notas Gerais: exibe a grade clássica
             if (this.activeNotebookTitle) this.activeNotebookTitle.innerHTML = `<i class="fa-solid fa-folder-open"></i> Notas Gerais`;
             
             if (this.notebooksViewContainer) this.notebooksViewContainer.classList.add('hidden');
@@ -288,7 +274,6 @@ class NotepadManager {
 
             this.renderNotes();
         } else {
-            // Caderno Customizado: abre o editor de texto contínuo
             const notebooks = this.getNotebooks();
             const notebook = notebooks.find(nb => nb.id === notebookId);
             if (!notebook) return;
@@ -303,12 +288,10 @@ class NotepadManager {
                 this.editorSaveStatus.style.opacity = 0;
             }
 
-            // Alterna visibilidades
             if (this.notebooksViewContainer) this.notebooksViewContainer.classList.add('hidden');
             if (this.notesViewContainer) this.notesViewContainer.classList.add('hidden');
             if (this.notebookEditorView) this.notebookEditorView.classList.remove('hidden');
 
-            // Foca na textarea
             setTimeout(() => {
                 if (this.editorTextarea) this.editorTextarea.focus();
             }, 100);
@@ -325,7 +308,6 @@ class NotepadManager {
 
         const textContent = this.editorTextarea ? this.editorTextarea.value : '';
         
-        // Só salva se houver alguma diferença para poupar localStorage
         if (notebooks[notebookIndex].content === textContent) {
             if (isAuto) {
                 this.showSaveStatus('Salvo', true);
@@ -366,7 +348,6 @@ class NotepadManager {
 
     // Sair de um Caderno (Voltar para Lista de Pastas)
     exitNotebook() {
-        // Salva conteúdo de segurança se estiver no editor
         if (this.activeNotebookId && this.activeNotebookId !== 'general') {
             clearTimeout(this.autoSaveTimeout);
             this.saveActiveNotebookContent(true);
@@ -389,8 +370,8 @@ class NotepadManager {
         const notebooks = this.getNotebooks();
         const notes = this.getNotes();
 
-        // 1. Caderno Fixo: Notas Gerais (Contém todas as notas rápidas)
-        const generalNotesCount = notes.length; // Como as notas agora são todas gerais
+        // 1. Caderno Fixo: Notas Gerais
+        const generalNotesCount = notes.length;
         const generalCard = document.createElement('div');
         generalCard.className = 'notebook-card general-folder';
         generalCard.innerHTML = `
@@ -428,7 +409,6 @@ class NotepadManager {
 
         const title = this.titleInput.value.trim();
         const content = this.contentInput.value.trim();
-        const isImportant = this.importantCheckbox.checked;
         const editId = this.editIdInput.value;
         const reminderTime = this.reminderTimeInput ? this.reminderTimeInput.value : '';
         
@@ -453,8 +433,7 @@ class NotepadManager {
                         title,
                         content,
                         color: colorClass,
-                        isImportant,
-                        notebookId: null, // Notas flutuantes são sempre sem vínculo
+                        notebookId: null,
                         reminderTime: reminderTime || null,
                         reminderTriggered: hasReminderChanged ? false : (note.reminderTriggered || false),
                         updatedAt: new Date().toISOString()
@@ -471,8 +450,7 @@ class NotepadManager {
                 title,
                 content,
                 color: colorClass,
-                isImportant,
-                notebookId: null, // Sem caderno
+                notebookId: null,
                 reminderTime: reminderTime || null,
                 reminderTriggered: false,
                 createdAt: new Date().toISOString()
@@ -480,10 +458,6 @@ class NotepadManager {
             notes.unshift(newNote);
 
             if (window.showToast) window.showToast('Nota Salva', 'Nova anotação adicionada ao seu bloco.', 'success');
-
-            if (isImportant) {
-                this.triggerWebNotification(title, content);
-            }
         }
 
         this.saveNotes(notes);
@@ -533,7 +507,6 @@ class NotepadManager {
         this.editIdInput.value = note.id;
         this.titleInput.value = note.title;
         this.contentInput.value = note.content;
-        this.importantCheckbox.checked = note.isImportant;
         if (this.reminderTimeInput) {
             this.reminderTimeInput.value = note.reminderTime || '';
         }
@@ -566,12 +539,7 @@ class NotepadManager {
         const noteCards = this.notesGrid.querySelectorAll('.note-card');
         noteCards.forEach(card => card.remove());
 
-        // Notas Gerais = todas as notas, pois não há mais subdivisão por pasta
         let filteredNotes = notes;
-
-        if (this.activeFilter === 'important') {
-            filteredNotes = filteredNotes.filter(n => n.isImportant);
-        }
 
         if (searchQuery) {
             filteredNotes = filteredNotes.filter(n => 
@@ -589,7 +557,7 @@ class NotepadManager {
 
         filteredNotes.forEach(note => {
             const card = document.createElement('div');
-            card.className = `note-card ${note.color} ${note.isImportant ? 'important' : ''}`;
+            card.className = `note-card ${note.color}`;
             card.setAttribute('data-id', note.id);
 
             const date = new Date(note.createdAt);
@@ -606,7 +574,6 @@ class NotepadManager {
                     <h4 class="note-card-title">${this.escapeHTML(note.title)}</h4>
                     <div style="display: flex; gap: 6px; align-items: center;">
                         ${timeBadge}
-                        ${note.isImportant ? '<span class="note-card-badge" title="Item Importante"><i class="fa-solid fa-triangle-exclamation"></i></span>' : ''}
                     </div>
                 </div>
                 <p class="note-body">${this.escapeHTML(note.content)}</p>
@@ -622,19 +589,6 @@ class NotepadManager {
 
             this.notesGrid.appendChild(card);
         });
-    }
-
-    // Gerencia botões de filtragem
-    setFilter(filterType) {
-        this.activeFilter = filterType;
-        if (filterType === 'all') {
-            this.filterAllBtn.classList.add('active');
-            this.filterImportantBtn.classList.remove('active');
-        } else {
-            this.filterImportantBtn.classList.add('active');
-            this.filterAllBtn.classList.remove('active');
-        }
-        this.renderNotes();
     }
 
     // Limpa formulário
@@ -670,7 +624,7 @@ class NotepadManager {
             this.updateNotificationButtonState();
             
             if (permission === 'granted') {
-                if (window.showToast) window.showToast('Notificações Ativadas', 'Você receberá alertas nativos para notas Importantes.', 'success');
+                if (window.showToast) window.showToast('Notificações Ativadas', 'Você receberá alertas nativos nos horários agendados.', 'success');
                 if (window.logNotificationTrigger) window.logNotificationTrigger('Permissão de Notificação Concedida 🔔', 'success');
                 new Notification('FocusFlow', {
                     body: 'Alertas no navegador ativados com sucesso! 🚀',
@@ -712,30 +666,7 @@ class NotepadManager {
         }
     }
 
-    triggerWebNotification(title, content) {
-        if (!('Notification' in window)) return;
-
-        if (Notification.permission === 'granted') {
-            const snippet = content.length > 80 ? content.substring(0, 80) + '...' : content;
-            
-            try {
-                new Notification(`Nota Importante: ${title}`, {
-                    body: snippet,
-                    icon: 'assets/images/workspace.png',
-                    tag: 'important-note',
-                    requireInteraction: true
-                });
-                if (window.logNotificationTrigger) {
-                    window.logNotificationTrigger(`Alerta enviado para "${title}" 🔔`, 'info');
-                }
-            } catch (e) {
-                console.error('Erro ao tentar disparar Web Notification', e);
-            }
-        } else if (Notification.permission === 'default') {
-            this.requestNotificationPermission();
-        }
-    }
-
+    // Verifica se há lembretes agendados para disparar
     checkReminders() {
         if (!this.currentUser) return;
         const notes = this.getNotes();
@@ -766,6 +697,7 @@ class NotepadManager {
         }
     }
 
+    // Dispara a notificação de lembrete agendado
     triggerReminderNotification(note) {
         if (window.showToast) {
             window.showToast('Lembrete Agendado ⏰', `Está na hora: "${note.title}"`, 'info');
