@@ -166,7 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Vincula cliques aos botões da sidebar
+    // Vincula cliques aos botões da sidebar e ao logotipo inicial
+    const sidebarBrandHome = document.getElementById('sidebar-brand-home');
+    if (sidebarBrandHome) {
+        sidebarBrandHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('dashboard');
+        });
+    }
     if (navDashboard) {
         navDashboard.addEventListener('click', (e) => {
             e.preventDefault();
