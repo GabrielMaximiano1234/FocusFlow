@@ -318,7 +318,7 @@ class NotepadManager {
             if (permission === 'granted') {
                 if (window.showToast) window.showToast('Notificações Ativadas', 'Você receberá alertas nativos para notas Importantes.', 'success');
                 // Dispara uma notificação de confirmação imediata
-                new Notification('Productivity Hub', {
+                new Notification('FocusFlow', {
                     body: 'Alertas no navegador ativados com sucesso! 🚀',
                     icon: 'assets/images/workspace.png'
                 });
