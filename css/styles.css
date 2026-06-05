@@ -1989,7 +1989,7 @@ button {
 }
 
 /* Custom glow borders and colors for selected categories */
-.category-select-btn[data-category="Work"].active {
+.category-select-btn[data-category="Trabalho"].active {
     border-color: #60a5fa !important;
     background: rgba(96, 165, 250, 0.15) !important;
     color: #fff !important;
@@ -1997,7 +1997,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="School"].active {
+.category-select-btn[data-category="Escola"].active {
     border-color: #a855f7 !important;
     background: rgba(168, 85, 247, 0.15) !important;
     color: #fff !important;
@@ -2005,7 +2005,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="Family"].active {
+.category-select-btn[data-category="Família"].active {
     border-color: #22c55e !important;
     background: rgba(34, 197, 94, 0.15) !important;
     color: #fff !important;
@@ -2013,7 +2013,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="Church"].active {
+.category-select-btn[data-category="Igreja"].active {
     border-color: #f59e0b !important;
     background: rgba(245, 158, 11, 0.15) !important;
     color: #fff !important;
@@ -2021,7 +2021,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="Health"].active {
+.category-select-btn[data-category="Saúde"].active {
     border-color: #ef4444 !important;
     background: rgba(239, 68, 68, 0.15) !important;
     color: #fff !important;
@@ -2029,7 +2029,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="Friends"].active {
+.category-select-btn[data-category="Amigos"].active {
     border-color: #06b6d4 !important;
     background: rgba(6, 182, 212, 0.15) !important;
     color: #fff !important;
@@ -2037,7 +2037,7 @@ button {
     transform: translateY(-1px);
 }
 
-.category-select-btn[data-category="Love"].active {
+.category-select-btn[data-category="Amor"].active {
     border-color: #ec4899 !important;
     background: rgba(236, 72, 153, 0.15) !important;
     color: #fff !important;

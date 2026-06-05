@@ -335,6 +335,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         timeEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${displayTimeStr}`;
 
+        const btnNextUpDone = document.getElementById('btn-next-up-done');
+        if (btnNextUpDone) {
+            btnNextUpDone.style.display = 'inline-block';
+            // Clona o botão para remover os event listeners anteriores
+            const newBtn = btnNextUpDone.cloneNode(true);
+            btnNextUpDone.parentNode.replaceChild(newBtn, btnNextUpDone);
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (window.notepadInstance) {
+                    window.notepadInstance.toggleNoteCompleted(note.id);
+                }
+            });
+        }
+
         const updateTimer = () => {
             const now = new Date();
             const diffMs = date - now;
@@ -355,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hours > 0) {
                 timerStr += `${hours}h `;
             }
-            timerStr += `${mins}m ${String(secs).padStart(2, '0')}s from now`;
+            timerStr += `${mins}m ${String(secs).padStart(2, '0')}s a partir de agora`;
             timerEl.textContent = timerStr;
         };
 
@@ -441,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <button class="btn-mark-done" data-id="${note.id}" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; transition: all 0.2s;">
-                    Mark done ✓
+                    Marcar como concluída ✓
                 </button>
             `;
 
@@ -462,26 +476,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const now = new Date();
         const hour = now.getHours();
-        let greeting = 'Good morning';
+        let greeting = 'Bom dia';
         if (hour >= 12 && hour < 18) {
-            greeting = 'Good afternoon';
+            greeting = 'Boa tarde';
         } else if (hour >= 18 || hour < 5) {
-            greeting = 'Good evening';
+            greeting = 'Boa noite';
         }
 
         const firstName = user ? user.name.split(' ')[0] : 'Usuário';
-        greetingText.textContent = `${greeting}, ${firstName}! 👋`;
+        greetingText.textContent = `${greeting}, ${firstName} 👋`;
 
         const todayStr = now.toDateString();
+        const todayFormatted = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
         
         const todayNotes = notes.filter(n => {
+            if (n.reminderDate) {
+                return n.reminderDate === todayFormatted && !n.completed;
+            }
             const createdDateStr = new Date(n.createdAt).toDateString();
             return createdDateStr === todayStr && !n.completed;
         });
 
         const highPriorityCount = todayNotes.filter(n => n.priority === 'High').length;
 
-        greetingSubtext.innerHTML = `Você tem <strong>${todayNotes.length}</strong> tarefas restantes para hoje, sendo <strong>${highPriorityCount}</strong> de alta prioridade.`;
+        greetingSubtext.innerHTML = `Você tem <strong>${todayNotes.length}</strong> itens restantes hoje · <strong>${highPriorityCount}</strong> de alta prioridade.`;
     }
 
     // Atualiza as estatísticas exibidas na visão geral do Dashboard
@@ -500,8 +518,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const now = new Date();
         const todayStr = now.toDateString();
+        const todayFormatted = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-        const todayItems = notes.filter(n => new Date(n.createdAt).toDateString() === todayStr);
+        const todayItems = notes.filter(n => {
+            if (n.reminderDate) {
+                return n.reminderDate === todayFormatted;
+            }
+            return new Date(n.createdAt).toDateString() === todayStr;
+        });
         const pendingItems = notes.filter(n => !n.completed);
         const completedItems = notes.filter(n => n.completed);
         const highPriorityPending = notes.filter(n => n.priority === 'High' && !n.completed);

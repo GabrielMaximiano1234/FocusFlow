@@ -468,13 +468,13 @@ class NotepadManager {
 
         // Mapear categoria para cor
         let colorClass = 'note-default';
-        if (category === 'Work') colorClass = 'note-blue';
-        else if (category === 'School') colorClass = 'note-purple';
-        else if (category === 'Family') colorClass = 'note-green';
-        else if (category === 'Church') colorClass = 'note-amber';
-        else if (category === 'Health') colorClass = 'note-green';
-        else if (category === 'Friends') colorClass = 'note-blue';
-        else if (category === 'Love') colorClass = 'note-purple';
+        if (category === 'Trabalho') colorClass = 'note-blue';
+        else if (category === 'Escola') colorClass = 'note-purple';
+        else if (category === 'Família') colorClass = 'note-green';
+        else if (category === 'Igreja') colorClass = 'note-amber';
+        else if (category === 'Saúde') colorClass = 'note-green';
+        else if (category === 'Amigos') colorClass = 'note-blue';
+        else if (category === 'Amor') colorClass = 'note-purple';
 
         let notes = this.getNotes();
         let isEditMode = false;

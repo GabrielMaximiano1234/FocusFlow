@@ -165,11 +165,11 @@
                 <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
                     <button id="nav-top-calendar" class="btn-secondary">
                         <i class="fa-regular fa-calendar"></i>
-                        <span>Calendar</span>
+                        <span>Calendário</span>
                     </button>
                     <button id="nav-top-tasks" class="btn-secondary">
                         <i class="fa-solid fa-list-check"></i>
-                        <span>Tasks</span>
+                        <span>Tarefas</span>
                     </button>
                     <button id="btn-request-notif" class="btn-secondary">
                         <i class="fa-solid fa-bell-slash"></i>
@@ -190,7 +190,7 @@
                     </p>
                     
                     <button id="btn-home-add-task" class="btn-primary" style="margin: 0 auto; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
-                        <i class="fa-solid fa-circle-plus"></i> + Add New Item
+                        <i class="fa-solid fa-circle-plus"></i> + Adicionar Item
                     </button>
                 </div>
             </div>
@@ -200,30 +200,38 @@
                 <!-- CABEÇALHO DINÂMICO -->
                 <div class="dashboard-header-premium" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 20px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);">
                     <div class="greeting-area">
-                        <h2 id="dashboard-greeting-text" style="font-family: 'Outfit', sans-serif; font-size: 24px; margin-bottom: 6px; color: #fff;">Good morning, Usuário</h2>
-                        <p id="dashboard-greeting-subtext" style="font-size: 14px; color: #a0a0b0;">Você tem 0 tarefas restantes para hoje, sendo 0 de alta prioridade.</p>
+                        <h2 id="dashboard-greeting-text" style="font-family: 'Outfit', sans-serif; font-size: 24px; margin-bottom: 6px; color: #fff;">Bom dia, Usuário 👋</h2>
+                        <p id="dashboard-greeting-subtext" style="font-size: 14px; color: #a0a0b0;">Você tem 0 itens restantes hoje · 0 de alta prioridade.</p>
                     </div>
-                    <button id="btn-dashboard-quick-add" class="btn-primary" style="margin-top: 0; padding: 10px 20px; font-weight: 500;">
-                        <i class="fa-solid fa-plus"></i> + Quick Add
+                    <button id="btn-dashboard-quick-add" class="btn-primary" style="margin-top: 0; padding: 10px 20px; font-weight: 500; background: #3b82f6 !important; border-color: #3b82f6 !important;">
+                        <i class="fa-solid fa-plus"></i> + Adição Rápida
                     </button>
                 </div>
 
                 <!-- 4 CARDS DE ESTATÍSTICAS -->
                 <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
                     <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
-                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Today's Items</span>
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-regular fa-calendar-check" style="color: #3b82f6;"></i> Itens de Hoje
+                        </span>
                         <span id="metric-today-items" style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-top: 10px;">0</span>
                     </div>
                     <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
-                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Pending Tasks</span>
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-list-check" style="color: #eab308;"></i> Tarefas Pendentes
+                        </span>
                         <span id="metric-pending-tasks" style="font-size: 32px; font-weight: 700; color: #eab308; margin-top: 10px;">0</span>
                     </div>
                     <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
-                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Completed</span>
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-regular fa-circle-check" style="color: #22c55e;"></i> Concluídas
+                        </span>
                         <span id="metric-completed-tasks" style="font-size: 32px; font-weight: 700; color: #22c55e; margin-top: 10px;">0</span>
                     </div>
                     <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
-                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">High Priority</span>
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-circle-exclamation" style="color: #ef4444;"></i> Alta Prioridade
+                        </span>
                         <span id="metric-high-priority" style="font-size: 32px; font-weight: 700; color: #ef4444; margin-top: 10px;">0</span>
                     </div>
                 </div>
@@ -233,15 +241,20 @@
                     <div class="dashboard-card next-up-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                         <div class="next-up-info">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                <span class="badge-next-up" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px;">Next Up</span>
+                                <span class="badge-next-up" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px;">A Seguir</span>
                                 <span id="next-up-task-time" style="font-size: 13px; color: #9ca3af;"><i class="fa-regular fa-clock"></i> --:--</span>
                             </div>
                             <h3 id="next-up-task-title" style="font-family: 'Outfit', sans-serif; font-size: 18px; color: #fff; margin-bottom: 4px;">Nenhum lembrete agendado</h3>
-                            <p id="next-up-task-desc" style="font-size: 14px; color: #9ca3af; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Crie uma nota rápida com horário programado para ver o próximo evento aqui.</p>
+                            <p id="next-up-task-desc" style="font-size: 14px; color: #9ca3af; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Crie uma tarefa ou lembrete com horário programado para ver o próximo evento aqui.</p>
                         </div>
-                        <div class="next-up-countdown" style="text-align: right; min-width: 150px;">
-                            <span style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px;">CONTAGEM REGRESSIVA</span>
-                            <span id="next-up-timer" style="font-family: monospace; font-size: 24px; font-weight: 700; color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);">--:--:--</span>
+                        <div class="next-up-countdown" style="text-align: right; min-width: 150px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div>
+                                <span style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Contagem Regressiva</span>
+                                <span id="next-up-timer" style="font-family: monospace; font-size: 24px; font-weight: 700; color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);">--:--:--</span>
+                            </div>
+                            <button id="btn-next-up-done" class="btn-primary" style="margin-top: 0; padding: 6px 12px; font-size: 12px; background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: none;">
+                                Marcar como concluída ✓
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -485,7 +498,7 @@
     <div id="add-item-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
         <div class="modal-box" style="background: linear-gradient(145deg, #181824 0%, #10101a 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; width: 90%; max-width: 520px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 20px;">
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; margin: 0;"><i class="fa-solid fa-circle-plus" style="color: var(--primary); margin-right: 6px;"></i> Add New Item</h3>
+                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; margin: 0;"><i class="fa-solid fa-circle-plus" style="color: var(--primary); margin-right: 6px;"></i> Adicionar Novo Item</h3>
                 <button id="modal-close-x" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
             </div>
             
@@ -494,53 +507,53 @@
                 
                 <!-- TITLE -->
                 <div class="input-group">
-                    <label for="modal-item-title" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Title</label>
-                    <input type="text" id="modal-item-title" placeholder="What's this about?" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.2s;">
+                    <label for="modal-item-title" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TÍTULO</label>
+                    <input type="text" id="modal-item-title" placeholder="Sobre o que é isso?" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.2s;">
                 </div>
                 
                 <!-- DATE & TIME -->
                 <div style="display: flex; gap: 16px;">
                     <div class="input-group" style="flex: 1;">
-                        <label for="modal-item-date" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Date</label>
+                        <label for="modal-item-date" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DATA</label>
                         <input type="date" id="modal-item-date" required style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
                     </div>
                     <div class="input-group" style="flex: 1;">
-                        <label for="modal-item-time" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Time (Optional)</label>
+                        <label for="modal-item-time" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">HORA (OPCIONAL)</label>
                         <input type="time" id="modal-item-time" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
                     </div>
                 </div>
                 
                 <!-- CATEGORY GRID -->
                 <div class="input-group">
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">Category</label>
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">CATEGORIA</label>
                     <div id="modal-category-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                        <button type="button" class="category-select-btn" data-category="Work" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Trabalho" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-briefcase" style="color: #60a5fa; font-size: 1.1rem;"></i>
-                            Work
+                            Trabalho
                         </button>
-                        <button type="button" class="category-select-btn" data-category="School" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Escola" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-graduation-cap" style="color: #a855f7; font-size: 1.1rem;"></i>
-                            School
+                            Escola
                         </button>
-                        <button type="button" class="category-select-btn" data-category="Family" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Família" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-house-chimney-user" style="color: #22c55e; font-size: 1.1rem;"></i>
-                            Family
+                            Família
                         </button>
-                        <button type="button" class="category-select-btn" data-category="Church" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Igreja" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-church" style="color: #f59e0b; font-size: 1.1rem;"></i>
-                            Church
+                            Igreja
                         </button>
-                        <button type="button" class="category-select-btn" data-category="Health" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Saúde" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-heart-pulse" style="color: #ef4444; font-size: 1.1rem;"></i>
-                            Health
+                            Saúde
                         </button>
-                        <button type="button" class="category-select-btn" data-category="Friends" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Amigos" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-user-group" style="color: #06b6d4; font-size: 1.1rem;"></i>
-                            Friends
+                            Amigos
                         </button>
-                        <button type="button" class="category-select-btn" data-category="Love" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                        <button type="button" class="category-select-btn" data-category="Amor" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
                             <i class="fa-solid fa-heart" style="color: #ec4899; font-size: 1.1rem;"></i>
-                            Love
+                            Amor
                         </button>
                     </div>
                 </div>
@@ -548,33 +561,33 @@
                 <!-- TYPE & PRIORITY SELECTS -->
                 <div style="display: flex; gap: 16px;">
                     <div class="input-group" style="flex: 1;">
-                        <label for="modal-item-type" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Type</label>
+                        <label for="modal-item-type" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TIPO</label>
                         <select id="modal-item-type" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
-                            <option value="Task" style="background: #181824; color: #fff;">Task / To-Do</option>
-                            <option value="Note" style="background: #181824; color: #fff;">Note</option>
-                            <option value="Reminder" style="background: #181824; color: #fff;">Reminder</option>
+                            <option value="Task" style="background: #181824; color: #fff;">Tarefa / A Fazer</option>
+                            <option value="Note" style="background: #181824; color: #fff;">Nota</option>
+                            <option value="Reminder" style="background: #181824; color: #fff;">Lembrete</option>
                         </select>
                     </div>
                     <div class="input-group" style="flex: 1;">
-                        <label for="modal-item-priority" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Priority</label>
+                        <label for="modal-item-priority" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">PRIORIDADE</label>
                         <select id="modal-item-priority" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
-                            <option value="Low" style="background: #181824; color: #fff;">🟢 Low</option>
-                            <option value="Medium" selected style="background: #181824; color: #fff;">🟡 Medium</option>
-                            <option value="High" style="background: #181824; color: #fff;">🔴 High</option>
+                            <option value="Low" style="background: #181824; color: #fff;">🟢 Baixa</option>
+                            <option value="Medium" selected style="background: #181824; color: #fff;">🟡 Média</option>
+                            <option value="High" style="background: #181824; color: #fff;">🔴 Alta</option>
                         </select>
                     </div>
                 </div>
                 
                 <!-- DESCRIPTION / CONTENT -->
                 <div class="input-group">
-                    <label for="modal-item-content" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Description / Notes</label>
-                    <textarea id="modal-item-content" placeholder="Enter details or notes..." rows="3" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; resize: vertical; transition: all 0.2s;"></textarea>
+                    <label for="modal-item-content" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DESCRIÇÃO / DETALHES</label>
+                    <textarea id="modal-item-content" placeholder="Insira detalhes ou anotações..." rows="3" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; resize: vertical; transition: all 0.2s;"></textarea>
                 </div>
                 
                 <!-- MODAL ACTIONS -->
                 <div class="modal-actions-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; margin-top: 8px;">
-                    <button type="button" id="modal-cancel-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;">Cancel</button>
-                    <button type="submit" id="modal-save-btn" class="btn-primary" style="margin-top: 0; padding: 10px 24px; font-size: 0.9rem; font-weight: 600;">Save Item</button>
+                    <button type="button" id="modal-cancel-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;">Cancelar</button>
+                    <button type="submit" id="modal-save-btn" class="btn-primary" style="margin-top: 0; padding: 10px 24px; font-size: 0.9rem; font-weight: 600;">Salvar Item</button>
                 </div>
             </form>
         </div>
