@@ -155,7 +155,7 @@ function initAppModule() {
 
     function showAuth() {
         document.querySelector('#tela-dashboard').style.display = 'none';
-        document.querySelector('#tela-login').style.display = 'block';
+        document.querySelector('#tela-login').style.display = 'flex';
 
         dashboardSection.classList.add('hidden');
         authSection.classList.remove('hidden');

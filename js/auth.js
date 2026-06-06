@@ -292,7 +292,7 @@ function initAuthUI() {
                 if (hasError) {
                     triggerFormShake(loginForm);
                     // Reverte a transição do onclick inline para evitar tela preta
-                    document.getElementById('tela-login').style.display = 'block';
+                    document.getElementById('tela-login').style.display = 'flex';
                     document.getElementById('tela-dashboard').style.display = 'none';
                     return;
                 }
@@ -344,7 +344,7 @@ function initAuthUI() {
                             showInputError(loginEmail, registerResult.message);
                             triggerFormShake(loginForm);
                             // Reverte a transição do onclick inline para evitar tela preta
-                            document.getElementById('tela-login').style.display = 'block';
+                            document.getElementById('tela-login').style.display = 'flex';
                             document.getElementById('tela-dashboard').style.display = 'none';
                         }
                     } else {
@@ -352,7 +352,7 @@ function initAuthUI() {
                         showInputError(loginPass, 'Senha incorreta.');
                         triggerFormShake(loginForm);
                         // Reverte a transição do onclick inline para evitar tela preta
-                        document.getElementById('tela-login').style.display = 'block';
+                        document.getElementById('tela-login').style.display = 'flex';
                         document.getElementById('tela-dashboard').style.display = 'none';
                     }
                 }
