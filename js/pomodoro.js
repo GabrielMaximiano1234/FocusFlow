@@ -255,7 +255,12 @@ class PomodoroTimer {
     updateRelaxButtonVisibility() {
         if (!this.btnRelax) return;
         if (this.currentMode === 'break') {
-            this.btnRelax.classList.remove('hidden');
+            const plan = window.getUserPlan ? window.getUserPlan() : 'Iniciante Ativo';
+            if (plan === 'Iniciante Ativo') {
+                this.btnRelax.classList.add('hidden');
+            } else {
+                this.btnRelax.classList.remove('hidden');
+            }
         } else {
             this.btnRelax.classList.add('hidden');
         }

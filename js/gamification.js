@@ -865,6 +865,9 @@ class GamificationSystem {
     // MODO ZEN / RELAXAMENTO DE DESCANSO (POMODORO INTEGRADO)
     // ==========================================================================
     openZenRelax() {
+        if (window.checkPlanAccess && !window.checkPlanAccess('games')) {
+            return;
+        }
         const focusCard = document.querySelector(".focus-card");
         if (!focusCard) return;
 

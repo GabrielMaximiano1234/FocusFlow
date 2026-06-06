@@ -2709,6 +2709,30 @@ body.fullscreen-scaled {
     border-bottom: none;
 }
 
+/* Painel Gerencial (Admin) - MRR e SEO */
+.seo-dashboard-grid {
+    margin-top: 20px;
+}
+
+.pagespeed-gauge {
+    background: rgba(255, 255, 255, 0.02);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pagespeed-gauge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
+
+#seo-traffic-bars div {
+    transition: height 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+    cursor: pointer;
+}
+
+#seo-traffic-bars div:hover {
+    background-color: var(--secondary) !important;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
 
 
 

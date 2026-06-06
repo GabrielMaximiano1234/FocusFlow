@@ -6,6 +6,9 @@
 // Chaves para LocalStorage / SessionStorage
 const STORAGE_USERS_KEY = 'prod_hub_users';
 const STORAGE_SESSION_KEY = 'prod_hub_current_user';
+const STORAGE_JWT_KEY = 'prod_hub_jwt';
+const JWT_SECRET = 'focusflow_jwt_secret_salt_2026';
+
 
 // Algoritmo síncrono leve de hash SHA-256 para persistência segura das senhas
 function sha256(ascii) {
@@ -70,12 +73,105 @@ function sha256(ascii) {
 }
 
 // --- UTILITÁRIO DE COMUNICAÇÃO ENTRE VIEW E CONTROLADOR ---
+// Base64Url helper functions
+function base64urlEncode(obj) {
+    const jsonStr = JSON.stringify(obj);
+    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+    return base64.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function base64urlDecode(str) {
+    let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) {
+        base64 += '=';
+    }
+    return JSON.parse(decodeURIComponent(escape(atob(base64))));
+}
+
+// --- UTILITÁRIO DE COMUNICAÇÃO ENTRE VIEW E CONTROLADOR ---
 const Auth = {
-    // Retorna o usuário logado atualmente (ou null)
+    // Retorna o usuário logado atualmente validando o JWT (ou null)
     getCurrentUser() {
+        return this.verifyAndGetCurrentUser();
+    },
+
+    // Verifica assinatura e expiração do JWT
+    verifyAndGetCurrentUser() {
         try {
-            return JSON.parse(localStorage.getItem(STORAGE_SESSION_KEY)) || JSON.parse(sessionStorage.getItem(STORAGE_SESSION_KEY));
+            const token = sessionStorage.getItem(STORAGE_JWT_KEY) || localStorage.getItem(STORAGE_JWT_KEY);
+            if (!token) return null;
+
+            const parts = token.split('.');
+            if (parts.length !== 3) {
+                this.logout();
+                return null;
+            }
+
+            const [headerB64, payloadB64, signature] = parts;
+            const expectedSignature = sha256(headerB64 + "." + payloadB64 + "." + JWT_SECRET);
+            if (signature !== expectedSignature) {
+                console.error("JWT: Assinatura inválida!");
+                this.logout();
+                return null;
+            }
+
+            const payload = base64urlDecode(payloadB64);
+            if (payload.exp && Date.now() > payload.exp) {
+                console.error("JWT: Token expirado!");
+                this.logout();
+                return null;
+            }
+
+            return payload;
         } catch (e) {
+            console.error("Erro ao verificar JWT:", e);
+            this.logout();
+            return null;
+        }
+    },
+
+    // Auxiliar para criação do JWT assinado
+    _createJWT(payload) {
+        const header = { alg: "HS256", typ: "JWT" };
+        const headerB64 = base64urlEncode(header);
+        const payloadB64 = base64urlEncode(payload);
+        const signature = sha256(headerB64 + "." + payloadB64 + "." + JWT_SECRET);
+        return `${headerB64}.${payloadB64}.${signature}`;
+    },
+
+    // Reemissão de token quando há atualização de plano
+    reissueTokenWithNewPlan(newPlan) {
+        try {
+            const currentUser = this.getCurrentUser();
+            if (!currentUser) return null;
+
+            currentUser.plan_level = newPlan;
+            
+            // Persiste no banco de usuários
+            const users = this._getAllUsers();
+            const userIdx = users.findIndex(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (userIdx !== -1) {
+                users[userIdx].plan_level = newPlan;
+                localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+            }
+            
+            // Atualiza também a chave antiga de plano para compatibilidade com o assistant/etc
+            localStorage.setItem(`prod_hub_user_plan_${currentUser.email}`, newPlan);
+
+            // Emite novo JWT
+            const newToken = this._createJWT(currentUser);
+
+            // Salva na mesma mídia de armazenamento anterior
+            if (localStorage.getItem(STORAGE_JWT_KEY)) {
+                localStorage.setItem(STORAGE_JWT_KEY, newToken);
+            }
+            if (sessionStorage.getItem(STORAGE_JWT_KEY)) {
+                sessionStorage.setItem(STORAGE_JWT_KEY, newToken);
+            }
+
+            return currentUser;
+        } catch (e) {
+            console.error("Erro ao reemitir token JWT:", e);
             return null;
         }
     },
@@ -95,20 +191,22 @@ const Auth = {
                 id: 'usr_' + Date.now(),
                 name,
                 email: email.toLowerCase(),
-                password: sha256(password)
+                password: sha256(password),
+                role: 'user',
+                plan_level: 'Iniciante Ativo'
             };
 
             users.push(newUser);
             localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
 
-            return { success: true, user: { name: newUser.name, email: newUser.email } };
+            return { success: true, user: { name: newUser.name, email: newUser.email, role: newUser.role, plan_level: newUser.plan_level } };
         } catch (e) {
             console.error('Erro no método Auth.register:', e);
             throw e;
         }
     },
 
-    // Realiza o login do usuário (com suporte a migração de texto claro para hash)
+    // Realiza o login do usuário, gerando o JWT
     login(email, password, rememberMe) {
         try {
             const users = this._getAllUsers();
@@ -127,28 +225,40 @@ const Auth = {
                         name: 'Gabriel Maximiano',
                         email: adminEmail,
                         password: sha256(adminPass),
-                        role: 'superadmin'
+                        role: 'superadmin',
+                        plan_level: 'Mestre de Foco'
                     };
                     users.push(adminUser);
                     localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
                 } else {
-                    if (adminUser.role !== 'superadmin' || adminUser.password !== sha256(adminPass)) {
+                    if (adminUser.role !== 'superadmin' || adminUser.password !== sha256(adminPass) || adminUser.plan_level !== 'Mestre de Foco') {
                         adminUser.role = 'superadmin';
                         adminUser.password = sha256(adminPass);
+                        adminUser.plan_level = 'Mestre de Foco';
                         localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
                     }
                 }
-                const sessionUser = { name: adminUser.name, email: adminUser.email, role: 'superadmin' };
-                sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                
+                // Payload do Token JWT para o Admin
+                const payload = {
+                    user_id: adminUser.id,
+                    name: adminUser.name,
+                    email: adminEmail,
+                    role: 'superadmin',
+                    plan_level: 'Mestre de Foco',
+                    exp: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 dias
+                };
+
+                const token = this._createJWT(payload);
                 
                 if (rememberMe) {
-                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                    localStorage.setItem(STORAGE_JWT_KEY, token);
                     localStorage.setItem('prod_hub_remembered_email', adminEmail);
                 } else {
-                    localStorage.removeItem(STORAGE_SESSION_KEY);
+                    sessionStorage.setItem(STORAGE_JWT_KEY, token);
                     localStorage.removeItem('prod_hub_remembered_email');
                 }
-                return { success: true, user: sessionUser };
+                return { success: true, token, user: payload };
             }
 
             const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -166,29 +276,41 @@ const Auth = {
                 return { success: false, message: 'Senha incorreta.' };
             }
 
-            const sessionUser = { name: user.name, email: user.email, role: user.role || 'user' };
-            sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+            // Certifica de ler o plano persistido do usuário ou inicializar como Iniciante Ativo
+            const plan = user.plan_level || localStorage.getItem(`prod_hub_user_plan_${user.email}`) || 'Iniciante Ativo';
+
+            // Payload do Token JWT
+            const payload = {
+                user_id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role || 'user',
+                plan_level: plan,
+                exp: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 dias
+            };
+
+            const token = this._createJWT(payload);
             
             if (rememberMe) {
-                localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                localStorage.setItem(STORAGE_JWT_KEY, token);
                 localStorage.setItem('prod_hub_remembered_email', email.toLowerCase());
             } else {
-                localStorage.removeItem(STORAGE_SESSION_KEY);
+                sessionStorage.setItem(STORAGE_JWT_KEY, token);
                 localStorage.removeItem('prod_hub_remembered_email');
             }
 
-            return { success: true, user: sessionUser };
+            return { success: true, token, user: payload };
         } catch (e) {
             console.error('Erro no método Auth.login:', e);
             throw e;
         }
     },
 
-    // Encerra a sessão
+    // Encerra a sessão removendo o token JWT
     logout() {
         try {
-            sessionStorage.removeItem(STORAGE_SESSION_KEY);
-            localStorage.removeItem(STORAGE_SESSION_KEY);
+            sessionStorage.removeItem(STORAGE_JWT_KEY);
+            localStorage.removeItem(STORAGE_JWT_KEY);
         } catch (e) {
             console.error('Erro ao fazer logout:', e);
         }
@@ -470,10 +592,8 @@ function initAuthUI() {
                 const result = Auth.register(nameVal, emailVal, passVal);
                 if (result.success) {
                     if (window.showToast) window.showToast('Conta Criada!', 'Cadastro realizado com sucesso. Bem-vindo!', 'success');
-                    // Salva o usuário atual logado diretamente
-                    const sessionUser = { name: nameVal, email: emailVal.toLowerCase() };
-                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
-                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                    // Efetua login automático gerando o JWT
+                    Auth.login(emailVal, passVal, true);
                 } else {
                     triggerFormShake(signupForm);
                     showInputError(signupEmail, result.message);
@@ -482,11 +602,18 @@ function initAuthUI() {
                 }
             } catch (error) {
                 console.error('Erro na validação ou localStorage de cadastro:', error);
-                // Fallback de contingência para não travar a tela
+                // Fallback de contingência
                 const fallbackUser = { name: nameVal || 'Usuário', email: emailVal };
                 try {
-                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
-                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
+                    const fallbackToken = Auth._createJWT({
+                        user_id: 'usr_fallback',
+                        name: fallbackUser.name,
+                        email: fallbackUser.email,
+                        role: 'user',
+                        plan_level: 'Iniciante Ativo',
+                        exp: Date.now() + 60 * 60 * 1000
+                    });
+                    localStorage.setItem('prod_hub_jwt', fallbackToken);
                 } catch (innerErr) {
                     console.error('Erro ao persistir fallback no storage:', innerErr);
                 }

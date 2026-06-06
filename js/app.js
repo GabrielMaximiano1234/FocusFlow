@@ -669,11 +669,14 @@ function initAppModule() {
     }
 
     function getUserPlan() {
-        return localStorage.getItem(getPlanStorageKey()) || 'Iniciante Ativo';
+        const user = window.Auth.getCurrentUser();
+        return user ? (user.plan_level || 'Iniciante Ativo') : 'Iniciante Ativo';
     }
 
     function setUserPlan(planName) {
-        localStorage.setItem(getPlanStorageKey(), planName);
+        if (window.Auth && window.Auth.reissueTokenWithNewPlan) {
+            window.Auth.reissueTokenWithNewPlan(planName);
+        }
     }
 
     function updatePricingUI() {
@@ -834,6 +837,9 @@ function initAppModule() {
         const metricUsers = document.getElementById('admin-metric-users');
         const metricVisitors = document.getElementById('admin-metric-visitors');
         const metricOnline = document.getElementById('admin-metric-online');
+        const metricMRR = document.getElementById('admin-metric-mrr');
+        const metricOrganicClicks = document.getElementById('seo-organic-clicks');
+        const trafficBarsContainer = document.getElementById('seo-traffic-bars');
         const tableBody = document.getElementById('admin-users-table-body');
 
         if (!metricUsers || !metricVisitors || !metricOnline || !tableBody) return;
@@ -857,7 +863,40 @@ function initAppModule() {
         if (onlineSim > 40) onlineSim = 20;
         metricOnline.innerHTML = `${onlineSim} <span class="pulse-indicator-small"></span>`;
 
-        // 3. Renderizar tabela de usuários
+        // 3. Simular MRR dinâmico baseado em usuários reais cadastrados no localDB
+        let baseMRR = 14820.00;
+        users.forEach(u => {
+            const plan = u.plan_level || localStorage.getItem(`prod_hub_user_plan_${u.email}`) || 'Iniciante Ativo';
+            if (plan === 'Concentração Alfa') {
+                baseMRR += 9.90;
+            } else if (plan === 'Mestre de Foco') {
+                baseMRR += 19.90;
+            }
+        });
+        if (metricMRR) {
+            metricMRR.textContent = baseMRR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // 4. Simular Cliques Orgânicos de SEO com flutuações realistas
+        if (metricOrganicClicks) {
+            const fluct = Math.floor(Math.random() * 120) - 60;
+            metricOrganicClicks.textContent = (34200 + fluct).toLocaleString('pt-BR');
+        }
+
+        // 5. Simular variação das barras do gráfico de tráfego orgânico
+        if (trafficBarsContainer) {
+            const bars = trafficBarsContainer.children;
+            const baseHeights = [35, 44, 53, 65, 82, 100];
+            for (let i = 0; i < bars.length; i++) {
+                const bar = bars[i];
+                const baseH = baseHeights[i] || 50;
+                const fluct = Math.floor(Math.random() * 6) - 3; // -3 to +3
+                const finalH = Math.max(15, Math.min(100, baseH + fluct));
+                bar.style.height = `${finalH}%`;
+            }
+        }
+
+        // 6. Renderizar tabela de usuários
         tableBody.innerHTML = '';
         if (users.length === 0) {
             tableBody.innerHTML = `
@@ -869,17 +908,24 @@ function initAppModule() {
         }
 
         users.forEach(u => {
+            const plan = u.plan_level || localStorage.getItem(`prod_hub_user_plan_${u.email}`) || 'Iniciante Ativo';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="padding: 12px 16px; font-weight: 500; color: #fff;">${escapeHTML(u.name)}</td>
                 <td style="padding: 12px 16px; color: var(--text-muted); font-family: monospace;">${escapeHTML(u.email)}</td>
                 <td style="padding: 12px 16px;">
-                    <span style="font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: bold; 
-                        background: ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.1)'}; 
-                        color: ${u.role === 'superadmin' ? '#f87171' : '#818cf8'}; 
-                        border: 1px solid ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(99, 102, 241, 0.2)'};">
-                        ${u.role === 'superadmin' ? 'SUPERADMIN' : 'USUÁRIO'}
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: bold; 
+                            background: ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.1)'}; 
+                            color: ${u.role === 'superadmin' ? '#f87171' : '#818cf8'}; 
+                            border: 1px solid ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(99, 102, 241, 0.2)'};">
+                            ${u.role === 'superadmin' ? 'SUPERADMIN' : 'USUÁRIO'}
+                        </span>
+                        <span style="font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: bold; 
+                            background: rgba(255, 255, 255, 0.05); color: #a5b4fc; border: 1px solid rgba(255, 255, 255, 0.08);">
+                            ${plan}
+                        </span>
+                    </div>
                 </td>
             `;
             tableBody.appendChild(tr);

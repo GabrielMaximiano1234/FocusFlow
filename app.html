@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FocusFlow - Domine sua Rotina</title>
+    <meta name="description" content="Aumente sua produtividade diária com o FocusFlow. Bloco de notas inteligente, carrossel de foco e controle total sobre suas tarefas com notificações em tempo real.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome para ícones premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="css/styles.css?v=25">
+</head>
+<body>
+    <!-- Notificações Toast no canto da tela (feedback visual interno) -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- 1. TELA DE LOGIN / CADASTRO (BARREIRA DE ENTRADA) -->
+    <div id="tela-login" class="auth-section">
+        <div class="auth-card-wrapper">
+            <div class="auth-brand">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <h1>Focus<span>Flow</span></h1>
+                <p>Organize suas ideias, foque no que importa.</p>
+            </div>
+            
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <button id="tab-login" class="auth-tab-btn active">Entrar</button>
+                    <button id="tab-signup" class="auth-tab-btn">Cadastrar</button>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form id="login-form" class="auth-form active">
+                    <div class="input-group">
+                        <label for="login-email">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="login-email" placeholder="nome@exemplo.com" required autocomplete="email">
+                        </div>
+                        <span class="error-message" id="login-email-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="login-password">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="login-password" placeholder="Sua senha" required autocomplete="current-password">
+                            <button type="button" class="btn-toggle-password" tabindex="-1">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="login-password-error"></span>
+                    </div>
+
+                    <!-- Lógica Manter conectado -->
+                    <div class="auth-options" style="display: flex; align-items: center; justify-content: space-between; margin-top: -8px; margin-bottom: 8px;">
+                        <label class="checkbox-container" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="login-remember" style="width: auto; cursor: pointer;">
+                            <span>Manter conectado</span>
+                        </label>
+                    </div>
+
+                    <button type="button" id="btn-submit-login" class="btn-primary" onclick="document.getElementById('tela-login').style.display='none'; document.getElementById('tela-dashboard').style.display='block';">Acessar Painel ➔</button>
+                </form>
+
+                <!-- Formulário de Cadastro -->
+                <form id="signup-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="signup-name">Nome Completo</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-user input-icon"></i>
+                            <input type="text" id="signup-name" placeholder="Seu nome" required autocomplete="name">
+                        </div>
+                        <span class="error-message" id="signup-name-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signup-email">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="signup-email" placeholder="nome@exemplo.com" required autocomplete="email">
+                        </div>
+                        <span class="error-message" id="signup-email-error"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signup-password">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                            <button type="button" class="btn-toggle-password" tabindex="-1">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Força da senha</span>
+                        </div>
+                        <span class="error-message" id="signup-password-error"></span>
+                    </div>
+
+                    <button type="button" id="btn-submit-signup" class="btn-primary">
+                        <span>Criar Conta</span>
+                        <i class="fa-solid fa-user-plus"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. INTERFACE PRINCIPAL (DASHBOARD - OCULTA POR PADRÃO) -->
+    <div id="tela-dashboard" class="dashboard-section hidden" style="display: none;">
+        <!-- Sidebar lateral -->
+        <aside class="sidebar">
+            <div class="sidebar-header" id="sidebar-brand-home" style="cursor: pointer;" title="Ir para o Início">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <span class="logo-text">Focus<span>Flow</span></span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-library">
+                    <i class="fa-regular fa-clipboard"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-focus">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Modo Foco</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-challenges">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Desafios</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-games">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Jogos</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-notifications" style="position: relative;">
+                    <i class="fa-regular fa-bell"></i>
+                    <span>Notificações</span>
+                    <span id="notif-badge" class="notif-badge hidden"></span>
+                </a>
+                <a href="#" class="nav-item" id="nav-pricing">
+                    <i class="fa-solid fa-gem"></i>
+                    <span>Planos</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-admin" style="display: none;">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Painel Gerencial</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <div class="user-info">
+                        <span class="username" id="user-display-name">Usuário</span>
+                        <span class="user-email" id="user-display-email">usuario@exemplo.com</span>
+                    </div>
+                </div>
+                <button id="btn-logout" class="btn-logout" title="Sair da Conta">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <section class="main-content">
+            <!-- Topbar de boas vindas -->
+            <header class="content-header">
+                <div class="welcome-msg">
+                    <h2>Olá, <span id="welcome-username">Usuário</span>! 👋</h2>
+                    <p>Aqui está o resumo do seu dia.</p>
+                </div>
+                <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button id="nav-top-calendar" class="btn-secondary">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>Calendário</span>
+                    </button>
+                    <button id="nav-top-tasks" class="btn-secondary">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Tarefas</span>
+                    </button>
+                    <button id="btn-request-notif" class="btn-secondary">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <span>Ativar Alertas no Navegador</span>
+                    </button>
+                    <button id="btn-fullscreen" class="btn-secondary" title="Tela Cheia (Modo Paisagem)">
+                        <i class="fa-solid fa-expand"></i>
+                        <span>Tela Cheia</span>
+                    </button>
+                </div>
+            </header>
+
+
+
+            <!-- VIEW 2: DASHBOARD (INSPIRAÇÃO E STATUS) -->
+            <div id="view-dashboard" class="spa-view hidden">
+                <!-- CABEÇALHO DINÂMICO -->
+                <div class="dashboard-header-premium" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 20px; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);">
+                    <div class="greeting-area">
+                        <h2 id="dashboard-greeting-text" style="font-family: 'Outfit', sans-serif; font-size: 24px; margin-bottom: 6px; color: #fff;">Bom dia, Usuário 👋</h2>
+                        <p id="dashboard-greeting-subtext" style="font-size: 14px; color: #a0a0b0;">Você tem 0 itens restantes hoje · 0 de alta prioridade.</p>
+                    </div>
+                    <button id="btn-dashboard-quick-add" class="btn-primary" style="margin-top: 0; padding: 10px 20px; font-weight: 500; background: #3b82f6 !important; border-color: #3b82f6 !important;">
+                        <i class="fa-solid fa-plus"></i> + Adição Rápida
+                    </button>
+                </div>
+
+                <!-- 4 CARDS DE ESTATÍSTICAS -->
+                <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-regular fa-calendar-check" style="color: #3b82f6;"></i> Itens de Hoje
+                        </span>
+                        <span id="metric-today-items" style="font-size: 32px; font-weight: 700; color: #3b82f6; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-list-check" style="color: #eab308;"></i> Tarefas Pendentes
+                        </span>
+                        <span id="metric-pending-tasks" style="font-size: 32px; font-weight: 700; color: #eab308; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-regular fa-circle-check" style="color: #22c55e;"></i> Concluídas
+                        </span>
+                        <span id="metric-completed-tasks" style="font-size: 32px; font-weight: 700; color: #22c55e; margin-top: 10px;">0</span>
+                    </div>
+                    <div class="metric-card-premium" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column;">
+                        <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-circle-exclamation" style="color: #ef4444;"></i> Alta Prioridade
+                        </span>
+                        <span id="metric-high-priority" style="font-size: 32px; font-weight: 700; color: #ef4444; margin-top: 10px;">0</span>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 'NEXT UP' -->
+                <div class="next-up-section" style="margin-bottom: 24px;">
+                    <div class="dashboard-card next-up-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div class="next-up-info">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="badge-next-up" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px;">A Seguir</span>
+                                <span id="next-up-task-time" style="font-size: 13px; color: #9ca3af;"><i class="fa-regular fa-clock"></i> --:--</span>
+                            </div>
+                            <h3 id="next-up-task-title" style="font-family: 'Outfit', sans-serif; font-size: 18px; color: #fff; margin-bottom: 4px;">Nenhum lembrete agendado</h3>
+                            <p id="next-up-task-desc" style="font-size: 14px; color: #9ca3af; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Crie uma tarefa ou lembrete com horário programado para ver o próximo evento aqui.</p>
+                        </div>
+                        <div class="next-up-countdown" style="text-align: right; min-width: 150px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div>
+                                <span style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Contagem Regressiva</span>
+                                <span id="next-up-timer" style="font-family: monospace; font-size: 24px; font-weight: 700; color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);">--:--:--</span>
+                            </div>
+                            <button id="btn-next-up-done" class="btn-primary" style="margin-top: 0; padding: 6px 12px; font-size: 12px; background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: none;">
+                                Marcar como concluída ✓
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAINEL DE RECOMENDAÇÃO DIÁRIA -->
+                <div class="dashboard-card routine-recommendation-card" style="margin-bottom: 24px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3><i class="fa-solid fa-wand-magic-sparkles header-icon" style="color: var(--secondary);"></i> Sua Rotina Ideal</h3>
+                            <p>Recomendações inteligentes personalizadas com base no histórico das suas atividades.</p>
+                        </div>
+                        <button id="btn-refresh-routine" class="btn-secondary" style="margin-top: 0; padding: 6px 12px; font-size: 12px;" title="Recalcular recomendações">
+                            <i class="fa-solid fa-arrows-rotate"></i> Recalcular
+                        </button>
+                    </div>
+                    <div id="routine-timeline-container" style="margin-top: 20px;">
+                        <!-- Timeline será injetada aqui pelo JS -->
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- CONTAINER 1: CARROSSEL DINÂMICO -->
+                    <div class="dashboard-card carousel-card">
+                        <div class="card-header">
+                            <h3><i class="fa-regular fa-compass header-icon"></i> Inspiração e Foco</h3>
+                            <p>Imagens motivacionais para impulsionar o seu foco diário.</p>
+                        </div>
+                        
+                        <div class="carousel-container" id="focus-carousel">
+                            <!-- Slides -->
+                            <div class="carousel-slides">
+                                <div class="carousel-slide active">
+                                    <img src="assets/images/workspace.png" alt="Workspace Organizado">
+                                    <div class="slide-caption">
+                                        <h4>Organize seu espaço de trabalho</h4>
+                                        <p>Um ambiente livre de distrações melhora a clareza mental e a produtividade.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <img src="assets/images/planner.png" alt="Digital Planner">
+                                    <div class="slide-caption">
+                                        <h4>Planeje com inteligência</h4>
+                                        <p>Divida seus grandes objetivos em tarefas diárias gerenciáveis.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <img src="assets/images/focus.png" alt="Mente Focada">
+                                    <div class="slide-caption">
+                                        <h4>Mantenha a atenção plena</h4>
+                                        <p>Faça pausas regulares e reconecte-se com sua meta principal.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de Navegação -->
+                            <button class="carousel-btn prev-btn" id="carousel-prev" aria-label="Slide anterior">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-btn next-btn" id="carousel-next" aria-label="Próximo slide">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Indicadores na base -->
+                            <div class="carousel-dots" id="carousel-dots">
+                                <span class="dot active" data-index="0"></span>
+                                <span class="dot" data-index="1"></span>
+                                <span class="dot" data-index="2"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTAINER 2: TAREFAS DE HOJE / RECENTES -->
+                    <div class="dashboard-card tasks-today-card" style="display: flex; flex-direction: column;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3><i class="fa-solid fa-list-check header-icon"></i> Tarefas Recentes</h3>
+                                <p>Gerencie seus itens diretamente do Dashboard.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="dashboard-tasks-list" class="dashboard-tasks-list" style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto;">
+                            <!-- Tarefas serão renderizadas aqui pelo JS -->
+                            <div class="empty-state-tasks" style="text-align: center; padding: 24px; color: #9ca3af;">
+                                <i class="fa-solid fa-tasks" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
+                                <p>Nenhuma tarefa pendente criada.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: BIBLIOTECA (LISTA DE NOTAS) -->
+            <div id="view-library" class="spa-view hidden">
+                <div class="dashboard-card notes-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-clipboard header-icon"></i> Biblioteca de Notas</h3>
+                        <p>Consulte, filtre, edite ou exclua as suas anotações salvas.</p>
+                    </div>
+
+                    <!-- SUB-VIEW 1: LISTA DE CADERNOS -->
+                    <div id="library-notebooks-view">
+                        <div class="notebooks-header" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                            <button id="btn-create-notebook" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
+                                <i class="fa-solid fa-folder-plus"></i>
+                                <span>+ Criar Novo Caderno</span>
+                            </button>
+                        </div>
+                        <div class="notebooks-grid" id="notebooks-grid">
+                            <!-- Cadernos inseridos dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- SUB-VIEW 2: NOTAS DO CADERNO SELECIONADO (NOTAS GERAIS) -->
+                    <div id="library-notes-view" class="hidden">
+                        <div class="notebook-detail-header">
+                            <button id="btn-back-to-notebooks" class="btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Voltar para Cadernos
+                            </button>
+                            <h3 id="active-notebook-title" style="margin: 0; font-family: var(--font-display);">Notas Gerais</h3>
+                        </div>
+
+                        <!-- Barra de filtros e pesquisa -->
+                        <div class="notes-filter-bar">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-notes" placeholder="Pesquisar notas...">
+                            </div>
+                        </div>
+
+                        <!-- Container para renderizar a lista de notas -->
+                        <div class="notes-grid" id="notes-grid">
+                            <!-- As notas serão inseridas dinamicamente via JS -->
+                            <div class="no-notes-state" id="no-notes-state">
+                                <i class="fa-regular fa-folder-open"></i>
+                                <p>Nenhuma nota encontrada. Crie uma nota no menu Início!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-VIEW 3: EDITOR DE TEXTO ÚNICO DO CADERNO -->
+                    <div id="library-notebook-editor-view" class="hidden">
+                        <div class="notebook-detail-header" style="justify-content: space-between;">
+                            <button id="btn-editor-back" class="btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Voltar para Cadernos
+                            </button>
+                            <h3 id="editor-notebook-title" style="margin: 0; font-family: var(--font-display);"><i class="fa-solid fa-folder-open"></i> Caderno: Projetos</h3>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span id="editor-save-status" style="font-size: 0.8rem; color: var(--success); opacity: 0; transition: var(--transition-smooth); display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-circle-check"></i> Salvo</span>
+                                <button id="btn-save-notebook-content" class="btn-primary" style="margin-top: 0; padding: 10px 16px;">
+                                    <i class="fa-solid fa-floppy-disk"></i> Salvar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notebook-editor-container" style="margin-top: 20px;">
+                            <textarea id="notebook-text-content" placeholder="Comece a escrever no seu caderno..." rows="20"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: NOTIFICAÇÕES -->
+            <div id="view-notifications" class="spa-view hidden">
+                <div class="dashboard-card notifications-panel-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-bell header-icon"></i> Central de Alertas</h3>
+                        <p>Gerencie as permissões e veja os registros das notificações disparadas.</p>
+                    </div>
+                    
+                    <div class="notification-setting-box">
+                        <div class="setting-desc">
+                            <h4>Notificações do Navegador</h4>
+                            <p>Se ativado, o navegador exibirá pop-ups nativos do sistema quando notas importantes forem salvas ou nos horários agendados.</p>
+                        </div>
+                        <button id="btn-request-notif-view" class="btn-secondary">
+                            <i class="fa-solid fa-bell-slash"></i>
+                            <span>Ativar Notificações</span>
+                        </button>
+                    </div>
+
+                    <div class="notification-history-box">
+                        <h4>Log de Alertas Enviados (Sessão)</h4>
+                        <div class="notif-log-container" id="notif-log-container">
+                            <div class="no-logs-state" id="no-logs-state">
+                                <i class="fa-solid fa-history"></i>
+                                <p>Nenhum alerta foi disparado nesta sessão.</p>
+                            </div>
+                            <ul class="notif-log-list hidden" id="notif-log-list">
+                                <!-- Logs serão listados dinamicamente -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: CALENDAR -->
+            <div id="view-calendar" class="spa-view hidden">
+                <div class="dashboard-card calendar-card-view">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-calendar header-icon"></i> Calendário de Tarefas</h3>
+                        <p>Visualize e organize suas tarefas programadas.</p>
+                    </div>
+                    <div class="calendar-container-view" style="padding: 20px;">
+                        <div class="calendar-header-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <button id="btn-prev-month" class="btn-secondary" style="margin-top: 0; padding: 6px 12px;"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h4 id="calendar-month-year" style="font-family: 'Outfit', sans-serif; font-size: 18px; margin: 0; color: #fff;">Junho 2026</h4>
+                            <button id="btn-next-month" class="btn-secondary" style="margin-top: 0; padding: 6px 12px;"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-days-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 500; color: #8a8ab0; margin-bottom: 8px;">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                            <!-- Dias gerados via JS -->
+                        </div>
+                    </div>
+                    <div id="calendar-day-tasks" style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <h4 style="color: #fff; margin-bottom: 12px;">Tarefas para o dia selecionado</h4>
+                        <div id="calendar-tasks-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Tarefas do dia -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: TASKS -->
+            <div id="view-tasks" class="spa-view hidden">
+                <div class="dashboard-card tasks-manager-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3><i class="fa-solid fa-list-check header-icon"></i> Gerenciador de Tarefas</h3>
+                            <p>Lista interativa de todas as suas tarefas com filtros rápidos.</p>
+                        </div>
+                        <div class="tasks-filter-bar" style="display: flex; gap: 8px; align-items: center;">
+                            <select id="filter-task-status" style="padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                                <option value="all">Status: Todas</option>
+                                <option value="pending">Status: Pendentes</option>
+                                <option value="completed">Status: Concluídas</option>
+                            </select>
+                            <select id="filter-task-priority" style="padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                                <option value="all">Prioridade: Todas</option>
+                                <option value="High">Prioridade: Alta</option>
+                                <option value="Medium">Prioridade: Média</option>
+                                <option value="Low">Prioridade: Baixa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="tasks-list-container" style="padding: 20px;">
+                        <div id="tasks-manager-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 8: DESAFIOS (GAMIFICAÇÃO) -->
+            <div id="view-challenges" class="spa-view hidden">
+                <!-- Renderizado via JS -->
+            </div>
+
+            <!-- VIEW 9: JOGOS DE FOCO -->
+            <div id="view-games" class="spa-view hidden">
+                <!-- Renderizado via JS -->
+            </div>
+
+            <!-- VIEW 10: VITRINE DE PLANOS E ASSINATURAS -->
+            <div id="view-pricing" class="spa-view hidden">
+                <div class="dashboard-card pricing-panel-card" style="padding: 30px;">
+                    <div class="card-header" style="text-align: center; margin-bottom: 40px;">
+                        <h3 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; margin-bottom: 8px; color: #fff;"><i class="fa-solid fa-gem header-icon" style="color: var(--primary); margin-right: 10px;"></i> Planos & Assinaturas</h3>
+                        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.5;">Escolha o nível de foco ideal para suas metas diárias. Desbloqueie todo o poder do FocusFlow.</p>
+                    </div>
+
+                    <div class="pricing-grid">
+                        <!-- CARD 1: INICIANTE ATIVO -->
+                        <div class="pricing-card" id="card-plan-free">
+                            <div class="pricing-card-header">
+                                <h4>Iniciante Ativo</h4>
+                                <div class="price">Grátis</div>
+                                <p class="plan-desc">O ponto de partida para organizar sua rotina básica.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Acesso ao Dashboard</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Criação básica de notas</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Modo Foco Padrão (25 min)</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Pomodoro Customizável</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Mini-jogos & Modo Relax</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Recomendação Inteligente</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-free" class="btn-plan-action">Plano Atual</button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 2: CONCENTRAÇÃO ALFA -->
+                        <div class="pricing-card featured" id="card-plan-alpha">
+                            <div class="popular-badge">MAIS POPULAR</div>
+                            <div class="pricing-card-header">
+                                <h4>Concentração Alfa</h4>
+                                <div class="price">R$ 9,90<span>/mês</span></div>
+                                <p class="plan-desc">Para quem busca alta performance e gamificação completa.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Tudo do plano Iniciante</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Pomodoro Customizável</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Modo Relax (Respiração & Bolhas)</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Mini-jogos de Concentração</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Efeitos Sonoros e Toasts Premium</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Recomendação Inteligente</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-alpha" class="btn-plan-action">Assinar</button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: MESTRE DE FOCO -->
+                        <div class="pricing-card" id="card-plan-pro">
+                            <div class="pricing-card-header">
+                                <h4>Mestre de Foco</h4>
+                                <div class="price">R$ 19,90<span>/mês</span></div>
+                                <p class="plan-desc">A experiência máxima de foco inteligente e personalização.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Tudo do plano Alfa</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Assistente de Recomendação Diária</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Crachá VIP no Ranking</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Backup em Nuvem Automatizado</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Estatísticas e Históricos Completos</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-pro" class="btn-plan-action">Assinar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 11: PAINEL SECRETO (ADMIN) -->
+            <div id="view-admin" class="spa-view hidden">
+                <div class="dashboard-card admin-panel-card" style="padding: 30px; background: linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%); border: 1.5px solid rgba(239, 68, 68, 0.15); box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);">
+                    
+                    <!-- Header -->
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 20px; margin-bottom: 30px;">
+                        <div>
+                            <h3 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 12px;">
+                                <i class="fa-solid fa-user-shield" style="color: #ef4444; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));"></i> FocusFlow Admin Suite
+                            </h3>
+                            <p style="color: var(--text-muted); margin: 6px 0 0 0; font-size: 0.95rem;">Sala de comando exclusiva para a gerência da plataforma.</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 8px 16px; border-radius: 100px;">
+                            <span class="status-dot-green"></span>
+                            <span style="font-size: 0.8rem; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">Servidor Online</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards Grid -->
+                    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div class="metric-card-premium" style="padding: 24px; border-radius: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                            <div style="position: absolute; right: 16px; top: 16px; font-size: 2rem; opacity: 0.05; color: #fff;"><i class="fa-solid fa-users"></i></div>
+                            <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Usuários Cadastrados</span>
+                            <span id="admin-metric-users" style="font-size: 36px; font-weight: 800; color: #fff; margin-top: 10px; font-family: 'Outfit', sans-serif;">0</span>
+                        </div>
+                        <div class="metric-card-premium" style="padding: 24px; border-radius: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                            <div style="position: absolute; right: 16px; top: 16px; font-size: 2rem; opacity: 0.05; color: #fff;"><i class="fa-solid fa-chart-line"></i></div>
+                            <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Visitantes Hoje</span>
+                            <span id="admin-metric-visitors" style="font-size: 36px; font-weight: 800; color: #3b82f6; margin-top: 10px; font-family: 'Outfit', sans-serif;">0</span>
+                        </div>
+                        <div class="metric-card-premium" style="padding: 24px; border-radius: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                            <div style="position: absolute; right: 16px; top: 16px; font-size: 2rem; opacity: 0.05; color: #fff;"><i class="fa-solid fa-tower-broadcast"></i></div>
+                            <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Online Agora</span>
+                            <span id="admin-metric-online" style="font-size: 36px; font-weight: 800; color: #22c55e; margin-top: 10px; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 8px;">
+                                0 <span class="pulse-indicator-small"></span>
+                            </span>
+                        </div>
+                        <div class="metric-card-premium" style="padding: 24px; border-radius: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;">
+                            <div style="position: absolute; right: 16px; top: 16px; font-size: 2rem; opacity: 0.05; color: #fff;"><i class="fa-solid fa-dollar-sign"></i></div>
+                            <span style="font-size: 13px; color: #8a8ab0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">MRR (Faturamento)</span>
+                            <span id="admin-metric-mrr" style="font-size: 36px; font-weight: 800; color: #a855f7; margin-top: 10px; font-family: 'Outfit', sans-serif;">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- SEO Performance Dashboard -->
+                    <div class="seo-dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <!-- Circular Gauges for PageSpeed -->
+                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 20px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-gauge-high" style="color: #4ade80;"></i> Google PageSpeed Core Web Vitals
+                            </h4>
+                            <div style="display: flex; justify-content: space-around; align-items: center; padding: 15px 0;">
+                                <!-- Mobile Score -->
+                                <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <div class="pagespeed-gauge" style="position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 6px solid #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);">
+                                        <span style="font-size: 1.8rem; font-weight: 800; color: #4ade80; font-family: 'Outfit';">98</span>
+                                    </div>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Mobile Speed</span>
+                                </div>
+                                <!-- Desktop Score -->
+                                <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                    <div class="pagespeed-gauge" style="position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 6px solid #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);">
+                                        <span style="font-size: 1.8rem; font-weight: 800; color: #4ade80; font-family: 'Outfit';">100</span>
+                                    </div>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Desktop Speed</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Traffic Chart and Keyword summary -->
+                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 20px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-chart-area" style="color: #3b82f6;"></i> Tráfego Orgânico Estimado
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
+                                    <span>Cliques Orgânicos (Mensal):</span>
+                                    <span style="font-weight: bold; color: #fff;" id="seo-organic-clicks">34.200</span>
+                                </div>
+                                <div style="display: flex; align-items: flex-end; gap: 8px; height: 70px; padding-top: 10px;" id="seo-traffic-bars">
+                                    <!-- Barras de crescimento dinâmicas -->
+                                    <div style="flex: 1; background: rgba(99, 102, 241, 0.2); height: 35%; border-radius: 4px; position: relative;" title="Dez: 12k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted);">Dez</span></div>
+                                    <div style="flex: 1; background: rgba(99, 102, 241, 0.3); height: 44%; border-radius: 4px; position: relative;" title="Jan: 15k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted);">Jan</span></div>
+                                    <div style="flex: 1; background: rgba(99, 102, 241, 0.4); height: 53%; border-radius: 4px; position: relative;" title="Fev: 18k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted);">Fev</span></div>
+                                    <div style="flex: 1; background: rgba(99, 102, 241, 0.6); height: 65%; border-radius: 4px; position: relative;" title="Mar: 22k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted);">Mar</span></div>
+                                    <div style="flex: 1; background: rgba(99, 102, 241, 0.8); height: 82%; border-radius: 4px; position: relative;" title="Abr: 28k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted);">Abr</span></div>
+                                    <div style="flex: 1; background: var(--primary); height: 100%; border-radius: 4px; position: relative; box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);" title="Mai: 34k"><span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--text-muted); font-weight: bold;">Mai</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEO Keywords Table -->
+                    <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 20px; margin-bottom: 30px; overflow-x: auto;">
+                        <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-key" style="color: var(--secondary);"></i> Palavras-chave Ranqueadas no Google
+                        </h4>
+                        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 500px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid rgba(255,255,255,0.06);">
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Palavra-chave</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">Posição</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Volume (Buscas)</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">CTR Estimado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 500; color: #fff;">app de foco</td>
+                                    <td style="padding: 12px 16px; text-align: center;"><span style="background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 2px 8px; border-radius: 100px; font-weight: bold; font-size: 11px;">#2</span></td>
+                                    <td style="padding: 12px 16px; text-align: right; color: var(--text-muted); font-family: monospace;">12.000/mês</td>
+                                    <td style="padding: 12px 16px; text-align: right; color: #4ade80; font-weight: 600;">15%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 500; color: #fff;">pomodoro online</td>
+                                    <td style="padding: 12px 16px; text-align: center;"><span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 2px 8px; border-radius: 100px; font-weight: bold; font-size: 11px;">#4</span></td>
+                                    <td style="padding: 12px 16px; text-align: right; color: var(--text-muted); font-family: monospace;">35.000/mês</td>
+                                    <td style="padding: 12px 16px; text-align: right; color: #fbbf24; font-weight: 600;">8%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 500; color: #fff;">gerenciador de rotina</td>
+                                    <td style="padding: 12px 16px; text-align: center;"><span style="background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 2px 8px; border-radius: 100px; font-weight: bold; font-size: 11px;">#1</span></td>
+                                    <td style="padding: 12px 16px; text-align: right; color: var(--text-muted); font-family: monospace;">5.400/mês</td>
+                                    <td style="padding: 12px 16px; text-align: right; color: #4ade80; font-weight: 600;">28%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 500; color: #fff;">organizador diario</td>
+                                    <td style="padding: 12px 16px; text-align: center;"><span style="background: rgba(156, 163, 175, 0.15); color: #9ca3af; padding: 2px 8px; border-radius: 100px; font-weight: bold; font-size: 11px;">#7</span></td>
+                                    <td style="padding: 12px 16px; text-align: right; color: var(--text-muted); font-family: monospace;">8.900/mês</td>
+                                    <td style="padding: 12px 16px; text-align: right; color: #9ca3af;">3%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 500; color: #fff;">focusflow</td>
+                                    <td style="padding: 12px 16px; text-align: center;"><span style="background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 2px 8px; border-radius: 100px; font-weight: bold; font-size: 11px;">#1</span></td>
+                                    <td style="padding: 12px 16px; text-align: right; color: var(--text-muted); font-family: monospace;">1.200/mês</td>
+                                    <td style="padding: 12px 16px; text-align: right; color: #4ade80; font-weight: 600;">95%</td>
+                                </tr>
+                            </tbody>
+                          </table>
+                      </div>
+
+                    <!-- User Table -->
+                    <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 20px; overflow-x: auto;">
+                        <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-list-ul" style="color: var(--primary);"></i> Banco de Dados de Usuários
+                        </h4>
+                        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 500px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid rgba(255,255,255,0.06);">
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Nome</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">E-mail</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; color: #8a8ab0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Role / Nível</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table-body">
+                                <!-- Preenchido dinamicamente via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 7: MODO FOCO (POMODORO) -->
+            <div id="tela-foco" class="spa-view hidden">
+                <div class="dashboard-card focus-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-clock header-icon"></i> Modo Foco (Pomodoro)</h3>
+                        <p>Aumente sua produtividade focando em ciclos com pausas curtas.</p>
+                    </div>
+                    <div class="focus-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 30px;">
+                        
+                        <!-- CRONÔMETRO CIRCULAR -->
+                        <div class="timer-display-container" style="position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center;">
+                            <svg class="progress-ring" width="280" height="280">
+                                <circle class="progress-ring__circle-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="120" cx="140" cy="140" />
+                                <circle id="timer-progress" class="progress-ring__circle" stroke="var(--primary)" stroke-width="8" stroke-dasharray="753.98" stroke-dashoffset="753.98" fill="transparent" r="120" cx="140" cy="140" style="transition: stroke-dashoffset 0.1s linear, stroke 0.3s, filter 0.3s; filter: drop-shadow(0 0 10px var(--primary-glow));" />
+                            </svg>
+                            <div class="timer-text-container" style="position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 5;">
+                                <span id="timer-display-time" style="font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.1); line-height: 1;">25:00</span>
+                                <span id="timer-display-label" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Foco</span>
+                            </div>
+                        </div>
+
+                        <!-- CONTROLES -->
+                        <div class="timer-controls" style="display: flex; gap: 12px; justify-content: center; width: 100%; flex-wrap: wrap;">
+                            <button id="btn-timer-start" class="btn-primary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; background: var(--primary) !important; border-color: var(--primary) !important;">
+                                <i class="fa-solid fa-play"></i> Iniciar Foco
+                            </button>
+                            <button id="btn-timer-pause" class="btn-secondary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem;" disabled>
+                                <i class="fa-solid fa-pause"></i> Pausar
+                            </button>
+                            <button id="btn-timer-break" class="btn-secondary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem;">
+                                <i class="fa-solid fa-mug-hot"></i> Descanso Curto (5:00)
+                            </button>
+                            <button id="btn-timer-relax" class="btn-secondary hidden" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; background: var(--success) !important; border-color: var(--success) !important; color: #fff !important;" title="Relaxar">
+                                <i class="fa-solid fa-seedling"></i> Relaxar
+                            </button>
+                            <button id="btn-timer-reset" class="btn-secondary" style="margin-top: 0; padding: 12px 16px; font-weight: 600; font-size: 0.95rem;" title="Reiniciar">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </div>
+
+                        <!-- CONFIGURAÇÕES DE TEMPO -->
+                        <div id="pomodoro-settings" style="display: flex; gap: 16px; margin-top: 20px; width: 100%; max-width: 400px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; justify-content: space-between;">
+                            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                                <label for="pomodoro-focus-time" style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Tempo de Foco (min)</label>
+                                <input type="number" id="pomodoro-focus-time" min="1" max="120" value="25" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                                <label for="pomodoro-break-time" style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Tempo de Descanso (min)</label>
+                                <input type="number" id="pomodoro-break-time" min="1" max="120" value="5" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 3. MODAL ADICIONAR NOVO ITEM (ADD NEW ITEM OVERLAY) -->
+    <div id="add-item-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div id="modal-scale-wrapper" style="width: 100%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease;">
+            <div class="modal-box" style="background: linear-gradient(145deg, #181824 0%, #10101a 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; width: 90%; max-width: 520px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 20px;">
+                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; margin: 0;"><i class="fa-solid fa-circle-plus" style="color: var(--primary); margin-right: 6px;"></i> Adicionar Novo Item</h3>
+                <button id="modal-close-x" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <form id="modal-item-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="modal-edit-id">
+                
+                <!-- TITLE -->
+                <div class="input-group">
+                    <label for="modal-item-title" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TÍTULO</label>
+                    <input type="text" id="modal-item-title" placeholder="Sobre o que é isso?" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.2s;">
+                </div>
+                
+                <!-- DATE & TIME -->
+                <div style="display: flex; gap: 16px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-date" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DATA</label>
+                        <input type="date" id="modal-item-date" required style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-time" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">HORA (OPCIONAL)</label>
+                        <input type="time" id="modal-item-time" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                </div>
+                
+                <!-- CATEGORY GRID -->
+                <div class="input-group">
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">CATEGORIA</label>
+                    <div id="modal-category-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <button type="button" class="category-select-btn" data-category="Trabalho" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-briefcase" style="color: #60a5fa; font-size: 1.1rem;"></i>
+                            Trabalho
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Escola" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-graduation-cap" style="color: #a855f7; font-size: 1.1rem;"></i>
+                            Escola
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Família" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-house-chimney-user" style="color: #22c55e; font-size: 1.1rem;"></i>
+                            Família
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Igreja" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-church" style="color: #f59e0b; font-size: 1.1rem;"></i>
+                            Igreja
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Saúde" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-heart-pulse" style="color: #ef4444; font-size: 1.1rem;"></i>
+                            Saúde
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Amigos" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-user-group" style="color: #06b6d4; font-size: 1.1rem;"></i>
+                            Amigos
+                        </button>
+                        <button type="button" class="category-select-btn" data-category="Amor" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 4px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; transition: all 0.2s;">
+                            <i class="fa-solid fa-heart" style="color: #ec4899; font-size: 1.1rem;"></i>
+                            Amor
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- TYPE & PRIORITY SELECTS -->
+                <div style="display: flex; gap: 16px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-type" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TIPO</label>
+                        <select id="modal-item-type" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
+                            <option value="Task" style="background: #181824; color: #fff;">Tarefa / A Fazer</option>
+                            <option value="Note" style="background: #181824; color: #fff;">Nota</option>
+                            <option value="Reminder" style="background: #181824; color: #fff;">Lembrete</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label for="modal-item-priority" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">PRIORIDADE</label>
+                        <select id="modal-item-priority" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; cursor: pointer;">
+                            <option value="Low" style="background: #181824; color: #fff;">🟢 Baixa</option>
+                            <option value="Medium" selected style="background: #181824; color: #fff;">🟡 Média</option>
+                            <option value="High" style="background: #181824; color: #fff;">🔴 Alta</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- DESCRIPTION / CONTENT -->
+                <div class="input-group">
+                    <label for="modal-item-content" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DESCRIÇÃO / DETALHES</label>
+                    <textarea id="modal-item-content" placeholder="Insira detalhes ou anotações..." rows="3" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; resize: vertical; transition: all 0.2s;"></textarea>
+                </div>
+                
+                <!-- MODAL ACTIONS -->
+                <div class="modal-actions-footer" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; margin-top: 8px;">
+                    <button type="button" id="modal-cancel-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s;">Cancelar</button>
+                    <button type="submit" id="modal-save-btn" class="btn-primary" style="margin-top: 0; padding: 10px 24px; font-size: 0.9rem; font-weight: 600;">Salvar Item</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+    <!-- LANDSCAPE ORIENTATION LOCK OVERLAY FOR MOBILE -->
+    <div id="landscape-lock-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0c0c14; z-index: 100000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; color: #fff; box-sizing: border-box;">
+        <div class="phone-rotate-icon" style="font-size: 5rem; color: #3b82f6; margin-bottom: 24px; animation: rotatePhone 2.5s ease-in-out infinite;">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+        </div>
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 12px; font-weight: 600;">Modo Paisagem Requerido</h3>
+        <p style="color: #8a8ab0; font-size: 1rem; max-width: 320px; line-height: 1.6; margin: 0;">
+            Para a melhor experiência e para visualizar seu Dashboard completo, por favor, gire seu dispositivo para o modo paisagem (tela deitada).
+        </p>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script src="js/auth.js?v=25"></script>
+    <script src="js/carousel.js?v=25"></script>
+    <script src="js/notepad.js?v=25"></script>
+    <script src="js/gamification.js?v=25"></script>
+    <script src="js/assistant.js?v=25"></script>
+    <script src="js/app.js?v=25"></script>
+    <script src="js/pomodoro.js?v=25"></script>
+</body>
+</html>
