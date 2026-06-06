@@ -16,17 +16,17 @@ function initAppModule() {
     }
 
     // Referências das Seções Principais (SPA)
-    const authSection = document.getElementById('tela-login');
-    const dashboardSection = document.getElementById('tela-dashboard');
+    const authSection = document.getElementById('tela-login') || null;
+    const dashboardSection = document.getElementById('tela-dashboard') || null;
     
     // Dados de perfil e exibição no Dashboard
-    const userDisplayName = document.getElementById('user-display-name');
-    const userDisplayEmail = document.getElementById('user-display-email');
-    const welcomeUsername = document.getElementById('welcome-username');
-    const userAvatar = document.getElementById('user-avatar');
+    const userDisplayName = document.getElementById('user-display-name') || null;
+    const userDisplayEmail = document.getElementById('user-display-email') || null;
+    const welcomeUsername = document.getElementById('welcome-username') || null;
+    const userAvatar = document.getElementById('user-avatar') || null;
     
     // Botões e navegação
-    const btnLogout = document.getElementById('btn-logout');
+    const btnLogout = document.getElementById('btn-logout') || null;
     
     // Instâncias Globais dos Componentes
     let carouselInstance = null;
@@ -84,27 +84,27 @@ function initAppModule() {
     window.showToast = showToast;
 
     // Navegação interna do Dashboard (SPA de visualizações secundárias)
-    const navDashboard = document.getElementById('nav-dashboard');
-    const navLibrary = document.getElementById('nav-library');
-    const navFocus = document.getElementById('nav-focus');
-    const navChallenges = document.getElementById('nav-challenges');
-    const navGames = document.getElementById('nav-games');
-    const navNotifications = document.getElementById('nav-notifications');
-    const navPricing = document.getElementById('nav-pricing');
-    const navTopCalendar = document.getElementById('nav-top-calendar');
-    const navTopTasks = document.getElementById('nav-top-tasks');
+    const navDashboard = document.getElementById('nav-dashboard') || null;
+    const navLibrary = document.getElementById('nav-library') || null;
+    const navFocus = document.getElementById('nav-focus') || null;
+    const navChallenges = document.getElementById('nav-challenges') || null;
+    const navGames = document.getElementById('nav-games') || null;
+    const navNotifications = document.getElementById('nav-notifications') || null;
+    const navPricing = document.getElementById('nav-pricing') || null;
+    const navTopCalendar = document.getElementById('nav-top-calendar') || null;
+    const navTopTasks = document.getElementById('nav-top-tasks') || null;
 
-    const viewDashboard = document.getElementById('view-dashboard');
-    const viewLibrary = document.getElementById('view-library');
-    const viewNotifications = document.getElementById('view-notifications');
-    const viewCalendar = document.getElementById('view-calendar');
-    const viewTasks = document.getElementById('view-tasks');
-    const viewFocus = document.getElementById('view-focus') || document.getElementById('tela-foco');
-    const viewChallenges = document.getElementById('view-challenges');
-    const viewGames = document.getElementById('view-games');
-    const viewPricing = document.getElementById('view-pricing');
-    const navAdmin = document.getElementById('nav-admin');
-    const viewAdmin = document.getElementById('view-admin');
+    const viewDashboard = document.getElementById('view-dashboard') || null;
+    const viewLibrary = document.getElementById('view-library') || null;
+    const viewNotifications = document.getElementById('view-notifications') || null;
+    const viewCalendar = document.getElementById('view-calendar') || null;
+    const viewTasks = document.getElementById('view-tasks') || null;
+    const viewFocus = document.getElementById('view-focus') || document.getElementById('tela-foco') || null;
+    const viewChallenges = document.getElementById('view-challenges') || null;
+    const viewGames = document.getElementById('view-games') || null;
+    const viewPricing = document.getElementById('view-pricing') || null;
+    const navAdmin = document.getElementById('nav-admin') || null;
+    const viewAdmin = document.getElementById('view-admin') || null;
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -128,7 +128,7 @@ function initAppModule() {
             const link = document.createElement('link');
             link.id = linkId;
             link.rel = 'stylesheet';
-            link.href = 'css/styles.css?v=27';
+            link.href = 'css/styles.css?v=999';
             document.head.appendChild(link);
         }
     }
@@ -154,12 +154,14 @@ function initAppModule() {
         loadAppStylesheet();
 
         // Transição visual suave
-        document.querySelector('#tela-login').style.display = 'none';
-        document.querySelector('#tela-dashboard').style.display = 'block';
+        const loginEl = document.querySelector('#tela-login');
+        if (loginEl) loginEl.style.display = 'none';
+        const dashboardEl = document.querySelector('#tela-dashboard');
+        if (dashboardEl) dashboardEl.style.display = 'block';
         console.log("Transição executada");
 
-        authSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
+        if (authSection) authSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.remove('hidden');
 
         // Garante objeto de usuário válido para evitar erros de leitura
         const currentUser = user || { name: 'Usuário', email: 'usuario@exemplo.com' };
@@ -218,19 +220,22 @@ function initAppModule() {
 
     function showAuth() {
         const landing = document.getElementById('tela-landing');
+        const loginEl = document.querySelector('#tela-login');
+        const dashboardEl = document.querySelector('#tela-dashboard');
+
         if (landing && !window.explicitLoginRequested) {
             landing.style.display = 'block';
-            document.querySelector('#tela-login').style.display = 'none';
-            document.querySelector('#tela-dashboard').style.display = 'none';
-            dashboardSection.classList.add('hidden');
-            authSection.classList.add('hidden');
+            if (loginEl) loginEl.style.display = 'none';
+            if (dashboardEl) dashboardEl.style.display = 'none';
+            if (dashboardSection) dashboardSection.classList.add('hidden');
+            if (authSection) authSection.classList.add('hidden');
         } else {
             if (landing) landing.style.display = 'none';
             loadAppStylesheet();
-            document.querySelector('#tela-dashboard').style.display = 'none';
-            document.querySelector('#tela-login').style.display = 'flex';
-            dashboardSection.classList.add('hidden');
-            authSection.classList.remove('hidden');
+            if (dashboardEl) dashboardEl.style.display = 'none';
+            if (loginEl) loginEl.style.display = 'flex';
+            if (dashboardSection) dashboardSection.classList.add('hidden');
+            if (authSection) authSection.classList.remove('hidden');
         }
         
         // Pausa autoplay se usuário deslogar
@@ -264,17 +269,15 @@ function initAppModule() {
             }
         }
 
-        // Oculta todas as sub-views
-        if (viewDashboard) { viewDashboard.classList.add('hidden'); viewDashboard.style.display = 'none'; }
-        if (viewLibrary) { viewLibrary.classList.add('hidden'); viewLibrary.style.display = 'none'; }
-        if (viewNotifications) { viewNotifications.classList.add('hidden'); viewNotifications.style.display = 'none'; }
-        if (viewCalendar) { viewCalendar.classList.add('hidden'); viewCalendar.style.display = 'none'; }
-        if (viewTasks) { viewTasks.classList.add('hidden'); viewTasks.style.display = 'none'; }
-        if (viewFocus) { viewFocus.classList.add('hidden'); viewFocus.style.display = 'none'; }
-        if (viewChallenges) { viewChallenges.classList.add('hidden'); viewChallenges.style.display = 'none'; }
-        if (viewGames) { viewGames.classList.add('hidden'); viewGames.style.display = 'none'; }
-        if (viewPricing) { viewPricing.classList.add('hidden'); viewPricing.style.display = 'none'; }
-        if (viewAdmin) { viewAdmin.classList.add('hidden'); viewAdmin.style.display = 'none'; }
+        // Oculta todas as sub-views usando um loop seguro baseado em IDs
+        const viewIds = ['view-dashboard', 'view-library', 'view-notifications', 'view-calendar', 'view-tasks', 'view-focus', 'tela-foco', 'view-challenges', 'view-games', 'view-pricing', 'view-admin'];
+        viewIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            }
+        });
 
         // Remove active class de todos os botões do menu lateral
         if (navDashboard) navDashboard.classList.remove('active');
