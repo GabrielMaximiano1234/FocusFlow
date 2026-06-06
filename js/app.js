@@ -127,7 +127,7 @@ function initAppModule() {
             const link = document.createElement('link');
             link.id = linkId;
             link.rel = 'stylesheet';
-            link.href = 'css/styles.css?v=26';
+            link.href = 'css/styles.css?v=RESGATE';
             document.head.appendChild(link);
         }
     }
