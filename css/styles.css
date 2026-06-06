@@ -522,17 +522,22 @@ button {
     text-align: center;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.04);
 }
 
 .nav-item.active {
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: var(--primary) !important;
     border-left: 3px solid var(--primary);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+.nav-item.active:hover {
+    background: rgba(99, 102, 241, 0.15) !important;
+    color: var(--primary) !important;
 }
 
 .notif-badge {

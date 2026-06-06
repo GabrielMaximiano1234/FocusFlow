@@ -632,10 +632,10 @@ function initAppModule() {
         // Atualiza saudação
         updateDashboardGreeting(user, notes);
 
-        const statsToday = document.getElementById('metric-today-items');
-        const statsPending = document.getElementById('metric-pending-tasks');
-        const statsCompleted = document.getElementById('metric-completed-tasks');
-        const statsHigh = document.getElementById('metric-high-priority');
+        const statsToday = document.getElementById('today-items-count');
+        const statsPending = document.getElementById('pending-tasks-count');
+        const statsCompleted = document.getElementById('completed-tasks-count');
+        const statsHigh = document.getElementById('high-priority-count');
 
         const now = new Date();
         const todayStr = now.toDateString();
