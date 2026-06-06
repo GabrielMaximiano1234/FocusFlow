@@ -99,8 +99,9 @@ function initAppModule() {
     const viewNotifications = document.getElementById('view-notifications');
     const viewCalendar = document.getElementById('view-calendar');
     const viewTasks = document.getElementById('view-tasks');
-    const viewFocus = document.getElementById('tela-foco');
+    const viewFocus = document.getElementById('view-focus') || document.getElementById('tela-foco');
     const viewChallenges = document.getElementById('view-challenges');
+    const viewGames = document.getElementById('view-games');
     const viewPricing = document.getElementById('view-pricing');
     const navAdmin = document.getElementById('nav-admin');
     const viewAdmin = document.getElementById('view-admin');
@@ -127,7 +128,7 @@ function initAppModule() {
             const link = document.createElement('link');
             link.id = linkId;
             link.rel = 'stylesheet';
-            link.href = 'css/styles.css?v=RESGATE';
+            link.href = 'css/styles.css?v=27';
             document.head.appendChild(link);
         }
     }
@@ -240,8 +241,6 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames || !viewPricing || !viewAdmin) return;
-
         // Barreira Anti-Hacker para o Painel Administrativo
         if (targetView === 'admin') {
             const user = window.Auth.getCurrentUser();
@@ -266,21 +265,21 @@ function initAppModule() {
         }
 
         // Oculta todas as sub-views
-        viewDashboard.classList.add('hidden');
-        viewLibrary.classList.add('hidden');
-        viewNotifications.classList.add('hidden');
-        viewCalendar.classList.add('hidden');
-        viewTasks.classList.add('hidden');
-        viewFocus.classList.add('hidden');
-        viewChallenges.classList.add('hidden');
-        viewGames.classList.add('hidden');
-        viewPricing.classList.add('hidden');
-        viewAdmin.classList.add('hidden');
+        if (viewDashboard) { viewDashboard.classList.add('hidden'); viewDashboard.style.display = 'none'; }
+        if (viewLibrary) { viewLibrary.classList.add('hidden'); viewLibrary.style.display = 'none'; }
+        if (viewNotifications) { viewNotifications.classList.add('hidden'); viewNotifications.style.display = 'none'; }
+        if (viewCalendar) { viewCalendar.classList.add('hidden'); viewCalendar.style.display = 'none'; }
+        if (viewTasks) { viewTasks.classList.add('hidden'); viewTasks.style.display = 'none'; }
+        if (viewFocus) { viewFocus.classList.add('hidden'); viewFocus.style.display = 'none'; }
+        if (viewChallenges) { viewChallenges.classList.add('hidden'); viewChallenges.style.display = 'none'; }
+        if (viewGames) { viewGames.classList.add('hidden'); viewGames.style.display = 'none'; }
+        if (viewPricing) { viewPricing.classList.add('hidden'); viewPricing.style.display = 'none'; }
+        if (viewAdmin) { viewAdmin.classList.add('hidden'); viewAdmin.style.display = 'none'; }
 
         // Remove active class de todos os botões do menu lateral
-        navDashboard.classList.remove('active');
-        navLibrary.classList.remove('active');
-        navNotifications.classList.remove('active');
+        if (navDashboard) navDashboard.classList.remove('active');
+        if (navLibrary) navLibrary.classList.remove('active');
+        if (navNotifications) navNotifications.classList.remove('active');
         if (navFocus) navFocus.classList.remove('active');
         if (navChallenges) navChallenges.classList.remove('active');
         if (navGames) navGames.classList.remove('active');
@@ -293,15 +292,15 @@ function initAppModule() {
 
         // Exibe a view selecionada e ativa o item correspondente no menu
         if (targetView === 'dashboard') {
-            viewDashboard.classList.remove('hidden');
-            navDashboard.classList.add('active');
+            if (viewDashboard) { viewDashboard.classList.remove('hidden'); viewDashboard.style.display = 'block'; }
+            if (navDashboard) navDashboard.classList.add('active');
             updateDashboardStats();
             if (window.DailyAssistant) {
                 window.DailyAssistant.renderRoutine();
             }
         } else if (targetView === 'library') {
-            viewLibrary.classList.remove('hidden');
-            navLibrary.classList.add('active');
+            if (viewLibrary) { viewLibrary.classList.remove('hidden'); viewLibrary.style.display = 'block'; }
+            if (navLibrary) navLibrary.classList.add('active');
             if (notepadInstance) {
                 if (notepadInstance.activeNotebookId === 'general') {
                     notepadInstance.renderNotes();
@@ -312,34 +311,34 @@ function initAppModule() {
                 }
             }
         } else if (targetView === 'notifications') {
-            viewNotifications.classList.remove('hidden');
-            navNotifications.classList.add('active');
+            if (viewNotifications) { viewNotifications.classList.remove('hidden'); viewNotifications.style.display = 'block'; }
+            if (navNotifications) navNotifications.classList.add('active');
             updateNotificationsView();
         } else if (targetView === 'calendar') {
-            viewCalendar.classList.remove('hidden');
+            if (viewCalendar) { viewCalendar.classList.remove('hidden'); viewCalendar.style.display = 'block'; }
             if (navTopCalendar) navTopCalendar.classList.add('active');
             if (notepadInstance) notepadInstance.renderCalendar();
         } else if (targetView === 'tasks') {
-            viewTasks.classList.remove('hidden');
+            if (viewTasks) { viewTasks.classList.remove('hidden'); viewTasks.style.display = 'block'; }
             if (navTopTasks) navTopTasks.classList.add('active');
             if (notepadInstance) notepadInstance.renderTasksManager();
         } else if (targetView === 'focus') {
-            viewFocus.classList.remove('hidden');
+            if (viewFocus) { viewFocus.classList.remove('hidden'); viewFocus.style.display = 'block'; }
             if (navFocus) navFocus.classList.add('active');
         } else if (targetView === 'challenges') {
-            viewChallenges.classList.remove('hidden');
+            if (viewChallenges) { viewChallenges.classList.remove('hidden'); viewChallenges.style.display = 'block'; }
             if (navChallenges) navChallenges.classList.add('active');
             if (window.Gamification) window.Gamification.renderChallengesView();
         } else if (targetView === 'games') {
-            viewGames.classList.remove('hidden');
+            if (viewGames) { viewGames.classList.remove('hidden'); viewGames.style.display = 'block'; }
             if (navGames) navGames.classList.add('active');
             if (window.Gamification) window.Gamification.renderGamesView();
         } else if (targetView === 'pricing') {
-            viewPricing.classList.remove('hidden');
+            if (viewPricing) { viewPricing.classList.remove('hidden'); viewPricing.style.display = 'block'; }
             if (navPricing) navPricing.classList.add('active');
             updatePricingUI();
         } else if (targetView === 'admin') {
-            viewAdmin.classList.remove('hidden');
+            if (viewAdmin) { viewAdmin.classList.remove('hidden'); viewAdmin.style.display = 'block'; }
             if (navAdmin) navAdmin.classList.add('active');
             renderAdminPanel();
         }
