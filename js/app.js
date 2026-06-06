@@ -716,7 +716,10 @@ function initAppModule() {
 
     function getUserPlan() {
         const user = window.Auth.getCurrentUser();
-        return user ? (user.plan_level || 'Iniciante Ativo') : 'Iniciante Ativo';
+        if (user && user.role === 'superadmin') {
+            return 'Mestre de Foco';
+        }
+        return 'Iniciante Ativo';
     }
 
     function setUserPlan(planName) {
@@ -781,28 +784,30 @@ function initAppModule() {
 
         if (!btnFree || !btnAlpha || !btnPro) return;
 
-        const handleUpgrade = (planName) => {
-            const oldPlan = getUserPlan();
-            if (oldPlan === planName) return;
-
-            setUserPlan(planName);
-            updatePricingUI();
-            playUpgradeSound();
-
-            if (window.showToast) {
-                window.showToast("Assinatura Atualizada!", `Você agora possui o plano ${planName}! Desbloqueando recursos.`, "success");
+        // Limpeza dos resíduos de simulação de upgrade no localStorage
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('prod_hub_user_plan_')) {
+                localStorage.removeItem(key);
             }
+        }
 
-            // Aplica restrições do novo plano (ex: Pomodoro, Recomendação Diária)
-            if (window.applyPlanConstraints) {
-                window.applyPlanConstraints();
+        // Limpeza de plan_level de usuários não-superadmins no localStorage
+        try {
+            const users = JSON.parse(localStorage.getItem('prod_hub_users')) || [];
+            let modified = false;
+            users.forEach(u => {
+                if (u.role !== 'superadmin' && u.plan_level && u.plan_level !== 'Iniciante Ativo') {
+                    u.plan_level = 'Iniciante Ativo';
+                    modified = true;
+                }
+            });
+            if (modified) {
+                localStorage.setItem('prod_hub_users', JSON.stringify(users));
             }
-
-            // Ganho de XP virtual bônus por realizar o Upgrade (Gamificação)
-            if (window.Gamification && window.Gamification.addXP) {
-                window.Gamification.addXP(150, "Upgrade de Conta");
-            }
-        };
+        } catch (e) {
+            console.error("Erro ao limpar planos do localStorage:", e);
+        }
 
         // Remove listeners antigos se houver
         const newBtnFree = btnFree.cloneNode(true);
@@ -812,9 +817,19 @@ function initAppModule() {
         const newBtnPro = btnPro.cloneNode(true);
         btnPro.parentNode.replaceChild(newBtnPro, btnPro);
 
-        newBtnFree.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Iniciante Ativo"); });
-        newBtnAlpha.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Concentração Alfa"); });
-        newBtnPro.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Mestre de Foco"); });
+        newBtnFree.addEventListener('click', (e) => {
+            e.preventDefault();
+        });
+
+        const handleCheckoutRedirect = (e) => {
+            e.preventDefault();
+            if (window.showToast) {
+                window.showToast("Checkout", "Redirecionando para o Checkout de Pagamento (Stripe)...", "info");
+            }
+        };
+
+        newBtnAlpha.addEventListener('click', handleCheckoutRedirect);
+        newBtnPro.addEventListener('click', handleCheckoutRedirect);
 
         updatePricingUI();
     }
