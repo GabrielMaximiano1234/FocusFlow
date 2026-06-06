@@ -1,6 +1,7 @@
 /**
  * POMODORO.JS - Controle do Modo Foco e Descanso
- * Implementa o timer Pomodoro imersivo integrado à Central de Alertas e Toasts.
+ * Implementa o timer Pomodoro imersivo com tempos configuráveis,
+ * botão de relaxamento dinâmico no intervalo e integração de gamificação.
  */
 
 class PomodoroTimer {
@@ -13,10 +14,16 @@ class PomodoroTimer {
         this.btnPause = document.getElementById('btn-timer-pause');
         this.btnBreak = document.getElementById('btn-timer-break');
         this.btnReset = document.getElementById('btn-timer-reset');
+        this.btnRelax = document.getElementById('btn-timer-relax');
+        this.inputFocus = document.getElementById('pomodoro-focus-time');
+        this.inputBreak = document.getElementById('pomodoro-break-time');
         this.container = document.querySelector('.timer-display-container');
 
-        // Configurações do Timer
-        this.totalSeconds = 25 * 60; // 25:00 default
+        // Configurações do Timer (Duração padrão e carregamento do localStorage)
+        this.focusDuration = parseInt(localStorage.getItem('pomodoro_focus_duration') || 25) * 60;
+        this.breakDuration = parseInt(localStorage.getItem('pomodoro_break_duration') || 5) * 60;
+
+        this.totalSeconds = this.focusDuration;
         this.secondsLeft = this.totalSeconds;
         this.timerInterval = null;
         this.isRunning = false;
@@ -31,35 +38,86 @@ class PomodoroTimer {
     init() {
         if (!this.timeDisplay) return;
 
+        // Preencher inputs com valores carregados
+        if (this.inputFocus) this.inputFocus.value = this.focusDuration / 60;
+        if (this.inputBreak) this.inputBreak.value = this.breakDuration / 60;
+
         // Associar eventos
         this.btnStart.addEventListener('click', () => this.startFocus());
         this.btnPause.addEventListener('click', () => this.pause());
         this.btnBreak.addEventListener('click', () => this.startBreak());
         this.btnReset.addEventListener('click', () => this.reset());
 
-        // Inicializar círculo de progresso
+        if (this.btnRelax) {
+            this.btnRelax.addEventListener('click', () => {
+                if (window.Gamification) {
+                    window.Gamification.openZenRelax();
+                }
+            });
+        }
+
+        // Listener para alteração do tempo de Foco
+        if (this.inputFocus) {
+            this.inputFocus.addEventListener('change', () => {
+                let val = parseInt(this.inputFocus.value);
+                if (isNaN(val) || val < 1) val = 1;
+                if (val > 120) val = 120;
+                this.inputFocus.value = val;
+                this.focusDuration = val * 60;
+                localStorage.setItem('pomodoro_focus_duration', val);
+                
+                if (this.currentMode === 'focus' && !this.isRunning) {
+                    this.totalSeconds = this.focusDuration;
+                    this.secondsLeft = this.totalSeconds;
+                    this.updateUI();
+                }
+            });
+        }
+
+        // Listener para alteração do tempo de Descanso
+        if (this.inputBreak) {
+            this.inputBreak.addEventListener('change', () => {
+                let val = parseInt(this.inputBreak.value);
+                if (isNaN(val) || val < 1) val = 1;
+                if (val > 120) val = 120;
+                this.inputBreak.value = val;
+                this.breakDuration = val * 60;
+                localStorage.setItem('pomodoro_break_duration', val);
+                
+                if (this.currentMode === 'break' && !this.isRunning) {
+                    this.totalSeconds = this.breakDuration;
+                    this.secondsLeft = this.totalSeconds;
+                    this.updateUI();
+                }
+            });
+        }
+
+        // Inicializar círculo de progresso e botão de relaxamento
         this.setProgress(1);
+        this.updateRelaxButtonVisibility();
     }
 
     startFocus() {
         this.currentMode = 'focus';
-        this.totalSeconds = 25 * 60;
+        this.totalSeconds = this.focusDuration;
         this.labelDisplay.textContent = 'Foco';
         this.container.classList.remove('break-mode');
         this.progressBar.style.stroke = 'var(--primary)';
         this.progressBar.style.filter = 'drop-shadow(0 0 10px var(--primary-glow))';
         
+        this.updateRelaxButtonVisibility();
         this.startCountdown();
     }
 
     startBreak() {
         this.currentMode = 'break';
-        this.totalSeconds = 5 * 60;
+        this.totalSeconds = this.breakDuration;
         this.labelDisplay.textContent = 'Descanso';
         this.container.classList.add('break-mode');
         this.progressBar.style.stroke = 'var(--success)';
         this.progressBar.style.filter = 'drop-shadow(0 0 10px var(--success-glow))';
         
+        this.updateRelaxButtonVisibility();
         this.startCountdown();
     }
 
@@ -98,20 +156,27 @@ class PomodoroTimer {
 
     reset() {
         this.pause();
+        
+        // Fecha o jogo zen se estiver aberto
+        if (window.Gamification && window.Gamification.closeZenRelax) {
+            window.Gamification.closeZenRelax();
+        }
+
         if (this.currentMode === 'focus') {
-            this.totalSeconds = 25 * 60;
+            this.totalSeconds = this.focusDuration;
             this.labelDisplay.textContent = 'Foco';
             this.container.classList.remove('break-mode');
             this.progressBar.style.stroke = 'var(--primary)';
             this.progressBar.style.filter = 'drop-shadow(0 0 10px var(--primary-glow))';
         } else {
-            this.totalSeconds = 5 * 60;
+            this.totalSeconds = this.breakDuration;
             this.labelDisplay.textContent = 'Descanso';
             this.container.classList.add('break-mode');
             this.progressBar.style.stroke = 'var(--success)';
             this.progressBar.style.filter = 'drop-shadow(0 0 10px var(--success-glow))';
         }
         this.secondsLeft = this.totalSeconds;
+        this.updateRelaxButtonVisibility();
         this.updateUI();
     }
 
@@ -146,6 +211,13 @@ class PomodoroTimer {
             window.logNotificationTrigger(`${modeTitle} - ${modeDesc}`, 'success');
         }
 
+        // 4. Conceder XP se for fim do Foco
+        if (this.currentMode === 'focus') {
+            if (window.Gamification) {
+                window.Gamification.onFocusSessionComplete();
+            }
+        }
+
         // Reset
         this.reset();
     }
@@ -167,6 +239,16 @@ class PomodoroTimer {
         if (!this.progressBar) return;
         const offset = this.circumference - (percent * this.circumference);
         this.progressBar.style.strokeDashoffset = offset;
+    }
+
+    // Gerencia exibição condicional do botão de relaxamento de descanso
+    updateRelaxButtonVisibility() {
+        if (!this.btnRelax) return;
+        if (this.currentMode === 'break') {
+            this.btnRelax.classList.remove('hidden');
+        } else {
+            this.btnRelax.classList.add('hidden');
+        }
     }
 }
 

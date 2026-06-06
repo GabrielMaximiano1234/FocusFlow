@@ -530,6 +530,7 @@ class NotepadManager {
             notes.unshift(newNote);
 
             if (window.showToast) window.showToast('Item Salvo', 'Novo item adicionado com sucesso.', 'success');
+            if (window.Gamification) window.Gamification.onNoteCreated();
         }
 
         this.saveNotes(notes);
@@ -897,6 +898,9 @@ class NotepadManager {
                         `A tarefa "${note.title}" foi marcada como ${newStatus ? 'concluída' : 'pendente'}.`,
                         newStatus ? 'success' : 'info'
                     );
+                }
+                if (newStatus && window.Gamification) {
+                    window.Gamification.onTaskComplete(note);
                 }
                 return {
                     ...note,

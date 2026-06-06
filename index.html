@@ -141,6 +141,14 @@
                     <i class="fa-regular fa-clock"></i>
                     <span>Modo Foco</span>
                 </a>
+                <a href="#" class="nav-item" id="nav-challenges">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Desafios</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-games">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Jogos</span>
+                </a>
                 <a href="#" class="nav-item" id="nav-notifications" style="position: relative;">
                     <i class="fa-regular fa-bell"></i>
                     <span>Notificações</span>
@@ -505,6 +513,16 @@
                 </div>
             </div>
 
+            <!-- VIEW 8: DESAFIOS (GAMIFICAÇÃO) -->
+            <div id="view-challenges" class="spa-view hidden">
+                <!-- Renderizado via JS -->
+            </div>
+
+            <!-- VIEW 9: JOGOS DE FOCO -->
+            <div id="view-games" class="spa-view hidden">
+                <!-- Renderizado via JS -->
+            </div>
+
             <!-- VIEW 7: MODO FOCO (POMODORO) -->
             <div id="tela-foco" class="spa-view hidden">
                 <div class="dashboard-card focus-card">
@@ -537,9 +555,24 @@
                             <button id="btn-timer-break" class="btn-secondary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem;">
                                 <i class="fa-solid fa-mug-hot"></i> Descanso Curto (5:00)
                             </button>
+                            <button id="btn-timer-relax" class="btn-secondary hidden" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; background: var(--success) !important; border-color: var(--success) !important; color: #fff !important;" title="Relaxar">
+                                <i class="fa-solid fa-seedling"></i> Relaxar
+                            </button>
                             <button id="btn-timer-reset" class="btn-secondary" style="margin-top: 0; padding: 12px 16px; font-weight: 600; font-size: 0.95rem;" title="Reiniciar">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
+                        </div>
+
+                        <!-- CONFIGURAÇÕES DE TEMPO -->
+                        <div id="pomodoro-settings" style="display: flex; gap: 16px; margin-top: 20px; width: 100%; max-width: 400px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; justify-content: space-between;">
+                            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                                <label for="pomodoro-focus-time" style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Tempo de Foco (min)</label>
+                                <input type="number" id="pomodoro-focus-time" min="1" max="120" value="25" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                                <label for="pomodoro-break-time" style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Tempo de Descanso (min)</label>
+                                <input type="number" id="pomodoro-break-time" min="1" max="120" value="5" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+                            </div>
                         </div>
 
                     </div>
@@ -663,6 +696,7 @@
     <script src="js/auth.js?v=20"></script>
     <script src="js/carousel.js?v=20"></script>
     <script src="js/notepad.js?v=20"></script>
+    <script src="js/gamification.js?v=20"></script>
     <script src="js/app.js?v=20"></script>
     <script src="js/pomodoro.js?v=20"></script>
 </body>

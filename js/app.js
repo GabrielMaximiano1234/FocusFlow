@@ -88,6 +88,8 @@ function initAppModule() {
     const navDashboard = document.getElementById('nav-dashboard');
     const navLibrary = document.getElementById('nav-library');
     const navFocus = document.getElementById('nav-focus');
+    const navChallenges = document.getElementById('nav-challenges');
+    const navGames = document.getElementById('nav-games');
     const navNotifications = document.getElementById('nav-notifications');
     const navTopCalendar = document.getElementById('nav-top-calendar');
     const navTopTasks = document.getElementById('nav-top-tasks');
@@ -99,6 +101,8 @@ function initAppModule() {
     const viewCalendar = document.getElementById('view-calendar');
     const viewTasks = document.getElementById('view-tasks');
     const viewFocus = document.getElementById('tela-foco');
+    const viewChallenges = document.getElementById('view-challenges');
+    const viewGames = document.getElementById('view-games');
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -149,6 +153,11 @@ function initAppModule() {
             notepadInstance.setUser(currentUser);
         }
 
+        // Inicializa o sistema de gamificação para o usuário
+        if (window.Gamification) {
+            window.Gamification.init(currentUser);
+        }
+
         // Garante que iniciamos na view principal de Início
         switchSubView('home');
     }
@@ -168,7 +177,7 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus) return;
+        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames) return;
 
         // Oculta todas as sub-views
         viewHome.classList.add('hidden');
@@ -178,6 +187,8 @@ function initAppModule() {
         viewCalendar.classList.add('hidden');
         viewTasks.classList.add('hidden');
         viewFocus.classList.add('hidden');
+        viewChallenges.classList.add('hidden');
+        viewGames.classList.add('hidden');
 
         // Remove active class de todos os botões do menu lateral
         navHome.classList.remove('active');
@@ -185,6 +196,8 @@ function initAppModule() {
         navLibrary.classList.remove('active');
         navNotifications.classList.remove('active');
         if (navFocus) navFocus.classList.remove('active');
+        if (navChallenges) navChallenges.classList.remove('active');
+        if (navGames) navGames.classList.remove('active');
         
         // Remove active class dos botões superiores
         if (navTopCalendar) navTopCalendar.classList.remove('active');
@@ -225,6 +238,14 @@ function initAppModule() {
         } else if (targetView === 'focus') {
             viewFocus.classList.remove('hidden');
             if (navFocus) navFocus.classList.add('active');
+        } else if (targetView === 'challenges') {
+            viewChallenges.classList.remove('hidden');
+            if (navChallenges) navChallenges.classList.add('active');
+            if (window.Gamification) window.Gamification.renderChallengesView();
+        } else if (targetView === 'games') {
+            viewGames.classList.remove('hidden');
+            if (navGames) navGames.classList.add('active');
+            if (window.Gamification) window.Gamification.renderGamesView();
         }
     }
 
@@ -270,6 +291,18 @@ function initAppModule() {
         navFocus.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('focus');
+        });
+    }
+    if (navChallenges) {
+        navChallenges.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('challenges');
+        });
+    }
+    if (navGames) {
+        navGames.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('games');
         });
     }
     if (navTopCalendar) {
@@ -689,6 +722,10 @@ function initAppModule() {
             showToast('Sessão Encerrada', 'Você saiu da sua conta com sucesso.', 'info');
             if (window.pomodoroTimer) {
                 window.pomodoroTimer.reset();
+            }
+            if (window.Gamification && window.Gamification.exitActiveGame) {
+                window.Gamification.exitActiveGame();
+                window.Gamification.closeZenRelax();
             }
             showAuth();
         });
