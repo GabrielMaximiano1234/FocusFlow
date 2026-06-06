@@ -86,9 +86,13 @@ class NotepadManager {
             });
         }
 
-        // Associa busca
+        // Associa busca (com debounce de 250ms para evitar lags de renderização ao digitar)
+        let searchTimeout = null;
         if (this.searchInput) {
-            this.searchInput.addEventListener('input', () => this.renderNotes());
+            this.searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => this.renderNotes(), 250);
+            });
         }
 
         // Configuração de Notificações

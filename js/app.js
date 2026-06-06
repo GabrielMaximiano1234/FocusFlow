@@ -4,6 +4,17 @@
  */
 
 function initAppModule() {
+    // Helper to escape HTML and prevent XSS
+    function escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     // Referências das Seções Principais (SPA)
     const authSection = document.getElementById('tela-login');
     const dashboardSection = document.getElementById('tela-dashboard');
@@ -39,8 +50,8 @@ function initAppModule() {
         toast.innerHTML = `
             <i class="${iconClass} toast-icon"></i>
             <div class="toast-content">
-                <div class="toast-title">${title}</div>
-                <div class="toast-desc">${desc}</div>
+                <div class="toast-title">${escapeHTML(title)}</div>
+                <div class="toast-desc">${escapeHTML(desc)}</div>
             </div>
             <button class="toast-close" aria-label="Fechar">&times;</button>
         `;
@@ -435,7 +446,7 @@ function initAppModule() {
 
             const categoryBadge = note.category ? `
                 <span class="badge-category" style="background: rgba(255,255,255,0.08); color: #e5e7eb; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 500;">
-                    ${note.category}
+                    ${escapeHTML(note.category)}
                 </span>
             ` : '';
 
@@ -457,7 +468,7 @@ function initAppModule() {
 
             div.innerHTML = `
                 <div class="task-info-side" style="display: flex; flex-direction: column; gap: 4px;">
-                    <h4 style="color: #fff; font-size: 14px; font-weight: 600; margin: 0;">${note.title}</h4>
+                    <h4 style="color: #fff; font-size: 14px; font-weight: 600; margin: 0;">${escapeHTML(note.title)}</h4>
                     <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                         ${priorityBadge}
                         ${categoryBadge}
@@ -631,8 +642,8 @@ function initAppModule() {
 
                 li.innerHTML = `
                     <i class="${iconClass}"></i>
-                    <span>${log.title}</span>
-                    <span class="notif-log-time">${log.timestamp}</span>
+                    <span>${escapeHTML(log.title)}</span>
+                    <span class="notif-log-time">${escapeHTML(log.timestamp)}</span>
                 `;
                 logList.appendChild(li);
             });
