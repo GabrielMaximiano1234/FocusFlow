@@ -105,6 +105,8 @@ function initAppModule() {
     const viewPricing = document.getElementById('view-pricing') || null;
     const navAdmin = document.getElementById('nav-admin') || null;
     const viewAdmin = document.getElementById('view-admin') || null;
+    const navAccount = document.getElementById('nav-account') || null;
+    const viewAccount = document.getElementById('view-account') || null;
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -169,8 +171,16 @@ function initAppModule() {
         // Atualizar informações do usuário na UI
         if (userDisplayName) userDisplayName.textContent = currentUser.name;
         if (userDisplayEmail) userDisplayEmail.textContent = currentUser.email;
-        if (welcomeUsername) welcomeUsername.textContent = currentUser.name; // Exibe o nome exato digitado no cadastro
-        if (userAvatar) userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+        if (welcomeUsername) welcomeUsername.textContent = currentUser.name;
+        
+        const savedAvatar = localStorage.getItem(`prod_hub_avatar_${currentUser.email}`);
+        if (userAvatar) {
+            if (savedAvatar) {
+                userAvatar.innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            } else {
+                userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            }
+        }
 
         // Inicializar componentes do painel se ainda não existirem
         if (!carouselInstance && window.FocusCarousel) {
@@ -199,6 +209,9 @@ function initAppModule() {
 
         // Inicializa o sistema de planos e assinaturas
         initPricingSystem();
+        
+        // Inicializa o sistema de perfil da conta
+        initAccountSystem();
 
         // Aplica restrições de planos para Pomodoro e Recomendação Diária
         if (window.applyPlanConstraints) {
@@ -270,7 +283,7 @@ function initAppModule() {
         }
 
         // Oculta todas as sub-views usando um loop seguro baseado em IDs
-        const viewIds = ['view-dashboard', 'view-library', 'view-notifications', 'view-calendar', 'view-tasks', 'view-focus', 'tela-foco', 'view-challenges', 'view-games', 'view-pricing', 'view-admin'];
+        const viewIds = ['view-dashboard', 'view-library', 'view-notifications', 'view-calendar', 'view-tasks', 'view-focus', 'tela-foco', 'view-challenges', 'view-games', 'view-pricing', 'view-admin', 'view-account'];
         viewIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -288,6 +301,7 @@ function initAppModule() {
         if (navGames) navGames.classList.remove('active');
         if (navPricing) navPricing.classList.remove('active');
         if (navAdmin) navAdmin.classList.remove('active');
+        if (navAccount) navAccount.classList.remove('active');
         
         // Remove active class dos botões superiores
         if (navTopCalendar) navTopCalendar.classList.remove('active');
@@ -344,6 +358,10 @@ function initAppModule() {
             if (viewAdmin) { viewAdmin.classList.remove('hidden'); viewAdmin.style.display = 'block'; }
             if (navAdmin) navAdmin.classList.add('active');
             renderAdminPanel();
+        } else if (targetView === 'account') {
+            if (viewAccount) { viewAccount.classList.remove('hidden'); viewAccount.style.display = 'block'; }
+            if (navAccount) navAccount.classList.add('active');
+            renderAccountView();
         }
     }
 
@@ -407,6 +425,12 @@ function initAppModule() {
         navAdmin.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('admin');
+        });
+    }
+    if (navAccount) {
+        navAccount.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('account');
         });
     }
     if (navTopCalendar) {
@@ -835,6 +859,197 @@ function initAppModule() {
     }
     window.initPricingSystem = initPricingSystem;
     window.getUserPlan = getUserPlan;
+
+    function compressAndSaveAvatar(file, userEmail, callback) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 150;
+                const MAX_HEIGHT = 150;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                localStorage.setItem(`prod_hub_avatar_${userEmail}`, compressedBase64);
+                if (callback) callback(compressedBase64);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function renderAccountView() {
+        const user = window.Auth.getCurrentUser();
+        if (!user) return;
+
+        const nameField = document.getElementById('account-full-name');
+        const emailField = document.getElementById('account-email');
+        if (nameField) nameField.value = user.name;
+        if (emailField) emailField.value = user.email;
+
+        const nicknameField = document.getElementById('account-nickname');
+        if (nicknameField) {
+            const savedNickname = localStorage.getItem(`prod_hub_nickname_${user.email}`) || '';
+            nicknameField.value = savedNickname;
+        }
+
+        const avatarImg = document.getElementById('account-avatar-img');
+        const avatarInitial = document.getElementById('account-avatar-initial');
+        const savedAvatar = localStorage.getItem(`prod_hub_avatar_${user.email}`);
+
+        if (savedAvatar) {
+            if (avatarImg) {
+                avatarImg.src = savedAvatar;
+                avatarImg.style.display = 'block';
+            }
+            if (avatarInitial) {
+                avatarInitial.style.display = 'none';
+            }
+        } else {
+            if (avatarImg) {
+                avatarImg.style.display = 'none';
+            }
+            if (avatarInitial) {
+                avatarInitial.textContent = user.name.charAt(0).toUpperCase();
+                avatarInitial.style.display = 'block';
+            }
+        }
+
+        const plan = getUserPlan();
+        const statusCard = document.getElementById('subscription-status-card');
+        const actionContainer = document.getElementById('sub-action-container');
+
+        if (!statusCard || !actionContainer) return;
+
+        if (plan === 'Concentração Alfa' || plan === 'Mestre de Foco') {
+            const today = new Date();
+            const renewalDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+            statusCard.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-size: 13px; color: var(--success); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Assinatura Ativa</span>
+                    <span style="font-size: 24px; font-weight: 800; color: #fff; margin-top: 5px;">${plan}</span>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Renovação automática em: <strong style="color: #fff;">${renewalDate}</strong></p>
+                </div>
+            `;
+            actionContainer.innerHTML = `
+                <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <i class="fa-solid fa-lock" style="color: var(--success);"></i>
+                    <span>Sua assinatura está sendo gerenciada pelo Stripe Checkout.</span>
+                </div>
+            `;
+        } else {
+            statusCard.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Plano Atual</span>
+                    <span style="font-size: 24px; font-weight: 800; color: #fff; margin-top: 5px;">Você está no plano Gratuito</span>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Acesse recursos premium como Pomodoro Customizável e Linha de Tempo de IA fazendo o upgrade.</p>
+                </div>
+            `;
+            actionContainer.innerHTML = `
+                <button id="btn-account-upgrade" class="btn-plan-action" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); border: none; color: #fff; cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); text-align: center; display: block;">
+                    <i class="fa-solid fa-gem"></i> Fazer Upgrade
+                </button>
+            `;
+
+            const btnUpgrade = document.getElementById('btn-account-upgrade');
+            if (btnUpgrade) {
+                btnUpgrade.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchSubView('pricing');
+                });
+            }
+        }
+    }
+
+    function initAccountSystem() {
+        const avatarInput = document.getElementById('account-avatar-input');
+        const btnSaveProfile = document.getElementById('btn-save-profile');
+
+        if (avatarInput) {
+            const newAvatarInput = avatarInput.cloneNode(true);
+            avatarInput.parentNode.replaceChild(newAvatarInput, avatarInput);
+
+            newAvatarInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 1024 * 1024 * 5) {
+                        if (window.showToast) {
+                            window.showToast("Imagem muito grande", "Por favor, envie uma imagem com menos de 5MB.", "warning");
+                        }
+                        return;
+                    }
+                    const user = window.Auth.getCurrentUser();
+                    if (!user) return;
+
+                    compressAndSaveAvatar(file, user.email, (base64) => {
+                        const avatarImg = document.getElementById('account-avatar-img');
+                        const avatarInitial = document.getElementById('account-avatar-initial');
+                        if (avatarImg) {
+                            avatarImg.src = base64;
+                            avatarImg.style.display = 'block';
+                        }
+                        if (avatarInitial) {
+                            avatarInitial.style.display = 'none';
+                        }
+                        const userAvatarEl = document.getElementById('user-avatar');
+                        if (userAvatarEl) {
+                            userAvatarEl.innerHTML = `<img src="${base64}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                        }
+                        if (window.showToast) {
+                            window.showToast("Avatar Carregado", "Imagem de perfil carregada e otimizada com sucesso!", "success");
+                        }
+                    });
+                }
+            });
+        }
+
+        if (btnSaveProfile) {
+            const newBtnSaveProfile = btnSaveProfile.cloneNode(true);
+            btnSaveProfile.parentNode.replaceChild(newBtnSaveProfile, btnSaveProfile);
+
+            newBtnSaveProfile.addEventListener('click', (e) => {
+                e.preventDefault();
+                const user = window.Auth.getCurrentUser();
+                if (!user) return;
+
+                const nicknameField = document.getElementById('account-nickname');
+                if (nicknameField) {
+                    const nickname = nicknameField.value.trim();
+                    localStorage.setItem(`prod_hub_nickname_${user.email}`, nickname);
+                }
+
+                if (window.showToast) {
+                    window.showToast("Perfil Atualizado", "Suas alterações foram salvas com sucesso!", "success");
+                }
+
+                if (window.Gamification && window.Gamification.playSynthSound) {
+                    window.Gamification.playSynthSound(523.25, 0.15, 'sine');
+                }
+                
+                renderAccountView();
+            });
+        }
+    }
 
     // --- SEGURANÇA E CONTROLE DE PLANOS (CHAVE MESTRA) ---
     function checkPlanAccess(targetView) {

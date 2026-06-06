@@ -310,8 +310,16 @@ class GamificationSystem {
 
     // Retorna a lista unificada de classificação ordenando XP
     getLeaderboardData() {
+        let displayName = this.currentUser ? this.currentUser.name : 'Você';
+        if (this.currentUser && this.currentUser.email) {
+            const savedNickname = localStorage.getItem(`prod_hub_nickname_${this.currentUser.email}`);
+            if (savedNickname && savedNickname.trim()) {
+                displayName = savedNickname.trim();
+            }
+        }
+
         const userRow = {
-            name: `${this.currentUser ? this.currentUser.name : 'Você'} (Você)`,
+            name: `${displayName} (Você)`,
             xp: this.state.xp,
             badge: this.getBadgeName(this.state.level),
             isUser: true

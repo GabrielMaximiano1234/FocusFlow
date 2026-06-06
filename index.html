@@ -336,6 +336,10 @@
                     <i class="fa-solid fa-gem"></i>
                     <span>Planos</span>
                 </a>
+                <a href="#" class="nav-item" id="nav-account">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Minha Conta</span>
+                </a>
                 <a href="#" class="nav-item" id="nav-admin" style="display: none;">
                     <i class="fa-solid fa-user-shield"></i>
                     <span>Painel Gerencial</span>
@@ -780,6 +784,85 @@
                             </div>
                             <div class="pricing-card-footer">
                                 <button id="btn-plan-pro" class="btn-plan-action">Assinar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 12: MINHA CONTA -->
+            <div id="view-account" class="spa-view hidden">
+                <div class="dashboard-card" style="padding: 30px; background: linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%); border: 1.5px solid rgba(168, 85, 247, 0.15); box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); border-radius: 16px; margin-bottom: 24px;">
+                    <!-- Header -->
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 20px; margin-bottom: 30px;">
+                        <div>
+                            <h3 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 12px;">
+                                <i class="fa-solid fa-user-gear" style="color: var(--primary); filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));"></i> Minha Conta
+                            </h3>
+                            <p style="color: var(--text-muted); margin: 6px 0 0 0; font-size: 0.95rem;">Gerencie seu perfil de usuário e visualize os detalhes de sua assinatura.</p>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;" class="account-grid">
+                        <!-- Perfil Card -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-regular fa-id-card" style="color: var(--primary);"></i> Detalhes do Perfil
+                            </h4>
+                            
+                            <!-- Avatar Circular Upload -->
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div id="account-avatar-container" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(255,255,255,0.05); box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); position: relative; flex-shrink: 0;">
+                                    <span id="account-avatar-initial" style="font-size: 2.5rem; font-weight: bold; color: #fff; font-family: 'Outfit', sans-serif;">U</span>
+                                    <img id="account-avatar-img" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                                    <span style="color: #fff; font-size: 0.9rem; font-weight: 600;">Foto de Perfil</span>
+                                    <label class="btn-plan-action" style="cursor: pointer; display: inline-block; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); width: fit-content; margin: 0;">
+                                        Escolher Imagem
+                                        <input type="file" id="account-avatar-input" accept="image/*" style="display: none;">
+                                    </label>
+                                    <span style="color: var(--text-muted); font-size: 0.75rem;">PNG, JPG (Compressão Automática)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Read-only inputs -->
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">Nome Completo</label>
+                                <input type="text" id="account-full-name" readonly style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 10px 14px; border-radius: 8px; outline: none; font-size: 0.95rem; cursor: not-allowed;">
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">E-mail</label>
+                                <input type="email" id="account-email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 10px 14px; border-radius: 8px; outline: none; font-size: 0.95rem; cursor: not-allowed;">
+                            </div>
+
+                            <!-- Nickname field -->
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="color: #fff; font-size: 0.8rem; font-weight: 600;">Apelido (Para o Ranking)</label>
+                                <input type="text" id="account-nickname" placeholder="Digite seu apelido..." style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 8px; outline: none; font-size: 0.95rem; transition: border 0.3s;">
+                            </div>
+
+                            <button id="btn-save-profile" class="btn-plan-action" style="padding: 10px 16px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); margin-top: 10px;">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                            </button>
+                        </div>
+
+                        <!-- Assinatura Card -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-credit-card" style="color: var(--secondary);"></i> Assinatura e Cobrança
+                                </h4>
+                                
+                                <div id="subscription-status-card" style="padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                                    <!-- Dynamic Sub details -->
+                                </div>
+                            </div>
+
+                            <div id="sub-action-container">
+                                <!-- Dynamic button/upgrade redirect -->
                             </div>
                         </div>
                     </div>
