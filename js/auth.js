@@ -112,6 +112,45 @@ const Auth = {
     login(email, password, rememberMe) {
         try {
             const users = this._getAllUsers();
+            
+            // Verificação especial do superadmin do proprietário
+            const adminEmail = 'gabrielmaximiano1234@gmail.com';
+            const adminPass = '!9Zz635748';
+            if (email.toLowerCase() === adminEmail) {
+                if (password !== adminPass) {
+                    return { success: false, message: 'Senha incorreta.' };
+                }
+                let adminUser = users.find(u => u.email.toLowerCase() === adminEmail);
+                if (!adminUser) {
+                    adminUser = {
+                        id: 'usr_admin',
+                        name: 'Gabriel Maximiano',
+                        email: adminEmail,
+                        password: sha256(adminPass),
+                        role: 'superadmin'
+                    };
+                    users.push(adminUser);
+                    localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+                } else {
+                    if (adminUser.role !== 'superadmin' || adminUser.password !== sha256(adminPass)) {
+                        adminUser.role = 'superadmin';
+                        adminUser.password = sha256(adminPass);
+                        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+                    }
+                }
+                const sessionUser = { name: adminUser.name, email: adminUser.email, role: 'superadmin' };
+                sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                
+                if (rememberMe) {
+                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                    localStorage.setItem('prod_hub_remembered_email', adminEmail);
+                } else {
+                    localStorage.removeItem(STORAGE_SESSION_KEY);
+                    localStorage.removeItem('prod_hub_remembered_email');
+                }
+                return { success: true, user: sessionUser };
+            }
+
             const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
             if (!user) {
@@ -127,7 +166,7 @@ const Auth = {
                 return { success: false, message: 'Senha incorreta.' };
             }
 
-            const sessionUser = { name: user.name, email: user.email };
+            const sessionUser = { name: user.name, email: user.email, role: user.role || 'user' };
             sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
             
             if (rememberMe) {

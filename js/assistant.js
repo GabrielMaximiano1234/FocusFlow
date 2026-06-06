@@ -209,6 +209,40 @@ class DailyAssistantSystem {
         const container = document.getElementById('routine-timeline-container');
         if (!container) return;
 
+        // Bloqueio do Assistente de Recomendação Diária para planos inferiores
+        if (window.checkPlanAccess && !window.checkPlanAccess('dashboard-recommendation')) {
+            const btnRefresh = document.getElementById('btn-refresh-routine');
+            if (btnRefresh) {
+                btnRefresh.style.display = 'none';
+            }
+
+            container.innerHTML = `
+                <div class="premium-lock-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; background: rgba(255, 255, 255, 0.01); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 12px; backdrop-filter: blur(4px);">
+                    <i class="fa-solid fa-lock" style="font-size: 2.5rem; color: #a855f7; margin-bottom: 16px; opacity: 0.8; filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.3));"></i>
+                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #fff; margin: 0 0 8px 0;">Recurso Exclusivo do Plano Mestre de Foco</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 380px; margin: 0 0 20px 0; line-height: 1.5;">O Assistente de Recomendação Diária analisa suas tarefas para montar a linha do tempo ideal para sua rotina.</p>
+                    <button id="btn-upgrade-recommendation" class="btn-primary" style="margin: 0; padding: 8px 20px; font-size: 0.85rem; font-weight: 600; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;">Fazer Upgrade</button>
+                </div>
+            `;
+
+            const btnUpgrade = document.getElementById('btn-upgrade-recommendation');
+            if (btnUpgrade) {
+                btnUpgrade.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.switchSubView) {
+                        window.switchSubView('pricing');
+                    }
+                });
+            }
+            return;
+        }
+
+        // Restaura exibição do botão de recálculo se tiver acesso
+        const btnRefresh = document.getElementById('btn-refresh-routine');
+        if (btnRefresh) {
+            btnRefresh.style.display = 'inline-flex';
+        }
+
         const routine = this.generateRoutine();
         
         let animationStyle = animate ? 'animation: slideDown 0.4s ease-out forwards; opacity:0;' : '';

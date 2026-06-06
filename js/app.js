@@ -101,8 +101,9 @@ function initAppModule() {
     const viewTasks = document.getElementById('view-tasks');
     const viewFocus = document.getElementById('tela-foco');
     const viewChallenges = document.getElementById('view-challenges');
-    const viewGames = document.getElementById('view-games');
     const viewPricing = document.getElementById('view-pricing');
+    const navAdmin = document.getElementById('nav-admin');
+    const viewAdmin = document.getElementById('view-admin');
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -166,6 +167,20 @@ function initAppModule() {
         // Inicializa o sistema de planos e assinaturas
         initPricingSystem();
 
+        // Aplica restrições de planos para Pomodoro e Recomendação Diária
+        if (window.applyPlanConstraints) {
+            window.applyPlanConstraints();
+        }
+
+        // Controla exibição do Painel Gerencial (Apenas para superadmin)
+        if (navAdmin) {
+            if (currentUser.role === 'superadmin') {
+                navAdmin.style.display = 'flex';
+            } else {
+                navAdmin.style.display = 'none';
+            }
+        }
+
         // Garante que iniciamos na view principal do Dashboard
         switchSubView('dashboard');
     }
@@ -185,7 +200,30 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames || !viewPricing) return;
+        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames || !viewPricing || !viewAdmin) return;
+
+        // Barreira Anti-Hacker para o Painel Administrativo
+        if (targetView === 'admin') {
+            const user = window.Auth.getCurrentUser();
+            if (!user || user.role !== 'superadmin') {
+                if (window.showToast) {
+                    window.showToast("Acesso Negado", "Acesso Negado: Área Restrita", "error");
+                }
+                if (window.Gamification && window.Gamification.playSynthSound) {
+                    window.Gamification.playSynthSound(220, 0.25, 'triangle'); // A3
+                }
+                switchSubView('dashboard');
+                return;
+            }
+        }
+
+        // Verificação de Planos e Assinaturas (Bloqueio SPA)
+        if (targetView === 'challenges' || targetView === 'games') {
+            if (window.checkPlanAccess && !window.checkPlanAccess(targetView)) {
+                switchSubView('pricing');
+                return;
+            }
+        }
 
         // Oculta todas as sub-views
         viewDashboard.classList.add('hidden');
@@ -197,6 +235,7 @@ function initAppModule() {
         viewChallenges.classList.add('hidden');
         viewGames.classList.add('hidden');
         viewPricing.classList.add('hidden');
+        viewAdmin.classList.add('hidden');
 
         // Remove active class de todos os botões do menu lateral
         navDashboard.classList.remove('active');
@@ -206,6 +245,7 @@ function initAppModule() {
         if (navChallenges) navChallenges.classList.remove('active');
         if (navGames) navGames.classList.remove('active');
         if (navPricing) navPricing.classList.remove('active');
+        if (navAdmin) navAdmin.classList.remove('active');
         
         // Remove active class dos botões superiores
         if (navTopCalendar) navTopCalendar.classList.remove('active');
@@ -258,6 +298,10 @@ function initAppModule() {
             viewPricing.classList.remove('hidden');
             if (navPricing) navPricing.classList.add('active');
             updatePricingUI();
+        } else if (targetView === 'admin') {
+            viewAdmin.classList.remove('hidden');
+            if (navAdmin) navAdmin.classList.add('active');
+            renderAdminPanel();
         }
     }
 
@@ -315,6 +359,12 @@ function initAppModule() {
         navPricing.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('pricing');
+        });
+    }
+    if (navAdmin) {
+        navAdmin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('admin');
         });
     }
     if (navTopCalendar) {
@@ -694,6 +744,11 @@ function initAppModule() {
                 window.showToast("Assinatura Atualizada!", `Você agora possui o plano ${planName}! Desbloqueando recursos.`, "success");
             }
 
+            // Aplica restrições do novo plano (ex: Pomodoro, Recomendação Diária)
+            if (window.applyPlanConstraints) {
+                window.applyPlanConstraints();
+            }
+
             // Ganho de XP virtual bônus por realizar o Upgrade (Gamificação)
             if (window.Gamification && window.Gamification.addXP) {
                 window.Gamification.addXP(150, "Upgrade de Conta");
@@ -716,6 +771,120 @@ function initAppModule() {
     }
     window.initPricingSystem = initPricingSystem;
     window.getUserPlan = getUserPlan;
+
+    // --- SEGURANÇA E CONTROLE DE PLANOS (CHAVE MESTRA) ---
+    function checkPlanAccess(targetView) {
+        const user = window.Auth.getCurrentUser();
+        // Chave Mestra: Se o usuário logado for superadmin, libera tudo sem precisar assinar
+        if (user && user.role === 'superadmin') {
+            return true;
+        }
+
+        const plan = getUserPlan();
+
+        // Bloqueios SPA baseados nos planos
+        if (targetView === 'challenges' || targetView === 'games') {
+            if (plan === 'Iniciante Ativo') {
+                if (window.showToast) {
+                    window.showToast("Recurso Premium", "Esta aba está disponível a partir do plano Concentração Alfa!", "warning");
+                }
+                return false;
+            }
+        }
+
+        if (targetView === 'dashboard-recommendation') {
+            if (plan === 'Iniciante Ativo' || plan === 'Concentração Alfa') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    window.checkPlanAccess = checkPlanAccess;
+
+    function applyPlanConstraints() {
+        if (window.pomodoroTimer) {
+            if (window.checkPlanAccess && !window.checkPlanAccess('challenges')) {
+                window.pomodoroTimer.focusDuration = 25 * 60;
+                window.pomodoroTimer.breakDuration = 5 * 60;
+                if (window.pomodoroTimer.inputFocus) window.pomodoroTimer.inputFocus.value = 25;
+                if (window.pomodoroTimer.inputBreak) window.pomodoroTimer.inputBreak.value = 5;
+                window.pomodoroTimer.reset();
+            } else {
+                const savedFocus = parseInt(localStorage.getItem('pomodoro_focus_duration') || 25);
+                const savedBreak = parseInt(localStorage.getItem('pomodoro_break_duration') || 5);
+                window.pomodoroTimer.focusDuration = savedFocus * 60;
+                window.pomodoroTimer.breakDuration = savedBreak * 60;
+                if (window.pomodoroTimer.inputFocus) window.pomodoroTimer.inputFocus.value = savedFocus;
+                if (window.pomodoroTimer.inputBreak) window.pomodoroTimer.inputBreak.value = savedBreak;
+                window.pomodoroTimer.reset();
+            }
+        }
+        if (window.DailyAssistant) {
+            window.DailyAssistant.renderRoutine();
+        }
+    }
+    window.applyPlanConstraints = applyPlanConstraints;
+
+    // --- PAINEL ADMINISTRATIVO E SIMULAÇÕES ---
+    let visitorsSim = Math.floor(Math.random() * 50) + 120;
+    let onlineSim = Math.floor(Math.random() * 8) + 12;
+
+    function renderAdminPanel() {
+        const metricUsers = document.getElementById('admin-metric-users');
+        const metricVisitors = document.getElementById('admin-metric-visitors');
+        const metricOnline = document.getElementById('admin-metric-online');
+        const tableBody = document.getElementById('admin-users-table-body');
+
+        if (!metricUsers || !metricVisitors || !metricOnline || !tableBody) return;
+
+        // 1. Contar usuários cadastrados
+        let users = [];
+        try {
+            users = JSON.parse(localStorage.getItem('prod_hub_users')) || [];
+        } catch (e) {
+            console.error("Erro ao ler usuários no admin:", e);
+        }
+        metricUsers.textContent = users.length;
+
+        // 2. Simular visitantes e online agora
+        visitorsSim += Math.floor(Math.random() * 5) - 2;
+        if (visitorsSim < 50) visitorsSim = 120;
+        metricVisitors.textContent = visitorsSim;
+
+        onlineSim += Math.floor(Math.random() * 3) - 1;
+        if (onlineSim < 1) onlineSim = 12;
+        if (onlineSim > 40) onlineSim = 20;
+        metricOnline.innerHTML = `${onlineSim} <span class="pulse-indicator-small"></span>`;
+
+        // 3. Renderizar tabela de usuários
+        tableBody.innerHTML = '';
+        if (users.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum usuário cadastrado no localStorage.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding: 12px 16px; font-weight: 500; color: #fff;">${escapeHTML(u.name)}</td>
+                <td style="padding: 12px 16px; color: var(--text-muted); font-family: monospace;">${escapeHTML(u.email)}</td>
+                <td style="padding: 12px 16px;">
+                    <span style="font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: bold; 
+                        background: ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.1)'}; 
+                        color: ${u.role === 'superadmin' ? '#f87171' : '#818cf8'}; 
+                        border: 1px solid ${u.role === 'superadmin' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(99, 102, 241, 0.2)'};">
+                        ${u.role === 'superadmin' ? 'SUPERADMIN' : 'USUÁRIO'}
+                    </span>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
 
     // Registra e exibe os logs de alertas disparados na sessão
     function logNotificationTrigger(title, type = 'info') {

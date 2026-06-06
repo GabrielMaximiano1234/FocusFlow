@@ -59,6 +59,11 @@ class PomodoroTimer {
         // Listener para alteração do tempo de Foco
         if (this.inputFocus) {
             this.inputFocus.addEventListener('change', () => {
+                if (window.checkPlanAccess && !window.checkPlanAccess('challenges')) {
+                    this.inputFocus.value = 25;
+                    this.focusDuration = 25 * 60;
+                    return;
+                }
                 let val = parseInt(this.inputFocus.value);
                 if (isNaN(val) || val < 1) val = 1;
                 if (val > 120) val = 120;
@@ -77,6 +82,11 @@ class PomodoroTimer {
         // Listener para alteração do tempo de Descanso
         if (this.inputBreak) {
             this.inputBreak.addEventListener('change', () => {
+                if (window.checkPlanAccess && !window.checkPlanAccess('challenges')) {
+                    this.inputBreak.value = 5;
+                    this.breakDuration = 5 * 60;
+                    return;
+                }
                 let val = parseInt(this.inputBreak.value);
                 if (isNaN(val) || val < 1) val = 1;
                 if (val > 120) val = 120;

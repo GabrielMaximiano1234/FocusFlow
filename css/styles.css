@@ -2642,6 +2642,74 @@ body.fullscreen-scaled {
     }
 }
 
+/* ==========================================================================
+   PAINEL DE GERENCIAMENTO (ADMIN VIEW)
+   ========================================================================== */
+
+.admin-panel-card {
+    border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.status-dot-green {
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px #22c55e, 0 0 20px rgba(34, 197, 94, 0.4);
+    animation: pulseOnlineStatus 2s infinite ease-in-out;
+}
+
+.pulse-indicator-small {
+    width: 6px;
+    height: 6px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulseOnlineStatus 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseOnlineStatus {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+        box-shadow: 0 0 12px #22c55e;
+    }
+}
+
+.admin-table {
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 16px;
+}
+
+.admin-table td {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: #e5e7eb;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.admin-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
 
 
 
