@@ -2030,9 +2030,8 @@ button {
     }
 }
 
-/* Mobile vertical orientation lock */
-body.portrait-locked #container-login,
-body.portrait-locked #container-dashboard,
+body.portrait-locked #tela-login,
+body.portrait-locked #tela-dashboard,
 body.portrait-locked #add-item-modal,
 body.portrait-locked #toast-container {
     display: none !important;

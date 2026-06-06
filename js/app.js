@@ -680,7 +680,6 @@ function initAppModule() {
 
     // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
-    const dashboardSection = document.getElementById('tela-dashboard');
 
     // Sincroniza a escala dinâmica via CSS transform ao entrar/sair de tela cheia
     const handleFullscreenViewportSync = () => {

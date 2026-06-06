@@ -282,6 +282,9 @@ function initAuthUI() {
 
                 if (hasError) {
                     triggerFormShake(loginForm);
+                    // Reverte a transição do onclick inline para evitar tela preta
+                    document.getElementById('tela-login').style.display = 'block';
+                    document.getElementById('tela-dashboard').style.display = 'none';
                     return;
                 }
 
@@ -290,11 +293,7 @@ function initAuthUI() {
                 if (result.success) {
                     if (window.showToast) window.showToast('Login Efetuado', `Seja bem-vindo de volta, ${result.user.name}!`, 'success');
                     
-                    // Validação deu sucesso: Troca de tela IMEDIATAMENTE
-                    document.querySelector('#tela-login').style.display = 'none';
-                    document.querySelector('#tela-dashboard').style.display = 'block';
-                    console.log("Transição executada");
-
+                    // Transição é conduzida pelo showDashboard() ativado via onAuthSuccess
                     // Atualiza a saudação imediatamente com o nome do usuário
                     const currentUser = Auth.getCurrentUser() || { name: emailVal.split('@')[0] || 'Usuário' };
                     const welcomeUsername = document.getElementById('welcome-username');
@@ -317,11 +316,6 @@ function initAuthUI() {
                             localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
                             if (window.showToast) window.showToast('Login & Cadastro Automático', `Conta criada e logada como ${sessionUser.name}!`, 'success');
                             
-                            // Validação deu sucesso (cadastro automático): Troca de tela IMEDIATAMENTE
-                            document.querySelector('#tela-login').style.display = 'none';
-                            document.querySelector('#tela-dashboard').style.display = 'block';
-                            console.log("Transição executada");
-
                             const welcomeUsername = document.getElementById('welcome-username');
                             if (welcomeUsername) welcomeUsername.textContent = sessionUser.name;
                             const userDisplayName = document.getElementById('user-display-name');
@@ -333,11 +327,17 @@ function initAuthUI() {
                         } else {
                             showInputError(loginEmail, registerResult.message);
                             triggerFormShake(loginForm);
+                            // Reverte a transição do onclick inline para evitar tela preta
+                            document.getElementById('tela-login').style.display = 'block';
+                            document.getElementById('tela-dashboard').style.display = 'none';
                         }
                     } else {
-                        // Validação de senha falhou (senha incorreta) - Não transiciona!
+                        // Validação de senha falhou (senha incorreta) - Reverte e impede transição!
                         showInputError(loginPass, 'Senha incorreta.');
                         triggerFormShake(loginForm);
+                        // Reverte a transição do onclick inline para evitar tela preta
+                        document.getElementById('tela-login').style.display = 'block';
+                        document.getElementById('tela-dashboard').style.display = 'none';
                     }
                 }
             } catch (error) {
@@ -351,10 +351,17 @@ function initAuthUI() {
                     console.error('Erro ao persistir fallback no storage:', innerErr);
                 }
 
-                // Troca de tela IMEDIATAMENTE no fallback
-                document.querySelector('#tela-login').style.display = 'none';
-                document.querySelector('#tela-dashboard').style.display = 'block';
-                console.log("Transição executada");
+                // Garante que o dashboard e a tela de login estão com visibilidades consistentes no fallback
+                const dashboard = document.getElementById('tela-dashboard');
+                if (dashboard) {
+                    dashboard.style.display = 'block';
+                    dashboard.classList.remove('hidden');
+                }
+                const loginScreen = document.getElementById('tela-login');
+                if (loginScreen) {
+                    loginScreen.style.display = 'none';
+                }
+                console.log("Transição executada (fallback)");
 
                 const welcomeUsername = document.getElementById('welcome-username');
                 if (welcomeUsername) welcomeUsername.textContent = fallbackUser.name;
