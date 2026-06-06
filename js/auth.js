@@ -7,6 +7,68 @@
 const STORAGE_USERS_KEY = 'prod_hub_users';
 const STORAGE_SESSION_KEY = 'prod_hub_current_user';
 
+// Algoritmo síncrono leve de hash SHA-256 para persistência segura das senhas
+function sha256(ascii) {
+    function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+    }
+    var mathPow = Math.pow;
+    var maxWord = mathPow(2, 32);
+    var lengthProperty = 'length';
+    var i, j;
+    var result = '';
+    var words = [];
+    var asciiLength = ascii[lengthProperty] * 8;
+    var hash = sha256.h = sha256.h || [];
+    var k = sha256.k = sha256.k || [];
+    var primeCounter = k[lengthProperty];
+    var isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = 1;
+            }
+            hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+    }
+    ascii += '\x80';
+    while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+        var charCode = ascii.charCodeAt(i);
+        if (charCode > 255) return null;
+        words[i >> 2] |= charCode << (24 - 8 * (i % 4));
+    }
+    words[words[lengthProperty]] = ((asciiLength / maxWord) | 0);
+    words[words[lengthProperty]] = (asciiLength | 0);
+    for (j = 0; j < words[lengthProperty]; ) {
+        var w = words.slice(j, j += 16);
+        var oldHash = hash.slice(0);
+        for (i = 0; i < 64; i++) {
+            var w15 = w[i - 15], w2 = w[i - 2];
+            var s0 = rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3);
+            var s1 = rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10);
+            var ch = (hash[4] & hash[5]) ^ (~hash[4] & hash[6]);
+            var maj = (hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]);
+            var temp1 = hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) + ch + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + s0 + w[i - 7] + s1) | 0);
+            var temp2 = (rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) + maj;
+            hash = [(temp1 + temp2) | 0].concat(hash);
+            hash[4] = (hash[4] + temp1) | 0;
+            hash.length = 8;
+        }
+        for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (hash[i] >> (j * 8)) & 255;
+            result += ((b < 16) ? '0' : '') + b.toString(16);
+        }
+    }
+    return result;
+}
+
 // --- UTILITÁRIO DE COMUNICAÇÃO ENTRE VIEW E CONTROLADOR ---
 const Auth = {
     // Retorna o usuário logado atualmente (ou null)
@@ -28,12 +90,12 @@ const Auth = {
                 return { success: false, message: 'Este e-mail já está cadastrado.' };
             }
 
-            // Insere o novo usuário
+            // Insere o novo usuário criptografando a senha (SHA-256)
             const newUser = {
                 id: 'usr_' + Date.now(),
                 name,
                 email: email.toLowerCase(),
-                password // Armazenado puro para fins de simulação simples frontend
+                password: sha256(password)
             };
 
             users.push(newUser);
@@ -46,7 +108,7 @@ const Auth = {
         }
     },
 
-    // Realiza o login do usuário
+    // Realiza o login do usuário (com suporte a migração de texto claro para hash)
     login(email, password) {
         try {
             const users = this._getAllUsers();
@@ -56,7 +118,12 @@ const Auth = {
                 return { success: false, message: 'Usuário não cadastrado.' };
             }
 
-            if (user.password !== password) {
+            // Se for senha antiga em texto claro, faz o login e migra automaticamente para hash SHA-256
+            if (user.password === password) {
+                user.password = sha256(password);
+                localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+                console.log('Senha migrada com sucesso para hash SHA-256');
+            } else if (user.password !== sha256(password)) {
                 return { success: false, message: 'Senha incorreta.' };
             }
 
