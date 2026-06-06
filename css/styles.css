@@ -2031,8 +2031,8 @@ button {
 }
 
 /* Mobile vertical orientation lock */
-body.portrait-locked #auth-section,
-body.portrait-locked #dashboard-section,
+body.portrait-locked #container-login,
+body.portrait-locked #container-dashboard,
 body.portrait-locked #add-item-modal,
 body.portrait-locked #toast-container {
     display: none !important;

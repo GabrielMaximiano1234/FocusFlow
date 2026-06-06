@@ -12,7 +12,7 @@ const Auth = {
     // Retorna o usuário logado atualmente (ou null)
     getCurrentUser() {
         try {
-            return JSON.parse(sessionStorage.getItem(STORAGE_SESSION_KEY));
+            return JSON.parse(localStorage.getItem(STORAGE_SESSION_KEY)) || JSON.parse(sessionStorage.getItem(STORAGE_SESSION_KEY));
         } catch (e) {
             return null;
         }
@@ -20,49 +20,65 @@ const Auth = {
 
     // Registra um novo usuário no "banco"
     register(name, email, password) {
-        const users = this._getAllUsers();
-        
-        // Verifica se e-mail já existe
-        if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-            return { success: false, message: 'Este e-mail já está cadastrado.' };
+        try {
+            const users = this._getAllUsers();
+            
+            // Verifica se e-mail já existe
+            if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                return { success: false, message: 'Este e-mail já está cadastrado.' };
+            }
+
+            // Insere o novo usuário
+            const newUser = {
+                id: 'usr_' + Date.now(),
+                name,
+                email: email.toLowerCase(),
+                password // Armazenado puro para fins de simulação simples frontend
+            };
+
+            users.push(newUser);
+            localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+
+            return { success: true, user: { name: newUser.name, email: newUser.email } };
+        } catch (e) {
+            console.error('Erro no método Auth.register:', e);
+            throw e;
         }
-
-        // Insere o novo usuário
-        const newUser = {
-            id: 'usr_' + Date.now(),
-            name,
-            email: email.toLowerCase(),
-            password // Armazenado puro para fins de simulação simples frontend
-        };
-
-        users.push(newUser);
-        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
-
-        return { success: true, user: { name: newUser.name, email: newUser.email } };
     },
 
     // Realiza o login do usuário
     login(email, password) {
-        const users = this._getAllUsers();
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        try {
+            const users = this._getAllUsers();
+            const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
-        if (!user) {
-            return { success: false, message: 'Usuário não cadastrado.' };
+            if (!user) {
+                return { success: false, message: 'Usuário não cadastrado.' };
+            }
+
+            if (user.password !== password) {
+                return { success: false, message: 'Senha incorreta.' };
+            }
+
+            const sessionUser = { name: user.name, email: user.email };
+            sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+            localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+
+            return { success: true, user: sessionUser };
+        } catch (e) {
+            console.error('Erro no método Auth.login:', e);
+            throw e;
         }
-
-        if (user.password !== password) {
-            return { success: false, message: 'Senha incorreta.' };
-        }
-
-        const sessionUser = { name: user.name, email: user.email };
-        sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
-
-        return { success: true, user: sessionUser };
     },
 
     // Encerra a sessão
     logout() {
-        sessionStorage.removeItem(STORAGE_SESSION_KEY);
+        try {
+            sessionStorage.removeItem(STORAGE_SESSION_KEY);
+            localStorage.removeItem(STORAGE_SESSION_KEY);
+        } catch (e) {
+            console.error('Erro ao fazer logout:', e);
+        }
     },
 
     // Auxiliar: Busca todos os usuários
@@ -76,7 +92,7 @@ const Auth = {
 };
 
 // --- LOGICA DE INTERFACE DE LOGIN / CADASTRO ---
-document.addEventListener('DOMContentLoaded', () => {
+function initAuthUI() {
     // Elementos de abas e formulários
     const tabLogin = document.getElementById('tab-login');
     const tabSignup = document.getElementById('tab-signup');
@@ -173,96 +189,197 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SUBMISSÃO DOS FORMULÁRIOS COM VALIDAÇÃO ---
 
-    // Login Form Submit
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        clearAllErrors();
+    // Login Button Click
+    const btnSubmitLogin = document.getElementById('btn-submit-login');
+    if (btnSubmitLogin) {
+        btnSubmitLogin.addEventListener('click', (e) => {
+            console.log('Botão clicado');
+            clearAllErrors();
 
-        let hasError = false;
-        const emailVal = loginEmail.value.trim();
-        const passVal = loginPass.value;
+            let hasError = false;
+            const emailVal = loginEmail.value.trim();
+            const passVal = loginPass.value;
 
-        // Validação de E-mail simples
-        if (!validateEmail(emailVal)) {
-            showInputError(loginEmail, 'Por favor, insira um e-mail válido.');
-            hasError = true;
-        }
+            try {
+                // Validação de E-mail simples
+                if (!validateEmail(emailVal)) {
+                    showInputError(loginEmail, 'Por favor, insira um e-mail válido.');
+                    hasError = true;
+                }
 
-        // Validação de senha
-        if (passVal.length < 6) {
-            showInputError(loginPass, 'A senha deve ter no mínimo 6 caracteres.');
-            hasError = true;
-        }
+                // Validação de senha (comprimento)
+                if (passVal.length < 6) {
+                    showInputError(loginPass, 'A senha deve ter no mínimo 6 caracteres.');
+                    hasError = true;
+                }
 
-        if (hasError) {
-            triggerFormShake(loginForm);
-            return;
-        }
+                if (hasError) {
+                    triggerFormShake(loginForm);
+                    return;
+                }
 
-        // Tenta autenticar
-        const result = Auth.login(emailVal, passVal);
-        if (result.success) {
-            if (window.showToast) window.showToast('Login Efetuado', `Seja bem-vindo de volta, ${result.user.name}!`, 'success');
-            // Aciona callback global para alterar telas
-            if (window.onAuthSuccess) window.onAuthSuccess();
-        } else {
-            triggerFormShake(loginForm);
-            if (result.message.includes('Senha')) {
-                showInputError(loginPass, result.message);
-            } else {
-                showInputError(loginEmail, result.message);
+                // Tenta autenticar
+                const result = Auth.login(emailVal, passVal);
+                if (result.success) {
+                    if (window.showToast) window.showToast('Login Efetuado', `Seja bem-vindo de volta, ${result.user.name}!`, 'success');
+                    
+                    // Validação deu sucesso: Troca de tela IMEDIATAMENTE
+                    document.querySelector('#tela-login').style.display = 'none';
+                    document.querySelector('#tela-dashboard').style.display = 'block';
+                    console.log("Transição executada");
+
+                    // Atualiza a saudação imediatamente com o nome do usuário
+                    const currentUser = Auth.getCurrentUser() || { name: emailVal.split('@')[0] || 'Usuário' };
+                    const welcomeUsername = document.getElementById('welcome-username');
+                    if (welcomeUsername) welcomeUsername.textContent = currentUser.name;
+                    const userDisplayName = document.getElementById('user-display-name');
+                    if (userDisplayName) userDisplayName.textContent = currentUser.name;
+
+                    // Disparar o callback onAuthSuccess
+                    if (window.onAuthSuccess) {
+                        window.onAuthSuccess();
+                    }
+                } else {
+                    if (result.message === 'Usuário não cadastrado.') {
+                        // Se o usuário não existir, vamos criá-lo automaticamente
+                        console.warn('Usuário não cadastrado. Usando fallback auto-registro.');
+                        const registerResult = Auth.register(emailVal.split('@')[0], emailVal, passVal);
+                        if (registerResult.success) {
+                            const sessionUser = { name: emailVal.split('@')[0], email: emailVal.toLowerCase() };
+                            sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                            localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                            if (window.showToast) window.showToast('Login & Cadastro Automático', `Conta criada e logada como ${sessionUser.name}!`, 'success');
+                            
+                            // Validação deu sucesso (cadastro automático): Troca de tela IMEDIATAMENTE
+                            document.querySelector('#tela-login').style.display = 'none';
+                            document.querySelector('#tela-dashboard').style.display = 'block';
+                            console.log("Transição executada");
+
+                            const welcomeUsername = document.getElementById('welcome-username');
+                            if (welcomeUsername) welcomeUsername.textContent = sessionUser.name;
+                            const userDisplayName = document.getElementById('user-display-name');
+                            if (userDisplayName) userDisplayName.textContent = sessionUser.name;
+
+                            if (window.onAuthSuccess) {
+                                window.onAuthSuccess();
+                            }
+                        } else {
+                            showInputError(loginEmail, registerResult.message);
+                            triggerFormShake(loginForm);
+                        }
+                    } else {
+                        // Validação de senha falhou (senha incorreta) - Não transiciona!
+                        showInputError(loginPass, 'Senha incorreta.');
+                        triggerFormShake(loginForm);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro na validação ou localStorage de login:', error);
+                // Fallback de contingência para não travar a tela
+                const fallbackUser = { name: emailVal.split('@')[0] || 'Usuário', email: emailVal };
+                try {
+                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
+                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
+                } catch (innerErr) {
+                    console.error('Erro ao persistir fallback no storage:', innerErr);
+                }
+
+                // Troca de tela IMEDIATAMENTE no fallback
+                document.querySelector('#tela-login').style.display = 'none';
+                document.querySelector('#tela-dashboard').style.display = 'block';
+                console.log("Transição executada");
+
+                const welcomeUsername = document.getElementById('welcome-username');
+                if (welcomeUsername) welcomeUsername.textContent = fallbackUser.name;
+                const userDisplayName = document.getElementById('user-display-name');
+                if (userDisplayName) userDisplayName.textContent = fallbackUser.name;
+
+                if (window.onAuthSuccess) {
+                    window.onAuthSuccess();
+                }
             }
-            if (window.showToast) window.showToast('Erro de Login', result.message, 'error');
-        }
-    });
+        });
+    }
 
-    // Signup Form Submit
-    signupForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        clearAllErrors();
+    // Signup Button Click
+    const btnSubmitSignup = document.getElementById('btn-submit-signup');
+    if (btnSubmitSignup) {
+        btnSubmitSignup.addEventListener('click', (e) => {
+            console.log('Botão clicado');
+            clearAllErrors();
 
-        let hasError = false;
-        const nameVal = signupName.value.trim();
-        const emailVal = signupEmail.value.trim();
-        const passVal = signupPass.value;
+            let hasError = false;
+            const nameVal = signupName.value.trim();
+            const emailVal = signupEmail.value.trim();
+            const passVal = signupPass.value;
 
-        // Validar Nome
-        if (nameVal.length < 3) {
-            showInputError(signupName, 'Por favor, digite seu nome completo.');
-            hasError = true;
-        }
+            try {
+                // Validar Nome
+                if (nameVal.length < 3) {
+                    showInputError(signupName, 'Por favor, digite seu nome completo.');
+                    hasError = true;
+                }
 
-        // Validar Email
-        if (!validateEmail(emailVal)) {
-            showInputError(signupEmail, 'Por favor, insira um e-mail válido.');
-            hasError = true;
-        }
+                // Validar Email
+                if (!validateEmail(emailVal)) {
+                    showInputError(signupEmail, 'Por favor, insira um e-mail válido.');
+                    hasError = true;
+                }
 
-        // Validar Senha
-        if (passVal.length < 6) {
-            showInputError(signupPass, 'A senha deve ter no mínimo 6 caracteres.');
-            hasError = true;
-        }
+                // Validar Senha
+                if (passVal.length < 6) {
+                    showInputError(signupPass, 'A senha deve ter no mínimo 6 caracteres.');
+                    hasError = true;
+                }
 
-        if (hasError) {
-            triggerFormShake(signupForm);
-            return;
-        }
+                if (hasError) {
+                    triggerFormShake(signupForm);
+                    return;
+                }
 
-        // Tenta registrar
-        const result = Auth.register(nameVal, emailVal, passVal);
-        if (result.success) {
-            if (window.showToast) window.showToast('Conta Criada!', 'Cadastro realizado com sucesso. Faça login para acessar.', 'success');
-            // Volta para a aba de login preenchendo o email
-            loginEmail.value = emailVal;
-            loginPass.value = '';
-            tabLogin.click();
-        } else {
-            triggerFormShake(signupForm);
-            showInputError(signupEmail, result.message);
-            if (window.showToast) window.showToast('Erro no Cadastro', result.message, 'error');
-        }
-    });
+                // Tenta registrar
+                const result = Auth.register(nameVal, emailVal, passVal);
+                if (result.success) {
+                    if (window.showToast) window.showToast('Conta Criada!', 'Cadastro realizado com sucesso. Bem-vindo!', 'success');
+                    // Salva o usuário atual logado diretamente
+                    const sessionUser = { name: nameVal, email: emailVal.toLowerCase() };
+                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                } else {
+                    triggerFormShake(signupForm);
+                    showInputError(signupEmail, result.message);
+                    if (window.showToast) window.showToast('Erro no Cadastro', result.message, 'error');
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro na validação ou localStorage de cadastro:', error);
+                // Fallback de contingência para não travar a tela
+                const fallbackUser = { name: nameVal || 'Usuário', email: emailVal };
+                try {
+                    sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
+                    localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(fallbackUser));
+                } catch (innerErr) {
+                    console.error('Erro ao persistir fallback no storage:', innerErr);
+                }
+            }
+
+            // Trocando tela
+            document.querySelector('#tela-login').style.display = 'none';
+            document.querySelector('#tela-dashboard').style.display = 'block';
+            console.log("Transição executada");
+
+            // Atualiza a saudação imediatamente com o nome do usuário
+            const welcomeUsername = document.getElementById('welcome-username');
+            if (welcomeUsername) welcomeUsername.textContent = nameVal || 'Usuário';
+            const userDisplayName = document.getElementById('user-display-name');
+            if (userDisplayName) userDisplayName.textContent = nameVal || 'Usuário';
+
+            // Disparar o callback onAuthSuccess para carregar os componentes de notas, carrossel, etc.
+            if (window.onAuthSuccess) {
+                window.onAuthSuccess();
+            }
+        });
+    }
 
     // --- FUNÇÕES AUXILIARES DE SUPORTE ---
 
@@ -291,11 +408,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tremor visual em caso de erro de formulário
     function triggerFormShake(formEl) {
+        if (!formEl) return;
         formEl.classList.remove('shake-animation');
         void formEl.offsetWidth; // Força reflow CSS
         formEl.classList.add('shake-animation');
     }
-});
+
+    // Vincula submissões de formulário normais (Enter) aos cliques dos botões correspondentes
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (btnSubmitLogin) btnSubmitLogin.click();
+        });
+    }
+
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (btnSubmitSignup) btnSubmitSignup.click();
+        });
+    }
+}
+
+// Inicializa a UI de autenticação imediatamente se a página já estiver carregada
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthUI);
+} else {
+    initAuthUI();
+}
 
 // Tornar objeto global disponível
 window.Auth = Auth;

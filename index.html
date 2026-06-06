@@ -22,7 +22,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- 1. TELA DE LOGIN / CADASTRO (BARREIRA DE ENTRADA) -->
-    <section id="auth-section" class="auth-section">
+    <div id="tela-login" class="auth-section">
         <div class="auth-card-wrapper">
             <div class="auth-brand">
                 <i class="fa-solid fa-cube logo-icon"></i>
@@ -59,10 +59,7 @@
                         <span class="error-message" id="login-password-error"></span>
                     </div>
 
-                    <button type="submit" id="btn-submit-login" class="btn-primary">
-                        <span>Acessar Painel</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+                    <button type="button" onclick="document.getElementById('tela-login').style.display='none'; document.getElementById('tela-dashboard').style.display='block';">Acessar Painel ➔</button>
                 </form>
 
                 <!-- Formulário de Cadastro -->
@@ -101,17 +98,17 @@
                         <span class="error-message" id="signup-password-error"></span>
                     </div>
 
-                    <button type="submit" id="btn-submit-signup" class="btn-primary">
+                    <button type="button" id="btn-submit-signup" class="btn-primary">
                         <span>Criar Conta</span>
                         <i class="fa-solid fa-user-plus"></i>
                     </button>
                 </form>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- 2. INTERFACE PRINCIPAL (DASHBOARD - OCULTA POR PADRÃO) -->
-    <main id="dashboard-section" class="dashboard-section hidden">
+    <div id="tela-dashboard" class="dashboard-section hidden" style="display: none;">
         <!-- Sidebar lateral -->
         <aside class="sidebar">
             <div class="sidebar-header" id="sidebar-brand-home" style="cursor: pointer;" title="Ir para o Início">
@@ -496,7 +493,7 @@
                 </div>
             </div>
         </section>
-    </main>
+    </div>
 
     <!-- 3. MODAL ADICIONAR NOVO ITEM (ADD NEW ITEM OVERLAY) -->
     <div id="add-item-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">

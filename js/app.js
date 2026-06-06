@@ -3,10 +3,10 @@
  * Coordena as visualizações (Auth vs. Dashboard), gerencia toasts e instancia os módulos.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAppModule() {
     // Referências das Seções Principais (SPA)
-    const authSection = document.getElementById('auth-section');
-    const dashboardSection = document.getElementById('dashboard-section');
+    const authSection = document.getElementById('tela-login');
+    const dashboardSection = document.getElementById('tela-dashboard');
     
     // Dados de perfil e exibição no Dashboard
     const userDisplayName = document.getElementById('user-display-name');
@@ -105,14 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showDashboard(user) {
         // Transição visual suave
+        document.querySelector('#tela-login').style.display = 'none';
+        document.querySelector('#tela-dashboard').style.display = 'block';
+        console.log("Transição executada");
+
         authSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
 
+        // Garante objeto de usuário válido para evitar erros de leitura
+        const currentUser = user || { name: 'Usuário', email: 'usuario@exemplo.com' };
+
         // Atualizar informações do usuário na UI
-        if (userDisplayName) userDisplayName.textContent = user.name;
-        if (userDisplayEmail) userDisplayEmail.textContent = user.email;
-        if (welcomeUsername) welcomeUsername.textContent = user.name.split(' ')[0]; // Pega primeiro nome
-        if (userAvatar) userAvatar.textContent = user.name.charAt(0).toUpperCase();
+        if (userDisplayName) userDisplayName.textContent = currentUser.name;
+        if (userDisplayEmail) userDisplayEmail.textContent = currentUser.email;
+        if (welcomeUsername) welcomeUsername.textContent = currentUser.name; // Exibe o nome exato digitado no cadastro
+        if (userAvatar) userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
 
         // Inicializar componentes do painel se ainda não existirem
         if (!carouselInstance && window.FocusCarousel) {
@@ -126,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Passa o escopo do usuário atual para carregar suas notas particulares
         if (notepadInstance) {
-            notepadInstance.setUser(user);
+            notepadInstance.setUser(currentUser);
         }
 
         // Garante que iniciamos na view principal de Início
@@ -134,6 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showAuth() {
+        document.querySelector('#tela-dashboard').style.display = 'none';
+        document.querySelector('#tela-login').style.display = 'block';
+
         dashboardSection.classList.add('hidden');
         authSection.classList.remove('hidden');
         
@@ -659,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONTROLE DE TELA CHEIA E ORIENTAÇÃO ---
     const btnFullscreen = document.getElementById('btn-fullscreen');
-    const dashboardSection = document.getElementById('dashboard-section');
+    const dashboardSection = document.getElementById('tela-dashboard');
 
     // Sincroniza a escala dinâmica via CSS transform ao entrar/sair de tela cheia
     const handleFullscreenViewportSync = () => {
@@ -783,4 +793,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicialização da aplicação
     initApp();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAppModule);
+} else {
+    initAppModule();
+}
