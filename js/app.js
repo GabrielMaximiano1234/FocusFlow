@@ -121,7 +121,37 @@ function initAppModule() {
         }
     }
 
+    function loadAppStylesheet() {
+        const linkId = 'app-stylesheet';
+        if (!document.getElementById(linkId)) {
+            const link = document.createElement('link');
+            link.id = linkId;
+            link.rel = 'stylesheet';
+            link.href = 'css/styles.css?v=26';
+            document.head.appendChild(link);
+        }
+    }
+
+    // Exporta globalmente para a landing page
+    window.showLoginFromLanding = function() {
+        window.explicitLoginRequested = true;
+        loadAppStylesheet();
+        const landing = document.getElementById('tela-landing');
+        if (landing) landing.style.display = 'none';
+        const login = document.getElementById('tela-login');
+        if (login) login.style.display = 'flex';
+        const authSection = document.getElementById('tela-login');
+        if (authSection) authSection.classList.remove('hidden');
+    };
+
     function showDashboard(user) {
+        // Oculta Landing Page se presente
+        const landing = document.getElementById('tela-landing');
+        if (landing) landing.style.display = 'none';
+        
+        // Garante carregamento dos estilos do painel
+        loadAppStylesheet();
+
         // Transição visual suave
         document.querySelector('#tela-login').style.display = 'none';
         document.querySelector('#tela-dashboard').style.display = 'block';
@@ -186,11 +216,21 @@ function initAppModule() {
     }
 
     function showAuth() {
-        document.querySelector('#tela-dashboard').style.display = 'none';
-        document.querySelector('#tela-login').style.display = 'flex';
-
-        dashboardSection.classList.add('hidden');
-        authSection.classList.remove('hidden');
+        const landing = document.getElementById('tela-landing');
+        if (landing && !window.explicitLoginRequested) {
+            landing.style.display = 'block';
+            document.querySelector('#tela-login').style.display = 'none';
+            document.querySelector('#tela-dashboard').style.display = 'none';
+            dashboardSection.classList.add('hidden');
+            authSection.classList.add('hidden');
+        } else {
+            if (landing) landing.style.display = 'none';
+            loadAppStylesheet();
+            document.querySelector('#tela-dashboard').style.display = 'none';
+            document.querySelector('#tela-login').style.display = 'flex';
+            dashboardSection.classList.add('hidden');
+            authSection.classList.remove('hidden');
+        }
         
         // Pausa autoplay se usuário deslogar
         if (carouselInstance) {
@@ -1042,6 +1082,7 @@ function initAppModule() {
     // Evento de Logout
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
+            window.explicitLoginRequested = true; // Força tela de login
             window.Auth.logout();
             showToast('Sessão Encerrada', 'Você saiu da sua conta com sucesso.', 'info');
             if (window.pomodoroTimer) {
