@@ -2045,4 +2045,218 @@ body.fullscreen-scaled {
     overflow-x: hidden !important;
 }
 
+/* ==========================================================================
+   MODO FOCO (POMODORO)
+   ========================================================================== */
+.focus-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+}
+
+.timer-display-container {
+    margin: 20px auto;
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.1));
+    transition: filter 0.3s ease;
+}
+
+.progress-ring__circle-bg {
+    stroke: rgba(255, 255, 255, 0.04);
+}
+
+.progress-ring__circle {
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.timer-text-container span {
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Modo Foco Running State (Pulse) */
+.timer-running .progress-ring__circle {
+    animation: pulseTimerGlow 3s infinite ease-in-out;
+}
+
+@keyframes pulseTimerGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px var(--primary-glow));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px var(--primary-glow));
+    }
+}
+
+/* Modo Descanso Running State (Pulse) */
+.timer-running.break-mode .progress-ring__circle {
+    animation: pulseBreakGlow 3s infinite ease-in-out;
+}
+
+@keyframes pulseBreakGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px var(--success-glow));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px var(--success-glow));
+    }
+}
+
+/* Responsividade Mobile Landscape para o Modo Foco */
+@media (max-height: 500px) and (orientation: landscape),
+       (max-height: 750px) and (orientation: landscape) and (max-width: 1300px) {
+    .focus-card {
+        min-height: auto;
+        padding: 20px !important;
+    }
+    .focus-container {
+        flex-direction: row !important;
+        justify-content: space-evenly !important;
+        padding: 10px !important;
+        gap: 20px !important;
+    }
+    .timer-display-container {
+        margin: 0 !important;
+        transform: scale(0.85);
+        transform-origin: center center;
+    }
+    .timer-controls {
+        flex-direction: row !important;
+        width: auto !important;
+        max-width: 320px;
+        gap: 10px !important;
+    }
+    .timer-controls button {
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* ==========================================================================
+   REFINE LOGIN, CHECKBOX, AND DISPLAY RESPONSIVENESS
+   ========================================================================== */
+
+/* Glow style for Acessar Painel / Entrar button */
+#btn-submit-login {
+    width: 100%;
+    margin-top: 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--text-inverse);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    transition: var(--transition-smooth);
+    border: none;
+    cursor: pointer;
+}
+
+#btn-submit-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.5), 0 6px 25px rgba(168, 85, 247, 0.4);
+    filter: brightness(1.1);
+}
+
+/* Custom Remember Me Checkbox */
+.checkbox-container input[type="checkbox"] {
+    appearance: none;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.checkbox-container input[type="checkbox"]:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.65rem;
+    color: var(--text-inverse);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-container input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    border-color: var(--primary);
+}
+
+/* 4K & Ultrawide Monitors Responsiveness */
+@media (min-width: 1800px) {
+    :root {
+        --sidebar-width: 320px;
+    }
+    body {
+        font-size: 17px;
+    }
+    .main-content {
+        padding: 50px 80px;
+        max-width: 1800px;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 48px;
+    }
+    .metrics-grid {
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    .metric-card-premium {
+        padding: 24px;
+    }
+    .dashboard-card {
+        padding: 36px;
+    }
+}
+
+/* Laptop Displays Responsiveness */
+@media (max-width: 1366px) and (min-width: 900px) {
+    :root {
+        --sidebar-width: 240px;
+    }
+    .main-content {
+        padding: 24px 32px;
+        gap: 24px;
+    }
+    .metrics-grid {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .metric-card-premium {
+        padding: 16px;
+    }
+    .dashboard-grid {
+        gap: 20px;
+    }
+    .dashboard-card {
+        padding: 20px;
+    }
+}
+
+/* Squeezed Notebook/Monitor Screen Optimization */
+@media (max-width: 1100px) and (min-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .main-content {
+        padding: 20px;
+    }
+}
+
 

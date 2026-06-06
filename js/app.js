@@ -87,6 +87,7 @@ function initAppModule() {
     const navHome = document.getElementById('nav-home');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLibrary = document.getElementById('nav-library');
+    const navFocus = document.getElementById('nav-focus');
     const navNotifications = document.getElementById('nav-notifications');
     const navTopCalendar = document.getElementById('nav-top-calendar');
     const navTopTasks = document.getElementById('nav-top-tasks');
@@ -97,6 +98,7 @@ function initAppModule() {
     const viewNotifications = document.getElementById('view-notifications');
     const viewCalendar = document.getElementById('view-calendar');
     const viewTasks = document.getElementById('view-tasks');
+    const viewFocus = document.getElementById('tela-foco');
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -166,7 +168,7 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks) return;
+        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus) return;
 
         // Oculta todas as sub-views
         viewHome.classList.add('hidden');
@@ -175,12 +177,14 @@ function initAppModule() {
         viewNotifications.classList.add('hidden');
         viewCalendar.classList.add('hidden');
         viewTasks.classList.add('hidden');
+        viewFocus.classList.add('hidden');
 
         // Remove active class de todos os botões do menu lateral
         navHome.classList.remove('active');
         navDashboard.classList.remove('active');
         navLibrary.classList.remove('active');
         navNotifications.classList.remove('active');
+        if (navFocus) navFocus.classList.remove('active');
         
         // Remove active class dos botões superiores
         if (navTopCalendar) navTopCalendar.classList.remove('active');
@@ -218,6 +222,9 @@ function initAppModule() {
             viewTasks.classList.remove('hidden');
             if (navTopTasks) navTopTasks.classList.add('active');
             if (notepadInstance) notepadInstance.renderTasksManager();
+        } else if (targetView === 'focus') {
+            viewFocus.classList.remove('hidden');
+            if (navFocus) navFocus.classList.add('active');
         }
     }
 
@@ -257,6 +264,12 @@ function initAppModule() {
         navNotifications.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('notifications');
+        });
+    }
+    if (navFocus) {
+        navFocus.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('focus');
         });
     }
     if (navTopCalendar) {
@@ -674,6 +687,9 @@ function initAppModule() {
         btnLogout.addEventListener('click', () => {
             window.Auth.logout();
             showToast('Sessão Encerrada', 'Você saiu da sua conta com sucesso.', 'info');
+            if (window.pomodoroTimer) {
+                window.pomodoroTimer.reset();
+            }
             showAuth();
         });
     }

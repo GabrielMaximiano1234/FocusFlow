@@ -109,7 +109,7 @@ const Auth = {
     },
 
     // Realiza o login do usuário (com suporte a migração de texto claro para hash)
-    login(email, password) {
+    login(email, password, rememberMe) {
         try {
             const users = this._getAllUsers();
             const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -129,7 +129,14 @@ const Auth = {
 
             const sessionUser = { name: user.name, email: user.email };
             sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
-            localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+            
+            if (rememberMe) {
+                localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                localStorage.setItem('prod_hub_remembered_email', email.toLowerCase());
+            } else {
+                localStorage.removeItem(STORAGE_SESSION_KEY);
+                localStorage.removeItem('prod_hub_remembered_email');
+            }
 
             return { success: true, user: sessionUser };
         } catch (e) {
@@ -266,6 +273,8 @@ function initAuthUI() {
             let hasError = false;
             const emailVal = loginEmail.value.trim();
             const passVal = loginPass.value;
+            const rememberCheck = document.getElementById('login-remember');
+            const rememberMe = rememberCheck ? rememberCheck.checked : false;
 
             try {
                 // Validação de E-mail simples
@@ -289,7 +298,7 @@ function initAuthUI() {
                 }
 
                 // Tenta autenticar
-                const result = Auth.login(emailVal, passVal);
+                const result = Auth.login(emailVal, passVal, rememberMe);
                 if (result.success) {
                     if (window.showToast) window.showToast('Login Efetuado', `Seja bem-vindo de volta, ${result.user.name}!`, 'success');
                     
@@ -313,7 +322,14 @@ function initAuthUI() {
                         if (registerResult.success) {
                             const sessionUser = { name: emailVal.split('@')[0], email: emailVal.toLowerCase() };
                             sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
-                            localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                            
+                            if (rememberMe) {
+                                localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(sessionUser));
+                                localStorage.setItem('prod_hub_remembered_email', emailVal.toLowerCase());
+                            } else {
+                                localStorage.removeItem(STORAGE_SESSION_KEY);
+                                localStorage.removeItem('prod_hub_remembered_email');
+                            }
                             if (window.showToast) window.showToast('Login & Cadastro Automático', `Conta criada e logada como ${sessionUser.name}!`, 'success');
                             
                             const welcomeUsername = document.getElementById('welcome-username');
@@ -501,6 +517,20 @@ function initAuthUI() {
             e.preventDefault();
             if (btnSubmitSignup) btnSubmitSignup.click();
         });
+    }
+
+    // Pre-fill email e checkbox de "Manter conectado" se estiver salvo
+    try {
+        const rememberedEmail = localStorage.getItem('prod_hub_remembered_email');
+        if (rememberedEmail && loginEmail) {
+            loginEmail.value = rememberedEmail;
+            const rememberCheckbox = document.getElementById('login-remember');
+            if (rememberCheckbox) {
+                rememberCheckbox.checked = true;
+            }
+        }
+    } catch (e) {
+        console.error('Erro ao ler remembered email:', e);
     }
 }
 

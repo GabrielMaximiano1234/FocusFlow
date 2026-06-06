@@ -59,7 +59,15 @@
                         <span class="error-message" id="login-password-error"></span>
                     </div>
 
-                    <button type="button" id="btn-submit-login" onclick="document.getElementById('tela-login').style.display='none'; document.getElementById('tela-dashboard').style.display='block';">Acessar Painel ➔</button>
+                    <!-- Lógica Manter conectado -->
+                    <div class="auth-options" style="display: flex; align-items: center; justify-content: space-between; margin-top: -8px; margin-bottom: 8px;">
+                        <label class="checkbox-container" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="login-remember" style="width: auto; cursor: pointer;">
+                            <span>Manter conectado</span>
+                        </label>
+                    </div>
+
+                    <button type="button" id="btn-submit-login" class="btn-primary" onclick="document.getElementById('tela-login').style.display='none'; document.getElementById('tela-dashboard').style.display='block';">Acessar Painel ➔</button>
                 </form>
 
                 <!-- Formulário de Cadastro -->
@@ -128,6 +136,10 @@
                 <a href="#" class="nav-item" id="nav-library">
                     <i class="fa-regular fa-clipboard"></i>
                     <span>Biblioteca</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-focus">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Modo Foco</span>
                 </a>
                 <a href="#" class="nav-item" id="nav-notifications" style="position: relative;">
                     <i class="fa-regular fa-bell"></i>
@@ -492,6 +504,47 @@
                     </div>
                 </div>
             </div>
+
+            <!-- VIEW 7: MODO FOCO (POMODORO) -->
+            <div id="tela-foco" class="spa-view hidden">
+                <div class="dashboard-card focus-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-clock header-icon"></i> Modo Foco (Pomodoro)</h3>
+                        <p>Aumente sua produtividade focando em ciclos com pausas curtas.</p>
+                    </div>
+                    <div class="focus-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 30px;">
+                        
+                        <!-- CRONÔMETRO CIRCULAR -->
+                        <div class="timer-display-container" style="position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center;">
+                            <svg class="progress-ring" width="280" height="280">
+                                <circle class="progress-ring__circle-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="120" cx="140" cy="140" />
+                                <circle id="timer-progress" class="progress-ring__circle" stroke="var(--primary)" stroke-width="8" stroke-dasharray="753.98" stroke-dashoffset="753.98" fill="transparent" r="120" cx="140" cy="140" style="transition: stroke-dashoffset 0.1s linear, stroke 0.3s, filter 0.3s; filter: drop-shadow(0 0 10px var(--primary-glow));" />
+                            </svg>
+                            <div class="timer-text-container" style="position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 5;">
+                                <span id="timer-display-time" style="font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.1); line-height: 1;">25:00</span>
+                                <span id="timer-display-label" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Foco</span>
+                            </div>
+                        </div>
+
+                        <!-- CONTROLES -->
+                        <div class="timer-controls" style="display: flex; gap: 12px; justify-content: center; width: 100%; flex-wrap: wrap;">
+                            <button id="btn-timer-start" class="btn-primary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem; background: var(--primary) !important; border-color: var(--primary) !important;">
+                                <i class="fa-solid fa-play"></i> Iniciar Foco
+                            </button>
+                            <button id="btn-timer-pause" class="btn-secondary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem;" disabled>
+                                <i class="fa-solid fa-pause"></i> Pausar
+                            </button>
+                            <button id="btn-timer-break" class="btn-secondary" style="margin-top: 0; padding: 12px 24px; font-weight: 600; font-size: 0.95rem;">
+                                <i class="fa-solid fa-mug-hot"></i> Descanso Curto (5:00)
+                            </button>
+                            <button id="btn-timer-reset" class="btn-secondary" style="margin-top: 0; padding: 12px 16px; font-weight: 600; font-size: 0.95rem;" title="Reiniciar">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -611,5 +664,6 @@
     <script src="js/carousel.js?v=20"></script>
     <script src="js/notepad.js?v=20"></script>
     <script src="js/app.js?v=20"></script>
+    <script src="js/pomodoro.js?v=20"></script>
 </body>
 </html>
