@@ -84,7 +84,6 @@ function initAppModule() {
     window.showToast = showToast;
 
     // Navegação interna do Dashboard (SPA de visualizações secundárias)
-    const navHome = document.getElementById('nav-home');
     const navDashboard = document.getElementById('nav-dashboard');
     const navLibrary = document.getElementById('nav-library');
     const navFocus = document.getElementById('nav-focus');
@@ -94,7 +93,6 @@ function initAppModule() {
     const navTopCalendar = document.getElementById('nav-top-calendar');
     const navTopTasks = document.getElementById('nav-top-tasks');
 
-    const viewHome = document.getElementById('view-home');
     const viewDashboard = document.getElementById('view-dashboard');
     const viewLibrary = document.getElementById('view-library');
     const viewNotifications = document.getElementById('view-notifications');
@@ -163,8 +161,8 @@ function initAppModule() {
             window.DailyAssistant.init(currentUser);
         }
 
-        // Garante que iniciamos na view principal de Início
-        switchSubView('home');
+        // Garante que iniciamos na view principal do Dashboard
+        switchSubView('dashboard');
     }
 
     function showAuth() {
@@ -182,10 +180,9 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewHome || !viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames) return;
+        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames) return;
 
         // Oculta todas as sub-views
-        viewHome.classList.add('hidden');
         viewDashboard.classList.add('hidden');
         viewLibrary.classList.add('hidden');
         viewNotifications.classList.add('hidden');
@@ -196,7 +193,6 @@ function initAppModule() {
         viewGames.classList.add('hidden');
 
         // Remove active class de todos os botões do menu lateral
-        navHome.classList.remove('active');
         navDashboard.classList.remove('active');
         navLibrary.classList.remove('active');
         navNotifications.classList.remove('active');
@@ -209,10 +205,7 @@ function initAppModule() {
         if (navTopTasks) navTopTasks.classList.remove('active');
 
         // Exibe a view selecionada e ativa o item correspondente no menu
-        if (targetView === 'home') {
-            viewHome.classList.remove('hidden');
-            navHome.classList.add('active');
-        } else if (targetView === 'dashboard') {
+        if (targetView === 'dashboard') {
             viewDashboard.classList.remove('hidden');
             navDashboard.classList.add('active');
             updateDashboardStats();
@@ -265,13 +258,7 @@ function initAppModule() {
     if (sidebarBrandHome) {
         sidebarBrandHome.addEventListener('click', (e) => {
             e.preventDefault();
-            switchSubView('home');
-        });
-    }
-    if (navHome) {
-        navHome.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchSubView('home');
+            switchSubView('dashboard');
         });
     }
     if (navDashboard) {
@@ -335,15 +322,7 @@ function initAppModule() {
         });
     }
 
-    const btnHomeAddTask = document.getElementById('btn-home-add-task');
-    if (btnHomeAddTask) {
-        btnHomeAddTask.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (notepadInstance) {
-                notepadInstance.openModal();
-            }
-        });
-    }
+
 
     // Global countdown state
     let countdownInterval = null;
