@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CSS Customizado -->
-    <link rel="stylesheet" href="css/styles.css?v=23">
+    <link rel="stylesheet" href="css/styles.css?v=24">
 </head>
 <body>
     <!-- Notificações Toast no canto da tela (feedback visual interno) -->
@@ -149,6 +149,10 @@
                     <i class="fa-regular fa-bell"></i>
                     <span>Notificações</span>
                     <span id="notif-badge" class="notif-badge hidden"></span>
+                </a>
+                <a href="#" class="nav-item" id="nav-pricing">
+                    <i class="fa-solid fa-gem"></i>
+                    <span>Planos</span>
                 </a>
             </nav>
 
@@ -520,6 +524,84 @@
                 <!-- Renderizado via JS -->
             </div>
 
+            <!-- VIEW 10: VITRINE DE PLANOS E ASSINATURAS -->
+            <div id="view-pricing" class="spa-view hidden">
+                <div class="dashboard-card pricing-panel-card" style="padding: 30px;">
+                    <div class="card-header" style="text-align: center; margin-bottom: 40px;">
+                        <h3 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; margin-bottom: 8px; color: #fff;"><i class="fa-solid fa-gem header-icon" style="color: var(--primary); margin-right: 10px;"></i> Planos & Assinaturas</h3>
+                        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.5;">Escolha o nível de foco ideal para suas metas diárias. Desbloqueie todo o poder do FocusFlow.</p>
+                    </div>
+
+                    <div class="pricing-grid">
+                        <!-- CARD 1: INICIANTE ATIVO -->
+                        <div class="pricing-card" id="card-plan-free">
+                            <div class="pricing-card-header">
+                                <h4>Iniciante Ativo</h4>
+                                <div class="price">Grátis</div>
+                                <p class="plan-desc">O ponto de partida para organizar sua rotina básica.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Acesso ao Dashboard</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Criação básica de notas</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Modo Foco Padrão (25 min)</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Pomodoro Customizável</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Mini-jogos & Modo Relax</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Recomendação Inteligente</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-free" class="btn-plan-action">Plano Atual</button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 2: CONCENTRAÇÃO ALFA -->
+                        <div class="pricing-card featured" id="card-plan-alpha">
+                            <div class="popular-badge">MAIS POPULAR</div>
+                            <div class="pricing-card-header">
+                                <h4>Concentração Alfa</h4>
+                                <div class="price">R$ 9,90<span>/mês</span></div>
+                                <p class="plan-desc">Para quem busca alta performance e gamificação completa.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Tudo do plano Iniciante</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Pomodoro Customizável</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Modo Relax (Respiração & Bolhas)</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Mini-jogos de Concentração</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Efeitos Sonoros e Toasts Premium</li>
+                                    <li class="disabled"><i class="fa-solid fa-circle-xmark"></i> Recomendação Inteligente</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-alpha" class="btn-plan-action">Assinar</button>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: MESTRE DE FOCO -->
+                        <div class="pricing-card" id="card-plan-pro">
+                            <div class="pricing-card-header">
+                                <h4>Mestre de Foco</h4>
+                                <div class="price">R$ 19,90<span>/mês</span></div>
+                                <p class="plan-desc">A experiência máxima de foco inteligente e personalização.</p>
+                            </div>
+                            <div class="pricing-card-features">
+                                <ul>
+                                    <li><i class="fa-solid fa-circle-check"></i> Tudo do plano Alfa</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Assistente de Recomendação Diária</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Crachá VIP no Ranking</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Backup em Nuvem Automatizado</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Estatísticas e Históricos Completos</li>
+                                </ul>
+                            </div>
+                            <div class="pricing-card-footer">
+                                <button id="btn-plan-pro" class="btn-plan-action">Assinar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- VIEW 7: MODO FOCO (POMODORO) -->
             <div id="tela-foco" class="spa-view hidden">
                 <div class="dashboard-card focus-card">
@@ -690,12 +772,12 @@
     </div>
 
     <!-- Scripts JavaScript -->
-    <script src="js/auth.js?v=23"></script>
-    <script src="js/carousel.js?v=23"></script>
-    <script src="js/notepad.js?v=23"></script>
-    <script src="js/gamification.js?v=23"></script>
-    <script src="js/assistant.js?v=23"></script>
-    <script src="js/app.js?v=23"></script>
-    <script src="js/pomodoro.js?v=23"></script>
+    <script src="js/auth.js?v=24"></script>
+    <script src="js/carousel.js?v=24"></script>
+    <script src="js/notepad.js?v=24"></script>
+    <script src="js/gamification.js?v=24"></script>
+    <script src="js/assistant.js?v=24"></script>
+    <script src="js/app.js?v=24"></script>
+    <script src="js/pomodoro.js?v=24"></script>
 </body>
 </html>

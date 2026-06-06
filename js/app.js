@@ -90,6 +90,7 @@ function initAppModule() {
     const navChallenges = document.getElementById('nav-challenges');
     const navGames = document.getElementById('nav-games');
     const navNotifications = document.getElementById('nav-notifications');
+    const navPricing = document.getElementById('nav-pricing');
     const navTopCalendar = document.getElementById('nav-top-calendar');
     const navTopTasks = document.getElementById('nav-top-tasks');
 
@@ -101,6 +102,7 @@ function initAppModule() {
     const viewFocus = document.getElementById('tela-foco');
     const viewChallenges = document.getElementById('view-challenges');
     const viewGames = document.getElementById('view-games');
+    const viewPricing = document.getElementById('view-pricing');
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -161,6 +163,9 @@ function initAppModule() {
             window.DailyAssistant.init(currentUser);
         }
 
+        // Inicializa o sistema de planos e assinaturas
+        initPricingSystem();
+
         // Garante que iniciamos na view principal do Dashboard
         switchSubView('dashboard');
     }
@@ -180,7 +185,7 @@ function initAppModule() {
 
     // --- GERENCIAMENTO DE SUB-VIEWS INTERNAS (SPA) ---
     function switchSubView(targetView) {
-        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames) return;
+        if (!viewDashboard || !viewLibrary || !viewNotifications || !viewCalendar || !viewTasks || !viewFocus || !viewChallenges || !viewGames || !viewPricing) return;
 
         // Oculta todas as sub-views
         viewDashboard.classList.add('hidden');
@@ -191,6 +196,7 @@ function initAppModule() {
         viewFocus.classList.add('hidden');
         viewChallenges.classList.add('hidden');
         viewGames.classList.add('hidden');
+        viewPricing.classList.add('hidden');
 
         // Remove active class de todos os botões do menu lateral
         navDashboard.classList.remove('active');
@@ -199,6 +205,7 @@ function initAppModule() {
         if (navFocus) navFocus.classList.remove('active');
         if (navChallenges) navChallenges.classList.remove('active');
         if (navGames) navGames.classList.remove('active');
+        if (navPricing) navPricing.classList.remove('active');
         
         // Remove active class dos botões superiores
         if (navTopCalendar) navTopCalendar.classList.remove('active');
@@ -247,6 +254,10 @@ function initAppModule() {
             viewGames.classList.remove('hidden');
             if (navGames) navGames.classList.add('active');
             if (window.Gamification) window.Gamification.renderGamesView();
+        } else if (targetView === 'pricing') {
+            viewPricing.classList.remove('hidden');
+            if (navPricing) navPricing.classList.add('active');
+            updatePricingUI();
         }
     }
 
@@ -298,6 +309,12 @@ function initAppModule() {
         navGames.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('games');
+        });
+    }
+    if (navPricing) {
+        navPricing.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('pricing');
         });
     }
     if (navTopCalendar) {
@@ -594,6 +611,111 @@ function initAppModule() {
         renderNextUpCard(notes);
     }
     window.updateDashboardStats = updateDashboardStats; // Deixa disponível para o notepad.js chamar!
+
+    // --- SISTEMA DE PLANOS E ASSINATURAS (SIMULAÇÃO) ---
+    function getPlanStorageKey() {
+        const user = window.Auth.getCurrentUser();
+        return user ? `prod_hub_user_plan_${user.email}` : 'prod_hub_user_plan_guest';
+    }
+
+    function getUserPlan() {
+        return localStorage.getItem(getPlanStorageKey()) || 'Iniciante Ativo';
+    }
+
+    function setUserPlan(planName) {
+        localStorage.setItem(getPlanStorageKey(), planName);
+    }
+
+    function updatePricingUI() {
+        const currentPlan = getUserPlan();
+        
+        const btnFree = document.getElementById('btn-plan-free');
+        const btnAlpha = document.getElementById('btn-plan-alpha');
+        const btnPro = document.getElementById('btn-plan-pro');
+
+        if (!btnFree || !btnAlpha || !btnPro) return;
+
+        // Resetar estados
+        btnFree.disabled = false;
+        btnFree.textContent = "Assinar";
+        btnFree.className = "btn-plan-action";
+
+        btnAlpha.disabled = false;
+        btnAlpha.textContent = "Assinar";
+        btnAlpha.className = "btn-plan-action";
+
+        btnPro.disabled = false;
+        btnPro.textContent = "Assinar";
+        btnPro.className = "btn-plan-action";
+
+        // Definir plano atual
+        if (currentPlan === "Iniciante Ativo") {
+            btnFree.disabled = true;
+            btnFree.textContent = "Plano Atual";
+            btnFree.className = "btn-plan-action";
+        } else if (currentPlan === "Concentração Alfa") {
+            btnAlpha.disabled = true;
+            btnAlpha.textContent = "Plano Atual";
+            btnAlpha.className = "btn-plan-action";
+        } else if (currentPlan === "Mestre de Foco") {
+            btnPro.disabled = true;
+            btnPro.textContent = "Plano Atual";
+            btnPro.className = "btn-plan-action";
+        }
+    }
+
+    function playUpgradeSound() {
+        // Toca acorde comemorativo sintetizado (som estelar ascendente)
+        if (window.Gamification && window.Gamification.playSynthSound) {
+            const synth = window.Gamification;
+            synth.playSynthSound(523.25, 0.1, 'sine'); // C5
+            setTimeout(() => synth.playSynthSound(659.25, 0.1, 'sine'), 100); // E5
+            setTimeout(() => synth.playSynthSound(783.99, 0.1, 'sine'), 200); // G5
+            setTimeout(() => synth.playSynthSound(1046.50, 0.25, 'sine'), 300); // C6
+        }
+    }
+
+    function initPricingSystem() {
+        const btnFree = document.getElementById('btn-plan-free');
+        const btnAlpha = document.getElementById('btn-plan-alpha');
+        const btnPro = document.getElementById('btn-plan-pro');
+
+        if (!btnFree || !btnAlpha || !btnPro) return;
+
+        const handleUpgrade = (planName) => {
+            const oldPlan = getUserPlan();
+            if (oldPlan === planName) return;
+
+            setUserPlan(planName);
+            updatePricingUI();
+            playUpgradeSound();
+
+            if (window.showToast) {
+                window.showToast("Assinatura Atualizada!", `Você agora possui o plano ${planName}! Desbloqueando recursos.`, "success");
+            }
+
+            // Ganho de XP virtual bônus por realizar o Upgrade (Gamificação)
+            if (window.Gamification && window.Gamification.addXP) {
+                window.Gamification.addXP(150, "Upgrade de Conta");
+            }
+        };
+
+        // Remove listeners antigos se houver
+        const newBtnFree = btnFree.cloneNode(true);
+        btnFree.parentNode.replaceChild(newBtnFree, btnFree);
+        const newBtnAlpha = btnAlpha.cloneNode(true);
+        btnAlpha.parentNode.replaceChild(newBtnAlpha, btnAlpha);
+        const newBtnPro = btnPro.cloneNode(true);
+        btnPro.parentNode.replaceChild(newBtnPro, btnPro);
+
+        newBtnFree.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Iniciante Ativo"); });
+        newBtnAlpha.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Concentração Alfa"); });
+        newBtnPro.addEventListener('click', (e) => { e.preventDefault(); handleUpgrade("Mestre de Foco"); });
+
+        updatePricingUI();
+    }
+    window.initPricingSystem = initPricingSystem;
+    window.getUserPlan = getUserPlan;
 
     // Registra e exibe os logs de alertas disparados na sessão
     function logNotificationTrigger(title, type = 'info') {
