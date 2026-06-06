@@ -665,40 +665,44 @@ function initAppModule() {
 
     // Atualiza as estatísticas exibidas na visão geral do Dashboard
     function updateDashboardStats() {
-        if (!notepadInstance) return;
-        const notes = notepadInstance.getNotes();
-        const user = window.Auth.getCurrentUser();
-        
-        // Atualiza saudação
-        updateDashboardGreeting(user, notes);
+        try {
+            if (!notepadInstance) return;
+            const notes = notepadInstance.getNotes();
+            const user = window.Auth.getCurrentUser();
+            
+            // Atualiza saudação
+            updateDashboardGreeting(user, notes);
 
-        const statsToday = document.getElementById('today-items-count');
-        const statsPending = document.getElementById('pending-tasks-count');
-        const statsCompleted = document.getElementById('completed-tasks-count');
-        const statsHigh = document.getElementById('high-priority-count');
+            const statsToday = document.getElementById('today-items-count');
+            const statsPending = document.getElementById('pending-tasks-count');
+            const statsCompleted = document.getElementById('completed-tasks-count');
+            const statsHigh = document.getElementById('high-priority-count');
 
-        const now = new Date();
-        const todayStr = now.toDateString();
-        const todayFormatted = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            const now = new Date();
+            const todayStr = now.toDateString();
+            const todayFormatted = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-        const todayItems = notes.filter(n => {
-            if (n.reminderDate) {
-                return n.reminderDate === todayFormatted;
-            }
-            return new Date(n.createdAt).toDateString() === todayStr;
-        });
-        const pendingItems = notes.filter(n => !n.completed);
-        const completedItems = notes.filter(n => n.completed);
-        const highPriorityPending = notes.filter(n => n.priority === 'High' && !n.completed);
+            const todayItems = notes.filter(n => {
+                if (n.reminderDate) {
+                    return n.reminderDate === todayFormatted;
+                }
+                return new Date(n.createdAt).toDateString() === todayStr;
+            });
+            const pendingItems = notes.filter(n => !n.completed);
+            const completedItems = notes.filter(n => n.completed);
+            const highPriorityPending = notes.filter(n => n.priority === 'High' && !n.completed);
 
-        if (statsToday) statsToday.textContent = todayItems.length;
-        if (statsPending) statsPending.textContent = pendingItems.length;
-        if (statsCompleted) statsCompleted.textContent = completedItems.length;
-        if (statsHigh) statsHigh.textContent = highPriorityPending.length;
+            if (statsToday) statsToday.textContent = todayItems.length;
+            if (statsPending) statsPending.textContent = pendingItems.length;
+            if (statsCompleted) statsCompleted.textContent = completedItems.length;
+            if (statsHigh) statsHigh.textContent = highPriorityPending.length;
 
-        // Renderizar lista e Next Up
-        renderDashboardTaskList(notes);
-        renderNextUpCard(notes);
+            // Renderizar lista e Next Up
+            renderDashboardTaskList(notes);
+            renderNextUpCard(notes);
+        } catch (error) {
+            console.error('Erro ao atualizar dashboard', error);
+        }
     }
     window.updateDashboardStats = updateDashboardStats; // Deixa disponível para o notepad.js chamar!
 
