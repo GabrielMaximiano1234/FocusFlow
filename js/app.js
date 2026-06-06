@@ -158,6 +158,11 @@ function initAppModule() {
             window.Gamification.init(currentUser);
         }
 
+        // Inicializa o sistema de recomendação diária
+        if (window.DailyAssistant) {
+            window.DailyAssistant.init(currentUser);
+        }
+
         // Garante que iniciamos na view principal de Início
         switchSubView('home');
     }
@@ -211,6 +216,9 @@ function initAppModule() {
             viewDashboard.classList.remove('hidden');
             navDashboard.classList.add('active');
             updateDashboardStats();
+            if (window.DailyAssistant) {
+                window.DailyAssistant.renderRoutine();
+            }
         } else if (targetView === 'library') {
             viewLibrary.classList.remove('hidden');
             navLibrary.classList.add('active');
