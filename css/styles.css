@@ -661,8 +661,11 @@ button {
     flex-wrap: wrap;
     margin-bottom: 30px;
     background-color: transparent !important;
+    border: none !important;
     border-bottom: none !important;
     box-shadow: none !important;
+    position: relative;
+    z-index: 10;
 }
 
 .welcome-msg h2 {
@@ -707,6 +710,7 @@ button {
     grid-template-columns: 1fr 1fr;
     gap: 32px;
     align-items: start;
+    margin-top: 120px !important;
 }
 
 
