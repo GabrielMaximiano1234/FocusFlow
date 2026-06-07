@@ -1,0 +1,9 @@
+{
+  "name": "productivity-hub",
+  "version": "1.0.0",
+  "description": "FocusFlow - Productivity Hub Micro SaaS",
+  "main": "js/app.js",
+  "dependencies": {
+    "stripe": "^14.22.0"
+  }
+}

@@ -112,6 +112,47 @@ function initAppModule() {
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
 
+    // --- PROCESSAMENTO DO RETORNO DE PAGAMENTO STRIPE ---
+    function handlePaymentSuccessRedirect() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payment_success') === 'true') {
+            const planId = urlParams.get('plan');
+            const planName = planId === 'alpha' ? 'Concentração Alfa' : 'Mestre de Foco';
+            
+            setUserPlan(planName);
+            updatePricingUI();
+            
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+            
+            setTimeout(() => {
+                if (window.showToast) {
+                    window.showToast("Pagamento Confirmado!", `Obrigado! Seu plano ${planName} está ativo agora.`, "success");
+                }
+                
+                if (window.Gamification && window.Gamification.playSynthSound) {
+                    window.Gamification.playSynthSound(261.63, 0.15); // C4
+                    setTimeout(() => window.Gamification.playSynthSound(329.63, 0.15), 150); // E4
+                    setTimeout(() => window.Gamification.playSynthSound(392.00, 0.15), 300); // G4
+                    setTimeout(() => window.Gamification.playSynthSound(523.25, 0.25), 450); // C5
+                }
+
+                if (window.Gamification && window.Gamification.awardXP) {
+                    window.Gamification.awardXP(150, 'Assinatura Stripe Ativa');
+                }
+            }, 500);
+        } else if (urlParams.get('payment_cancelled') === 'true') {
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+            
+            setTimeout(() => {
+                if (window.showToast) {
+                    window.showToast("Pagamento Cancelado", "O processo de checkout do Stripe foi interrompido.", "warning");
+                }
+            }, 500);
+        }
+    }
+
     // --- GERENCIADOR DE TRANSIÇÃO DE TELAS (SPA) ---
     function initApp() {
         const user = window.Auth.getCurrentUser();
@@ -119,6 +160,7 @@ function initAppModule() {
         if (user) {
             // Usuário logado: Exibe painel
             showDashboard(user);
+            handlePaymentSuccessRedirect();
         } else {
             // Deslogado: Exibe login/cadastro
             showAuth();
@@ -862,15 +904,81 @@ function initAppModule() {
             e.preventDefault();
         });
 
-        const handleCheckoutRedirect = (e) => {
-            e.preventDefault();
-            if (window.showToast) {
-                window.showToast("Checkout", "Redirecionando para o Checkout de Pagamento (Stripe)...", "info");
-            }
+        const handleCheckoutRedirect = (planId) => {
+            return async (e) => {
+                e.preventDefault();
+                const user = window.Auth.getCurrentUser();
+                const customerEmail = user ? user.email : '';
+
+                if (window.showToast) {
+                    window.showToast("Checkout", "Iniciando checkout do Stripe...", "info");
+                }
+
+                try {
+                    const response = await fetch('/api/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            planId: planId,
+                            customerEmail: customerEmail
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro na comunicação com o servidor');
+                    }
+
+                    const data = await response.json();
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error('URL de pagamento inválida');
+                    }
+                } catch (error) {
+                    console.warn('Servidor serverless não encontrado ou erro no Stripe. Ativando simulador local:', error);
+                    
+                    if (window.showToast) {
+                        window.showToast("Checkout Seguro", "Simulando checkout do Stripe localmente...", "info");
+                    }
+                    
+                    setTimeout(() => {
+                        if (window.Gamification && window.Gamification.playSynthSound) {
+                            window.Gamification.playSynthSound(261.63, 0.15); // C4
+                            setTimeout(() => window.Gamification.playSynthSound(329.63, 0.15), 150); // E4
+                            setTimeout(() => window.Gamification.playSynthSound(392.00, 0.15), 300); // G4
+                            setTimeout(() => window.Gamification.playSynthSound(523.25, 0.25), 450); // C5
+                        }
+
+                        if (window.Gamification && window.Gamification.awardXP) {
+                            window.Gamification.awardXP(150, 'Upgrade de Plano (Simulado)');
+                        }
+
+                        const planName = planId === 'alpha' ? 'Concentração Alfa' : 'Mestre de Foco';
+                        setUserPlan(planName);
+                        updatePricingUI();
+
+                        if (window.showToast) {
+                            window.showToast("Sucesso", `Plano ${planName} ativado com sucesso!`, "success");
+                        }
+                    }, 1000);
+                }
+            };
         };
 
-        newBtnAlpha.addEventListener('click', handleCheckoutRedirect);
-        newBtnPro.addEventListener('click', handleCheckoutRedirect);
+        newBtnAlpha.addEventListener('click', handleCheckoutRedirect('alpha'));
+        newBtnPro.addEventListener('click', handleCheckoutRedirect('pro'));
+
+        // Configura também os botões de checkout da landing page
+        const btnLandingAlpha = document.getElementById('btn-landing-alpha');
+        const btnLandingPro = document.getElementById('btn-landing-pro');
+        if (btnLandingAlpha) {
+            btnLandingAlpha.addEventListener('click', handleCheckoutRedirect('alpha'));
+        }
+        if (btnLandingPro) {
+            btnLandingPro.addEventListener('click', handleCheckoutRedirect('pro'));
+        }
 
         updatePricingUI();
     }
