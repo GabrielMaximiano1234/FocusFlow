@@ -16,6 +16,22 @@
     
     <!-- CSS da Landing Page -->
     <link rel="stylesheet" href="css/landing.css?v=999">
+    <style>
+        @keyframes pulseGlowGold {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 153, 0, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 18px rgba(255, 153, 0, 0.7);
+                transform: scale(1.04);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(255, 153, 0, 0.4);
+                transform: scale(1);
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -332,7 +348,7 @@
                     <span>Notificações</span>
                     <span id="notif-badge" class="notif-badge hidden"></span>
                 </a>
-                <a href="#" class="nav-item" id="nav-pricing">
+                <a href="#" class="nav-item" id="nav-pricing" style="display: none;">
                     <i class="fa-solid fa-gem"></i>
                     <span>Planos</span>
                 </a>
@@ -370,6 +386,9 @@
                     <p>Aqui está o resumo do seu dia.</p>
                 </div>
                 <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btn-top-seja-pro" class="btn-seja-pro" style="padding: 10px 18px; border-radius: 100px; font-weight: bold; background: linear-gradient(135deg, #e6b800 0%, #ff9900 100%); border: none; color: #000; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(255, 153, 0, 0.4); animation: pulseGlowGold 2s infinite ease-in-out; font-family: 'Outfit', sans-serif;">
+                        👑 Seja Pro
+                    </button>
                     <button id="nav-top-calendar" class="btn-secondary">
                         <i class="fa-regular fa-calendar"></i>
                         <span>Calendário</span>

@@ -107,6 +107,7 @@ function initAppModule() {
     const viewAdmin = document.getElementById('view-admin') || null;
     const navAccount = document.getElementById('nav-account') || null;
     const viewAccount = document.getElementById('view-account') || null;
+    const btnTopSejaPro = document.getElementById('btn-top-seja-pro') || null;
 
     // Histórico de logs de notificações para esta sessão
     const sessionNotificationLogs = [];
@@ -417,6 +418,12 @@ function initAppModule() {
     }
     if (navPricing) {
         navPricing.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSubView('pricing');
+        });
+    }
+    if (btnTopSejaPro) {
+        btnTopSejaPro.addEventListener('click', (e) => {
             e.preventDefault();
             switchSubView('pricing');
         });
@@ -787,6 +794,16 @@ function initAppModule() {
             btnPro.disabled = true;
             btnPro.textContent = "Plano Atual";
             btnPro.className = "btn-plan-action";
+        }
+
+        // Controlar exibição do botão Seja Pro no topo
+        const btnTopSejaProEl = document.getElementById('btn-top-seja-pro');
+        if (btnTopSejaProEl) {
+            if (currentPlan === "Concentração Alfa" || currentPlan === "Mestre de Foco") {
+                btnTopSejaProEl.style.display = 'none';
+            } else {
+                btnTopSejaProEl.style.display = 'flex';
+            }
         }
     }
 
