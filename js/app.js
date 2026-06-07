@@ -1337,7 +1337,6 @@ function initAppModule() {
         btnLogout.addEventListener('click', () => {
             window.explicitLoginRequested = true; // Força tela de login
             window.Auth.logout();
-            showToast('Sessão Encerrada', 'Você saiu da sua conta com sucesso.', 'info');
             if (window.pomodoroTimer) {
                 window.pomodoroTimer.reset();
             }
@@ -1345,7 +1344,6 @@ function initAppModule() {
                 window.Gamification.exitActiveGame();
                 window.Gamification.closeZenRelax();
             }
-            showAuth();
         });
     }
 

@@ -311,6 +311,30 @@ const Auth = {
         try {
             sessionStorage.removeItem(STORAGE_JWT_KEY);
             localStorage.removeItem(STORAGE_JWT_KEY);
+            sessionStorage.removeItem(STORAGE_SESSION_KEY);
+            localStorage.removeItem(STORAGE_SESSION_KEY);
+
+            // Exibir Toast Informativo
+            if (window.showToast) {
+                window.showToast('Sessão Encerrada', 'Você saiu da sua conta com sucesso.', 'info');
+            }
+
+            // Regra 1: Transição de DOM Forçada
+            const telaDashboard = document.getElementById('tela-dashboard');
+            const telaLogin = document.getElementById('tela-login');
+            const landing = document.getElementById('tela-landing');
+
+            if (landing) {
+                landing.style.display = 'none';
+            }
+            if (telaDashboard) {
+                telaDashboard.style.display = 'none';
+                telaDashboard.classList.add('hidden');
+            }
+            if (telaLogin) {
+                telaLogin.style.display = 'flex';
+                telaLogin.classList.remove('hidden');
+            }
         } catch (e) {
             console.error('Erro ao fazer logout:', e);
         }
